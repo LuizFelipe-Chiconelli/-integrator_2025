@@ -1,0 +1,17 @@
+{
+    "name": "conectando-talentos/backend",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Luiz Felipe",
+            "email": "lf5040870@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Core\\": "core/"
+        }
+    }
+}
