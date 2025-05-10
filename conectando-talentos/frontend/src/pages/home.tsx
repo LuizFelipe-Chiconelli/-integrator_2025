@@ -1,12 +1,13 @@
-import { Container } from "react-bootstrap"
+import Banner from "../components/sections/home/banner"
+import Presentation from "../components/sections/home/presentation"
+import FeaturedJobOffers from "../components/sections/home/featuredjoboffers"
 
 export default function Home() {
     return (
         <main>
-            <Container className="d-flex flex-column align-items-center my-5">
-                <h1>Bem-vindo ao InfoJobs</h1>
-                <span>Conquiste sua primeira vaga de emprego com facilidade!</span>
-            </Container>
+            <Banner />
+            <Presentation />
+            <FeaturedJobOffers />
         </main>
     )
 }

@@ -1,6 +1,7 @@
 import { Button, Container, Nav, Navbar, NavbarCollapse } from "react-bootstrap"
 
 import { Link } from "react-router-dom"
+import { FaInfoCircle } from "react-icons/fa"
 
 import "./header.css"
 
@@ -11,7 +12,9 @@ export default function Header() {
                 <Container>
 
                     <div className="col-3">
-                        <Navbar.Brand>InfoJobs</Navbar.Brand>
+                        <Navbar.Brand className="d-flex align-items-center gap-2">
+                            <FaInfoCircle /> InfoJobs
+                        </Navbar.Brand>
                     </div>
 
                     <div className="col-auto">
