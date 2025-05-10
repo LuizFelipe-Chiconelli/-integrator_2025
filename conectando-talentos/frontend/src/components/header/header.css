@@ -1,0 +1,12 @@
+#login-btn:hover {
+    background-color: var(--bs-primary) !important;
+    color: #fff !important;
+}
+
+#nav .nav-link {
+    color: var(--bs-primary);
+}
+
+#nav .nav-link.active, #nav .nav-link:hover {
+    color: var(--bs-text);
+}
