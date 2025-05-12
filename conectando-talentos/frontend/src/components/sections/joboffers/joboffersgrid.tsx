@@ -1,6 +1,7 @@
 import { Container } from "react-bootstrap"
 
 import OfferCard from "../../joboffers/offercard"
+import JobOffersFilter from "../../joboffers/filter"
 
 import type { JobOffer } from "../../../types/job"
 
@@ -71,7 +72,7 @@ export default function JobOffersGrid() {
     return (
         <Container fluid="xl" className="row d-flex justify-content-center mt-5">
             <Container id="job-offerfilter" className="col-3">
-                <input type="text" />
+                <JobOffersFilter />
             </Container>
             <Container id="featured-job-offers" className="col">
                 <div className="d-flex flex-column">

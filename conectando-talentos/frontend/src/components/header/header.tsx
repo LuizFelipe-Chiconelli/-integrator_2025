@@ -25,7 +25,7 @@ export default function Header() {
                                 <Nav.Link as={Link} to="#">Sobre nós</Nav.Link>
                                 <Nav.Link as={Link} to="#">Contato</Nav.Link>
                                 <Nav.Link as={Link} to="#">Empresas</Nav.Link>
-                                <Nav.Link as={Link} to="#">Vagas em destaque</Nav.Link>
+                                <Nav.Link as={Link} to="/vagas">Vagas</Nav.Link>
                             </Nav>
                         </NavbarCollapse>
                     </div>
