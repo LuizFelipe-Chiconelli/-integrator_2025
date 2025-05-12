@@ -79,7 +79,7 @@ export default function JobOffersGrid() {
                     <h2 className="fw-bold">Vagas disponíveis</h2>
                 </div>
 
-                <div className="row mt-5 row-gap-4">
+                <div className="row mt-2 row-gap-4">
                     {jobOfferList.map(jobOffer => {
                         return (
                             <div className="col-4">

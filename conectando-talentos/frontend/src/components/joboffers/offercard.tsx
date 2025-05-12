@@ -32,13 +32,17 @@ export default function OfferCard({ jobOffer }: Props) {
                 </div>
 
                 <div>
-                    <span><strong>{jobOffer.role.workhours}</strong> • R$ {jobOffer.role.salary} • {timeString}</span>
+                    <Badge bg="light" className="border text-primary">{jobOffer.role.workhours}</Badge>
+                </div>
+
+                <div>
+                    <Badge bg="light" className="border text-success">R$ {jobOffer.role.salary}</Badge> <Badge bg="light" className="border text-dark">{timeString}</Badge>
                 </div>
 
                 <div className="d-flex flex-wrap gap-1">
                     {jobOffer.skills.map(skill => {
                         return (
-                            <Badge bg="secondary">{skill}</Badge>
+                            <Badge bg="light" className="border text-dark">{skill}</Badge>
                         )
                     })}
                 </div>
