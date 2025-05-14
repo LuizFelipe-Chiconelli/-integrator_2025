@@ -77,7 +77,7 @@ export default function FeaturedJobOffers() {
             <div className="row mt-5 row-gap-4">
                 {jobOfferList.map(jobOffer => {
                     return (
-                        <div className="col-4">
+                        <div className="col-lg-4">
                             <OfferCard jobOffer={jobOffer} />
                         </div>
                     )

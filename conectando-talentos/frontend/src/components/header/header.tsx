@@ -20,17 +20,29 @@ export default function Header() {
                     <div className="col-auto">
                         <Navbar.Toggle aria-controls="basic-navbar-nav" />
                         <NavbarCollapse>
-                            <Nav id="nav">
-                                <Nav.Link as={Link} to="/">Início</Nav.Link>
-                                <Nav.Link as={Link} to="#">Sobre nós</Nav.Link>
-                                <Nav.Link as={Link} to="#">Contato</Nav.Link>
-                                <Nav.Link as={Link} to="#">Empresas</Nav.Link>
-                                <Nav.Link as={Link} to="/vagas">Vagas</Nav.Link>
-                            </Nav>
+                            <Navbar.Offcanvas placement="end" className="p-5 p-lg-0">
+                                <Nav id="nav">
+                                    <Nav.Link as={Link} to="/">Início</Nav.Link>
+                                    <Nav.Link as={Link} to="#">Sobre nós</Nav.Link>
+                                    <Nav.Link as={Link} to="#">Contato</Nav.Link>
+                                    <Nav.Link as={Link} to="#">Empresas</Nav.Link>
+                                    <Nav.Link as={Link} to="/vagas">Vagas</Nav.Link>
+                                </Nav>
+
+                                <div className="d-flex flex-column d-lg-none align-items-start gap-2">
+                                    <Button
+                                        id="login-btn"
+                                        className="bg-transparent text-primary"
+                                    >
+                                        Conecte-se
+                                    </Button>
+                                    <Button>Inscreva-se</Button>
+                                </div>
+                            </Navbar.Offcanvas>
                         </NavbarCollapse>
                     </div>
 
-                    <div className="col-3 d-flex align-items-center gap-2">
+                    <div className="col-3 d-none d-lg-flex align-items-center gap-2">
                         <Button
                             id="login-btn"
                             className="bg-transparent text-primary"

@@ -82,7 +82,7 @@ export default function JobOffersGrid() {
                 <div className="row mt-2 row-gap-4">
                     {jobOfferList.map(jobOffer => {
                         return (
-                            <div className="col-4">
+                            <div className="col-lg-4">
                                 <OfferCard jobOffer={jobOffer} />
                             </div>
                         )

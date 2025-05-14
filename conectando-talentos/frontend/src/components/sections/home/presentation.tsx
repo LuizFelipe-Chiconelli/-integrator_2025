@@ -16,8 +16,8 @@ export default function Presentation() {
                 <span className="fs-4">Soluções para simplificar a conexão entre candidatos e empresas</span>
             </div>
 
-            <div className="row mt-5">
-                <div className="col-3">
+            <div className="row row-gap-2 mt-5">
+                <div className="col-lg-3">
                     <InfoCard
                         icon={<MdOutlineWorkOutline className="fs-1" />}
                         title="Para Candidatos"
@@ -25,7 +25,7 @@ export default function Presentation() {
                     />
                 </div>
 
-                <div className="col-3">
+                <div className="col-lg-3">
                     <InfoCard
                         icon={<IoBusinessOutline className="fs-1" />}
                         title="Para Empresas"
@@ -33,7 +33,7 @@ export default function Presentation() {
                     />
                 </div>
 
-                <div className="col-3">
+                <div className="col-lg-3">
                     <InfoCard
                         icon={<IoNewspaperOutline className="fs-1" />}
                         title="Parocesso Simplificado"
@@ -41,7 +41,7 @@ export default function Presentation() {
                     />
                 </div>
 
-                <div className="col-3">
+                <div className="col-lg-3">
                     <InfoCard
                         icon={<RiRoadMapLine className="fs-1" />}
                         title="Foco Regional"
