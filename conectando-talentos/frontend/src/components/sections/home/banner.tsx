@@ -1,8 +1,6 @@
 import type { CSSProperties } from "react"
 import { Button, Container } from "react-bootstrap"
 
-import "./banner.css"
-
 const bannerStyle: CSSProperties = {
     background: "url(/banner.webp) rgba(0,0,0,0.4)",
     backgroundRepeat: "no-repeat",
