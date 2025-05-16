@@ -1,6 +1,6 @@
 import { Container, Form } from "react-bootstrap"
 
-export default function JobOffersFilter() {
+export default function JobsFilter() {
     return (
         <Container className="border rounded-3 p-3">
             <h3 className="fw-bold mb-3">Filtros</h3>

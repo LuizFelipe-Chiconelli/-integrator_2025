@@ -6,11 +6,12 @@ import { RiRoadMapLine } from "react-icons/ri"
 
 import InfoCard from "../../all/card"
 
-import "./presentation.css"
-
 export default function Presentation() {
     return (
-        <Container id="presentation">
+        <Container
+            className="d-flex flex-column align-items-center"
+            style={{ margin: "80px auto" }}
+        >
             <div className="text-center">
                 <h2>Uma plataforma completa para o mercado de trabalho</h2>
                 <span className="fs-4">Soluções para simplificar a conexão entre candidatos e empresas</span>
