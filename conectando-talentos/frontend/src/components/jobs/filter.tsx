@@ -1,4 +1,4 @@
-import { Container, Form } from "react-bootstrap"
+import { Button, Container, Form } from "react-bootstrap"
 
 export default function JobsFilter() {
     return (
@@ -38,6 +38,8 @@ export default function JobsFilter() {
                         <span>R$ 15000</span>
                     </div>
                 </Form.Group>
+
+                <Button>Filtrar</Button>
             </Form>
         </Container>
     )

@@ -1,8 +1,9 @@
 import { Container } from "react-bootstrap"
 
-import Pagination from "../../all/pagination"
 import JobCard from "../../jobs/jobcard"
 import JobsFilter from "../../jobs/filter"
+import Pagination from "../../all/pagination"
+import CardPlaceholder from "../../jobs/cardplaceholder"
 
 import type { Job } from "../../../types/job"
 
@@ -17,6 +18,7 @@ export default function JobsGrid() {
     const [searchParams] = useSearchParams()
     const [jobs, setJobs] = useState<Array<Job> | null>(null)
 
+    // Função que busca e seta as vagas de empregos
     async function fetchJobs() {
         const page: string = String(searchParams.get("page"))
 
@@ -24,8 +26,11 @@ export default function JobsGrid() {
         setJobs(res.slice(0, 9))
     }
 
+    // Ação a realizar sempre que os parametros de pesquisa mudarem
     useEffect(() => {
-        fetchJobs()
+        window.scrollTo({ top: 0, behavior: 'smooth'}) // Scrollar tela para o topo
+        setJobs(null) // Remover valores para mostrar os placeholder
+        fetchJobs() // Pesquisar e setar novos valores
     }, [searchParams])
 
     return (
@@ -49,8 +54,20 @@ export default function JobsGrid() {
                             </div>
                         )
                     })}
-                </div>
 
+                    {/* Placeholders */}
+                    {!jobs && (
+                        <>
+                            <div className="col-lg-4 px-1"><CardPlaceholder /></div>
+                            <div className="col-lg-4 px-1"><CardPlaceholder /></div>
+                            <div className="col-lg-4 px-1"><CardPlaceholder /></div>
+                        </>
+                    )}
+
+                    {jobs && jobs.length < 1 && (
+                        <span className="fs-4">Nenhuma vaga encontrada!</span>
+                    )}
+                </div>
                 <Pagination />
             </Container>
         </Container>

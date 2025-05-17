@@ -12,9 +12,15 @@ export default function PaginationButtons() {
     return (
         <Container fluid className="d-flex justify-content-center gap-1 mt-4">
             <Pagination>
-                <Pagination.Item onClick={() => { changePage("1") }}>1</Pagination.Item>
-                <Pagination.Item onClick={() => { changePage("2") }}>2</Pagination.Item>
-                <Pagination.Item onClick={() => { changePage("3") }}>3</Pagination.Item>
+                <Pagination.Item
+                    onClick={() => { changePage("1") }}
+                >1</Pagination.Item>
+                <Pagination.Item
+                    onClick={() => { changePage("2") }}
+                >2</Pagination.Item>
+                <Pagination.Item
+                    onClick={() => { changePage("3") }}
+                >3</Pagination.Item>
             </Pagination>
         </Container>
     )
