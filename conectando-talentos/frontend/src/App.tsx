@@ -7,24 +7,19 @@ import Jobs from './pages/jobs'
 import Login from './pages/login/login'
 import Register from './pages/register/register'
 
-import Header from './components/header/header'
-import Footer from './components/footer/footer'
+import DefaultLayout from './components/layouts/default'
 
 function App() {
 
   return (
     <>
       <BrowserRouter>
-        <Header />
-
         <Routes>
-          <Route path='/' element={<Home />} />
-          <Route path='/login' element={<Login />} />
-          <Route path='/register' element={<Register />} />
-          <Route path='/vagas' element={<Jobs />} />
+          <Route path='/' element={<DefaultLayout><Home /></DefaultLayout>} />
+          <Route path='/login' element={<DefaultLayout><Login /></DefaultLayout>} />
+          <Route path='/register' element={<DefaultLayout><Register /></DefaultLayout>} />
+          <Route path='/vagas' element={<DefaultLayout><Jobs /></DefaultLayout>} />
         </Routes>
-
-        <Footer />
       </BrowserRouter>
     </>
   )
