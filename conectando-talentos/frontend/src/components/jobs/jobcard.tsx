@@ -40,7 +40,7 @@ export default function JobCard({ job }: Props) {
                     <span>{job.location}</span>
                 </div>
 
-                <div>
+                <div className="d-flex flex-wrap gap-1">
                     <Badge
                         bg="light"
                         className="border text-success"
