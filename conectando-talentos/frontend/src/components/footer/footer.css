@@ -2,10 +2,6 @@
     font-size: 40px;
 }
 
-#copyright {
-    font-size: 14px;
-}
-
 .nav .nav-link {
     color: var(--bs-text);
     margin-bottom: 5px;
