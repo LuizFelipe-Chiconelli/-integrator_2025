@@ -1,5 +1,4 @@
-import { Button, Container, Nav, Navbar, NavbarCollapse } from "react-bootstrap"
-
+import { Container, Nav, Navbar, NavbarCollapse } from "react-bootstrap"
 import { Link } from "react-router-dom"
 import { FaInfoCircle } from "react-icons/fa"
 
@@ -22,34 +21,41 @@ export default function Header() {
                         <NavbarCollapse>
                             <Navbar.Offcanvas placement="end" className="p-5 p-lg-0">
                                 <Nav id="nav">
-                                    <Nav.Link as={Link} to="/">Início</Nav.Link>
-                                    <Nav.Link as={Link} to="#">Sobre nós</Nav.Link>
-                                    <Nav.Link as={Link} to="#">Contato</Nav.Link>
-                                    <Nav.Link as={Link} to="#">Empresas</Nav.Link>
+                                    <Nav.Link as={Link} to="/">Home</Nav.Link>
                                     <Nav.Link as={Link} to="/vagas">Vagas</Nav.Link>
+                                    <Nav.Link as={Link} to="/empresa">Empresas</Nav.Link>
+                                    <Nav.Link as={Link} to="/sobre">Sobre</Nav.Link>
                                 </Nav>
 
-                                <div className="d-flex flex-column d-lg-none align-items-start gap-2">
-                                    <Button
+                                {/* Botões para mobile */}
+                                <div className="d-flex flex-column d-lg-none align-items-start gap-2 mt-3">
+                                    <Link
+                                        to="/login"
+                                        className="btn bg-transparent text-primary"
                                         id="login-btn"
-                                        className="bg-transparent text-primary"
                                     >
                                         Conecte-se
-                                    </Button>
-                                    <Button>Inscreva-se</Button>
+                                    </Link>
+                                    <Link to="/register" className="btn btn-primary">
+                                        Inscreva-se
+                                    </Link>
                                 </div>
                             </Navbar.Offcanvas>
                         </NavbarCollapse>
                     </div>
 
+                    {/* Botões para desktop */}
                     <div className="col-3 d-none d-lg-flex align-items-center gap-2">
-                        <Button
+                        <Link
+                            to="/login"
+                            className="btn bg-transparent text-primary"
                             id="login-btn"
-                            className="bg-transparent text-primary"
                         >
                             Conecte-se
-                        </Button>
-                        <Button>Inscreva-se</Button>
+                        </Link>
+                        <Link to="/register" className="btn btn-primary">
+                            Inscreva-se
+                        </Link>
                     </div>
 
                 </Container>
