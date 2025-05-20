@@ -3,12 +3,12 @@ import './App.css'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 // Páginas padrão
-import Home from './pages/home'
-import Jobs from './pages/jobs'
-import Login from './pages/login/login'
-import Register from './pages/register/register'
-import About from './pages/abouts/abouts'
-import Business from './pages/business/business'
+import Home from './pages/(default)/home/page'
+import Jobs from './pages/(default)/jobs/page'
+import Login from './pages/(default)/login/page'
+import Register from './pages/(default)/register/page'
+import About from './pages/(default)/abouts/page'
+import Business from './pages/(default)/business/page'
 
 // Páginas do Dashboard
 import PublishVacancy from './pages/(dashboard)/publish-vacancy/page'
@@ -18,7 +18,6 @@ import DefaultLayout from './components/layouts/default'
 import DashboardLayout from './components/layouts/dashboard'
 
 function App() {
-
   return (
     <>
       <BrowserRouter>
