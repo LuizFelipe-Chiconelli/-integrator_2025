@@ -75,4 +75,14 @@ class Request
     {
         return baseUrl() . $this->getController() . '/' . $this->getAction();
     }
+
+    /**
+     * Retorna todos os dados recebidos via POST (como array associativo)
+     *
+     * @return array
+     */
+    public static function all()
+    {
+        return $_POST;
+    }
 }

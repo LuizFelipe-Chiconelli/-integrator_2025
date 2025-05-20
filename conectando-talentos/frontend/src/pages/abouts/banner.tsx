@@ -19,9 +19,6 @@ export default function Banner() {
                 className="d-flex flex-column justify-content-center align-items-center gap-5"
                 style={{ padding: "200px 80px" }}
             >
-                <div className="text-center text-white">
-                    <h1>Sobre a InfoJobs</h1>
-                </div>
             </Container>
         </Container>
     )
