@@ -1,17 +1,13 @@
-import type React from "react"
+import { Outlet } from "react-router-dom"
 
 import Header from "../header/header"
 import Footer from "../footer/footer"
 
-interface Props {
-    children: React.ReactNode
-}
-
-export default function DefaultLayout({ children }: Props) {
+export default function DefaultLayout() {
     return (
         <>
             <Header />
-            {children}
+            <Outlet />
             <Footer />
         </>
     )
