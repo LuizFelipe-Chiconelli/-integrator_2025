@@ -5,7 +5,7 @@ export default function Sidebar() {
     return (
         <aside
             className="bg-white h-100 d-flex flex-column border-end pt-3"
-            style={{ width: "260px" }}
+            style={{ width: "260px", minWidth: "260px" }}
         >
             <Profile />
             <Menu />
