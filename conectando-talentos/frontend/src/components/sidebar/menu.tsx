@@ -7,6 +7,11 @@ export default function Menu() {
     return (
         <div className="d-flex flex-column mt-4">
             <MenuButton
+                title="Perfil"
+                href="#"
+                icon={<FiUser />}
+            />
+            <MenuButton
                 title="Publicar Vaga"
                 href="/dashboard/publicar-vaga"
                 icon={<FiBriefcase />}
@@ -15,11 +20,6 @@ export default function Menu() {
                 title="Candidaturas"
                 href="/dashboard/candidaturas"
                 icon={<RxFileText />}
-            />
-            <MenuButton
-                title="Perfil"
-                href="#"
-                icon={<FiUser />}
             />
         </div>
     )
