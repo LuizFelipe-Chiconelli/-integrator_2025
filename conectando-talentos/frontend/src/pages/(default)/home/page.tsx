@@ -1,4 +1,4 @@
-import Banner from "../../../components/sections/about/banner"
+import Banner from "../../../components/sections/home/banner"
 import Presentation from "../../../components/sections/home/presentation"
 import FeaturedJobs from "../../../components/sections/home/featuredjobs"
 
