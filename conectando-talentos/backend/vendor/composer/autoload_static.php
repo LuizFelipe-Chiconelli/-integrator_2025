@@ -29,7 +29,21 @@ class ComposerStaticInit89bb691d10d883d891a5f02e9eb38e47
     );
 
     public static $classMap = array (
+        'App\\Controller\\Home' => __DIR__ . '/../..' . '/app/Controller/Home.php',
+        'App\\Controller\\Usuario' => __DIR__ . '/../..' . '/app/Controller/Usuario.php',
+        'App\\Model\\UsuarioModel' => __DIR__ . '/../..' . '/app/Model/UsuarioModel.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Core\\Library\\Ambiente' => __DIR__ . '/../..' . '/core/Library/Ambiente.php',
+        'Core\\Library\\ControllerMain' => __DIR__ . '/../..' . '/core/Library/ControllerMain.php',
+        'Core\\Library\\Database' => __DIR__ . '/../..' . '/core/Library/Database.php',
+        'Core\\Library\\Erros' => __DIR__ . '/../..' . '/core/Library/Erros.php',
+        'Core\\Library\\Files' => __DIR__ . '/../..' . '/core/Library/Files.php',
+        'Core\\Library\\ModelMain' => __DIR__ . '/../..' . '/core/Library/ModelMain.php',
+        'Core\\Library\\Request' => __DIR__ . '/../..' . '/core/Library/Request.php',
+        'Core\\Library\\RequestTrait' => __DIR__ . '/../..' . '/core/Library/RequestTrait.php',
+        'Core\\Library\\Routes' => __DIR__ . '/../..' . '/core/Library/Routes.php',
+        'Core\\Library\\Session' => __DIR__ . '/../..' . '/core/Library/Session.php',
+        'Core\\Library\\Validator' => __DIR__ . '/../..' . '/core/Library/Validator.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

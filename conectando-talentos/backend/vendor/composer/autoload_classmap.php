@@ -6,5 +6,19 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Controller\\Home' => $baseDir . '/app/Controller/Home.php',
+    'App\\Controller\\Usuario' => $baseDir . '/app/Controller/Usuario.php',
+    'App\\Model\\UsuarioModel' => $baseDir . '/app/Model/UsuarioModel.php',
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
+    'Core\\Library\\Ambiente' => $baseDir . '/core/Library/Ambiente.php',
+    'Core\\Library\\ControllerMain' => $baseDir . '/core/Library/ControllerMain.php',
+    'Core\\Library\\Database' => $baseDir . '/core/Library/Database.php',
+    'Core\\Library\\Erros' => $baseDir . '/core/Library/Erros.php',
+    'Core\\Library\\Files' => $baseDir . '/core/Library/Files.php',
+    'Core\\Library\\ModelMain' => $baseDir . '/core/Library/ModelMain.php',
+    'Core\\Library\\Request' => $baseDir . '/core/Library/Request.php',
+    'Core\\Library\\RequestTrait' => $baseDir . '/core/Library/RequestTrait.php',
+    'Core\\Library\\Routes' => $baseDir . '/core/Library/Routes.php',
+    'Core\\Library\\Session' => $baseDir . '/core/Library/Session.php',
+    'Core\\Library\\Validator' => $baseDir . '/core/Library/Validator.php',
 );
