@@ -8,6 +8,7 @@ import Check from "../../all/check"
 export default function VacancyForm() {
     return (
         <Form className="mt-3">
+            {/* Nome da vaga */}
             <TextInput
                 controlId="vagaNome"
                 label="Nome da vaga *"
@@ -15,21 +16,24 @@ export default function VacancyForm() {
                 required
             />
 
+            {/* Descrição da vaga */}
             <TextArea
                 controlId="vagaDesc"
                 label="Descrição da Vaga *"
-                placeholder="Ex: Desenvolvedor Full Stack"
+                placeholder="Descreva detalhadamente a vaga..."
                 required
             />
 
+            {/* Requisitos para a vaga */}
             <TextArea
-                controlId="vagaNome"
-                label="Nome da vaga *"
-                placeholder="Ex: Desenvolvedor Full Stack"
+                controlId="vagaRequisitos"
+                label="Requisitos da vaga *"
+                placeholder="Liste os requisitos necessários para a vaga..."
                 required
             />
 
             <div className="w-100 row row-cols-2 mx-auto">
+                {/* Tipo de vaga */}
                 <div className="ps-0 pe-2">
                     <Select
                         controlId="vagaTipo"
@@ -39,6 +43,7 @@ export default function VacancyForm() {
                     />
                 </div>
 
+                {/* Local da vaga */}
                 <div className="ps-2 pe-0">
                     <TextInput
                         controlId="vagaLocal"
@@ -49,6 +54,7 @@ export default function VacancyForm() {
             </div>
 
             <div className="w-100 row row-cols-2 mx-auto">
+                {/* Salário */}
                 <div className="ps-0 pe-2">
                     <TextInput
                         controlId="vagaSalario"
@@ -57,6 +63,7 @@ export default function VacancyForm() {
                     />
                 </div>
 
+                {/* Experiência */}
                 <div className="ps-2 pe-0">
                     <Select
                         controlId="vagaExp"
@@ -67,6 +74,7 @@ export default function VacancyForm() {
                 </div>
             </div>
 
+            {/* Vaga remota */}
             <div className="">
                 <Check
                     controlId="vagaExp"

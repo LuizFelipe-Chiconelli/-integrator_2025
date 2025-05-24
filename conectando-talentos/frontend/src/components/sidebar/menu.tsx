@@ -13,7 +13,7 @@ export default function Menu() {
             />
             <MenuButton
                 title="Candidaturas"
-                href="#"
+                href="/dashboard/candidaturas"
                 icon={<RxFileText />}
             />
             <MenuButton
