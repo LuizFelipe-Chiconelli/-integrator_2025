@@ -1,0 +1,27 @@
+/* Estilo para a página de login da empresa */
+
+.logo-infojobs {
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.card .form-label {
+  font-weight: 500;
+  color: #343a40;
+}
+
+.card .form-control {
+  font-size: 0.95rem;
+  padding: 0.6rem 0.75rem;
+}
+
+.card .form-control::placeholder {
+  color: #adb5bd;
+}
+
+.text-muted a {
+  text-decoration: none;
+}
+
+.text-muted a:hover {
+  text-decoration: underline;
+}

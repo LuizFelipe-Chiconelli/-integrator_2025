@@ -1,0 +1,48 @@
+/* Estilo para a página de registro de empresa */
+
+.step-indicator {
+  gap: 0.5rem;
+}
+
+.step {
+  width: 30px;
+  height: 30px;
+  background-color: #dee2e6;
+  color: #495057;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.step.active {
+  background-color: #0d6efd;
+  color: #fff;
+}
+
+.line {
+  width: 40px;
+  height: 4px;
+  background-color: #dee2e6;
+  border-radius: 2px;
+}
+
+.logo-infojobs {
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.card .form-label {
+  font-weight: 500;
+  color: #343a40;
+}
+
+.card .form-control,
+.card .form-select {
+  font-size: 0.95rem;
+  padding: 0.6rem 0.75rem;
+}
+
+.card .form-control::placeholder {
+  color: #adb5bd;
+}

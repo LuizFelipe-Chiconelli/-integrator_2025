@@ -1,6 +1,6 @@
 import { Container, Row, Col, Form, Button, Card } from "react-bootstrap";
 import { FaGoogle, FaFacebook, FaInfoCircle } from "react-icons/fa";
-import "./Login.css";
+import "./login-usuario.css";
 
 export default function Login() {
   return (
