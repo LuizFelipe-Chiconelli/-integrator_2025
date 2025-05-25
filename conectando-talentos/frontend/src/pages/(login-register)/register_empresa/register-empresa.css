@@ -14,6 +14,7 @@
   align-items: center;
   justify-content: center;
   font-weight: 600;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .step.active {
@@ -26,6 +27,12 @@
   height: 4px;
   background-color: #dee2e6;
   border-radius: 2px;
+  transition: background-color 0.3s ease;
+}
+
+/* Quando o primeiro passo estiver ativo, a linha à direita fica azul; quando o segundo estiver, a linha à esquerda já foi azulada (mantém cor) */
+.step.active + .line {
+  background-color: #0d6efd;
 }
 
 .logo-infojobs {
