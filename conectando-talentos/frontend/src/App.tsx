@@ -9,6 +9,7 @@ import About from './pages/(default)/abouts/page'
 import Business from './pages/(default)/business/page'
 
 // Páginas do Dashboard
+import Application from './pages/(dashboard)/application/page'
 import PublishVacancy from './pages/(dashboard)/publish-vacancy/page'
 
 // Páginas Login e Registro
@@ -38,6 +39,7 @@ function App() {
           {/* Rotas para layout Dashboard */}
           <Route path='/dashboard' element={<DashboardLayout />}>
             <Route path='publicar-vaga' element={<PublishVacancy />} />
+            <Route path='candidaturas' element={<Application />} />
           </Route>
 
           {/* Rotas para layout Login/Register */}

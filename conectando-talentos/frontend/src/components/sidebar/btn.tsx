@@ -18,7 +18,7 @@ export default function MenuButton({ title, href, icon }: Props) {
             to={href ?? "#"}
         >
             <button
-                className={`menu-button bg-transparent w-100 d-flex align-items-center border-0 gap-2 ${active}`}
+                className={`menu-button bg-transparent w-100 d-flex align-items-center text-dark border-0 gap-2 ${active}`}
             >
                 {icon}{title}
             </button>
