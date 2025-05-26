@@ -19,6 +19,10 @@ import Register from './pages/(auth)/register-usuario/page'
 import EmpresaLogin from './pages/(auth)/login-empresa/page'
 import EmpresaRegister from './pages/(auth)/register-empresa/page'
 
+// Páginas de Erro
+import PageNotFound from './pages/errors/404/page'
+import Unauthorized from './pages/errors/403/page'
+
 // Layouts
 import DefaultLayout from './components/layouts/default'
 import DashboardLayout from './components/layouts/dashboard'
@@ -35,6 +39,8 @@ function App() {
             <Route path='/vagas' element={<Jobs />} />
             <Route path='/sobre' element={<About />} />
             <Route path='/empresa' element={<Business />} />
+            <Route path='/unauthorized' element={<Unauthorized />} />
+            <Route path='*' element={<PageNotFound />} />
           </Route>
 
           {/* Rotas para layout Dashboard */}
