@@ -35,7 +35,7 @@ export default function Footer() {
                 </div>
 
                 <div className="col mb-3">
-                    <h5>Sobre a InfoJobs</h5>
+                    <h5 className="fw-bold">Sobre a InfoJobs</h5>
                     <Nav className='d-flex flex-column'>
                         <Nav.Link as={Link} to="/">Saiba mais</Nav.Link>
                         <Nav.Link as={Link} to="#">Trabalhe conosco</Nav.Link>
@@ -45,7 +45,7 @@ export default function Footer() {
                 </div>
 
                 <div className="col mb-3">
-                    <h5>Contato e Ajuda</h5>
+                    <h5 className="fw-bold">Contato e Ajuda</h5>
                     <Nav className='d-flex flex-column'>
                         <Nav.Link as={Link} to="/">Telefone</Nav.Link>
                         <Nav.Link as={Link} to="#">Whatsapp</Nav.Link>
@@ -55,7 +55,7 @@ export default function Footer() {
                 </div>
 
                 <div className="col mb-3">
-                    <h5>Para Candidatura</h5>
+                    <h5 className="fw-bold">Para Candidatura</h5>
                     <Nav className='d-flex flex-column'>
                         <Nav.Link as={Link} to="/">Vagas</Nav.Link>
                         <Nav.Link as={Link} to="#">Suporte</Nav.Link>

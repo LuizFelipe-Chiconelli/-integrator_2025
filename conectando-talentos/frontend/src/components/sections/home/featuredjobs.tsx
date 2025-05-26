@@ -27,9 +27,9 @@ export default function FeaturedJobs() {
             </div>
 
             <div className="row mt-5 row-gap-4">
-                {jobs && jobs.map(job => {
+                {jobs && jobs.map((job, index) => {
                     return (
-                        <div className="col-lg-4">
+                        <div className="col-lg-4" key={index}>
                             <JobCard job={job} />
                         </div>
                     )

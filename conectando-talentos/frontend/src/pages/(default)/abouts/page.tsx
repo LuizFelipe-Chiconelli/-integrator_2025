@@ -8,12 +8,7 @@ export default function About() {
     <>
       <Banner />
 
-      <Container className="my-5">
-        <h2 className="section-title">Sobre a InfoJobs</h2>
-        <p className="section-subtitle">
-          Conectando talentos locais com as melhores oportunidades da região
-        </p>
-
+      <Container className="">
         {/* Missão */}
         <Card className="p-4 my-4 text-center shadow-sm border-0">
           <h5 className="fw-bold text-primary">Nossa Missão</h5>
