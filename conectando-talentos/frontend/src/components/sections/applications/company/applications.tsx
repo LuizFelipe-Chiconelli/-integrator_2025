@@ -1,6 +1,6 @@
 import { Container } from "react-bootstrap"
 
-import ApplicationTable from "../../../applications/company/table"
+import ApplicationTable from "../../../company/applications/table"
 import PaginationButtons from "../../../all/pagination"
 
 import Select from "../../../all/select"

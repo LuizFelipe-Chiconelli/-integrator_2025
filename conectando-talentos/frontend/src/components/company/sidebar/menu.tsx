@@ -8,7 +8,7 @@ export default function Menu() {
         <div className="d-flex flex-column mt-4">
             <MenuButton
                 title="Perfil"
-                href="#"
+                href="/dashboard/perfil"
                 icon={<FiUser />}
             />
             <MenuButton

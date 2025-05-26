@@ -9,14 +9,15 @@ import About from './pages/(default)/abouts/page'
 import Business from './pages/(default)/business/page'
 
 // Páginas do Dashboard
+import Profile from './pages/(dashboard)/profile/page'
 import Application from './pages/(dashboard)/application/page'
 import PublishVacancy from './pages/(dashboard)/publish-vacancy/page'
 
 // Páginas Login e Registro
-import Login from './pages/(login-register)/login-usuario/page'
-import Register from './pages/(login-register)/register-usuario/page'
-import EmpresaLogin from './pages/(login-register)/login_empresa/page'
-import EmpresaRegister from './pages/(login-register)/register_empresa/page'
+import Login from './pages/(auth)/login-usuario/page'
+import Register from './pages/(auth)/register-usuario/page'
+import EmpresaLogin from './pages/(auth)/login-empresa/page'
+import EmpresaRegister from './pages/(auth)/register-empresa/page'
 
 // Layouts
 import DefaultLayout from './components/layouts/default'
@@ -38,16 +39,17 @@ function App() {
 
           {/* Rotas para layout Dashboard */}
           <Route path='/dashboard' element={<DashboardLayout />}>
+            <Route index path='perfil' element={<Profile />} />
             <Route path='publicar-vaga' element={<PublishVacancy />} />
             <Route path='candidaturas' element={<Application />} />
           </Route>
 
           {/* Rotas para layout Login/Register */}
-          <Route path='/login-register' element={<AuthLayout />}>
-            <Route path='login-usuario' element={< Login/>}/>
-            <Route path='register-usuario' element={< Register/>}/>
-            <Route path='login-empresa' element={< EmpresaLogin/>}/>
-            <Route path='register-empresa' element={< EmpresaRegister/>}/>
+          <Route path='/auth' element={<AuthLayout />}>
+            <Route path='login-usuario' element={<Login />}/>
+            <Route path='register-usuario' element={<Register />}/>
+            <Route path='login-empresa' element={<EmpresaLogin />}/>
+            <Route path='register-empresa' element={<EmpresaRegister />}/>
           </Route>
         </Routes>
       </BrowserRouter>

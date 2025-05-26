@@ -5,7 +5,7 @@ import { useSearchParams } from "react-router-dom"
 export default function PaginationButtons() {
     const [_, setSearchParams] = useSearchParams()
 
-    const changePage = (page: string) => {
+    const changePage = (page: string): void => {
         setSearchParams({ page })
     }
 

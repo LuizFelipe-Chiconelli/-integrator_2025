@@ -7,7 +7,7 @@ import Check from "../../all/check"
 
 export default function VacancyForm() {
     return (
-        <Form className="mt-3">
+        <Form className="mt-4">
             {/* Nome da vaga */}
             <TextInput
                 controlId="vagaNome"
@@ -82,7 +82,7 @@ export default function VacancyForm() {
                 />
             </div>
 
-            <div className="d-flex justify-content-end mb-4">
+            <div className="d-flex justify-content-end mt-4">
                 <Button>Publicar Vaga</Button>
             </div>
         </Form>

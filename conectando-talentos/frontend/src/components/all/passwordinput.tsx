@@ -7,17 +7,16 @@ interface Props {
     required?: boolean
 }
 
-export default function Select({ controlId, label, placeholder, required }: Props) {
+export default function PasswordInput({ controlId, label, placeholder, required }: Props) {
     return (
         <Form.Group controlId={controlId} className="mb-3">
             <Form.Label className="fw-semibold mb-1 ms-1" style={{ fontSize: "14px" }}>{label}</Form.Label>
-            <Form.Select
+            <Form.Control
+                type="password"
+                placeholder={placeholder}
                 className="bg-light"
-                defaultValue="null"
                 {...required ? {required} : {}}
-            >
-                <option value="null">{placeholder}</option>
-            </Form.Select>
+            />
         </Form.Group>
     )
 }
