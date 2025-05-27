@@ -37,7 +37,7 @@ export default function Header() {
                     </div>
 
                     {/* Botões para desktop */}
-                    <div className="col-3 d-none d-lg-flex align-items-center gap-2">
+                    <div className="col-3 d-none d-lg-flex justify-content-end align-items-center gap-2">
                         <Dropdown>
                             <Dropdown.Toggle variant="outline-primary">Login</Dropdown.Toggle>
                             <Dropdown.Menu>
