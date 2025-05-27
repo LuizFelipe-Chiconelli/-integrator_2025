@@ -9,8 +9,8 @@ import './footer.css'
 export default function Footer() {
     return (
         <footer className='d-flex flex-column align-items-center justify-content-center py-5 mt-5 border-top'>
-            <Container className='d-flex justify-content-center row row-cols-1 row-cols-sm-2 row-cols-md-5'>
-                <div className="col mb-3">
+            <Container className='justify-content-center row'>
+                <div className="col-lg-2 mb-3">
                     <Link to='/' className='d-flex align-items-center text-black text-decoration-none gap-2'>
                         <FaInfoCircle id='logo' /> <span className='fw-bold fs-3'>InfoJobs</span>
                     </Link>
@@ -31,10 +31,10 @@ export default function Footer() {
                     </div>
                 </div>
 
-                <div className="col mb-3">
+                <div className="col-lg-2 mb-3">
                 </div>
 
-                <div className="col mb-3">
+                <div className="col-lg-2 mb-3">
                     <h5 className="fw-bold">Sobre a InfoJobs</h5>
                     <Nav className='d-flex flex-column'>
                         <Nav.Link as={Link} to="/">Saiba mais</Nav.Link>
@@ -44,7 +44,7 @@ export default function Footer() {
                     </Nav>
                 </div>
 
-                <div className="col mb-3">
+                <div className="col-lg-2 mb-3">
                     <h5 className="fw-bold">Contato e Ajuda</h5>
                     <Nav className='d-flex flex-column'>
                         <Nav.Link as={Link} to="/">Telefone</Nav.Link>
@@ -54,7 +54,7 @@ export default function Footer() {
                     </Nav>
                 </div>
 
-                <div className="col mb-3">
+                <div className="col-lg-2 mb-3">
                     <h5 className="fw-bold">Para Candidatura</h5>
                     <Nav className='d-flex flex-column'>
                         <Nav.Link as={Link} to="/">Vagas</Nav.Link>

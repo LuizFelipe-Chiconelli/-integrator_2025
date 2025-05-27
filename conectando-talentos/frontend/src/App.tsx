@@ -45,7 +45,7 @@ function App() {
 
           {/* Rotas para layout Dashboard */}
           <Route path='/dashboard' element={<DashboardLayout />}>
-            <Route index path='perfil' element={<Profile />} />
+            <Route index element={<Profile />} />
             <Route path='publicar-vaga' element={<PublishVacancy />} />
             <Route path='candidaturas' element={<Application />} />
           </Route>

@@ -23,7 +23,7 @@ export default function SocialForm() {
             />
 
             <div className="d-flex justify-content-end mt-4">
-                <Button>Atualizar Senha</Button>
+                <Button>Salvar Alterações</Button>
             </div>
         </Form>
     )

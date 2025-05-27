@@ -1,4 +1,5 @@
-import { Container, Nav, Navbar, NavbarCollapse } from "react-bootstrap"
+import { Container, Nav, Navbar, NavbarCollapse, Dropdown } from "react-bootstrap"
+
 import { Link } from "react-router-dom"
 import { FaInfoCircle } from "react-icons/fa"
 
@@ -25,37 +26,25 @@ export default function Header() {
                                     <Nav.Link as={Link} to="/vagas">Vagas</Nav.Link>
                                     <Nav.Link as={Link} to="/empresa">Empresas</Nav.Link>
                                     <Nav.Link as={Link} to="/sobre">Sobre</Nav.Link>
-                                </Nav>
 
-                                {/* Botões para mobile */}
-                                <div className="d-flex flex-column d-lg-none align-items-start gap-2 mt-3">
-                                    <Link
-                                        to="/login"
-                                        className="btn bg-transparent text-primary"
-                                        id="login-btn"
-                                    >
-                                        Conecte-se
-                                    </Link>
-                                    <Link to="/register" className="btn btn-primary">
-                                        Inscreva-se
-                                    </Link>
-                                </div>
+                                    <div className="d-flex flex-column d-lg-none align-items-start gap-2 mt-3">
+                                        <Nav.Link as={Link} to="/auth/login-usuario">Login para Candidatos</Nav.Link>
+                                        <Nav.Link as={Link} to="/auth/login-empresa">Login para Empresas</Nav.Link>
+                                    </div>
+                                </Nav>
                             </Navbar.Offcanvas>
                         </NavbarCollapse>
                     </div>
 
                     {/* Botões para desktop */}
                     <div className="col-3 d-none d-lg-flex align-items-center gap-2">
-                        <Link
-                            to="/login"
-                            className="btn bg-transparent text-primary"
-                            id="login-btn"
-                        >
-                            Conecte-se
-                        </Link>
-                        <Link to="/register" className="btn btn-primary">
-                            Inscreva-se
-                        </Link>
+                        <Dropdown>
+                            <Dropdown.Toggle variant="outline-primary">Login</Dropdown.Toggle>
+                            <Dropdown.Menu>
+                                <Dropdown.Item as={Link} to="/auth/login-usuario">Login para Candidatos</Dropdown.Item>
+                                <Dropdown.Item as={Link} to="/auth/login-empresa">Login para Empresas</Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
                     </div>
 
                 </Container>
