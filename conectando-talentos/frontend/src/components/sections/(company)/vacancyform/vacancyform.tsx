@@ -1,9 +1,9 @@
 import { Button, Form } from "react-bootstrap"
 
-import Select from "../../all/select"
-import TextArea from "../../all/textarea"
-import TextInput from "../../all/textinput"
-import Check from "../../all/check"
+import Select from "../../../all/select"
+import TextArea from "../../../all/textarea"
+import TextInput from "../../../all/textinput"
+import Check from "../../../all/check"
 
 export default function VacancyForm() {
     return (

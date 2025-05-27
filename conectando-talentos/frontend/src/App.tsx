@@ -12,6 +12,7 @@ import Business from './pages/(default)/business/page'
 import Profile from './pages/(dashboard)/profile/page'
 import Application from './pages/(dashboard)/application/page'
 import PublishVacancy from './pages/(dashboard)/publish-vacancy/page'
+import CompanyJobs from './pages/(dashboard)/Jobs/page'
 
 // Páginas Login e Registro
 import Login from './pages/(auth)/login-usuario/page'
@@ -48,6 +49,7 @@ function App() {
             <Route index element={<Profile />} />
             <Route path='publicar-vaga' element={<PublishVacancy />} />
             <Route path='candidaturas' element={<Application />} />
+            <Route path='vagas' element={<CompanyJobs />} />
           </Route>
 
           {/* Rotas para layout Login/Register */}

@@ -1,6 +1,7 @@
 import MenuButton from "./btn"
 
 import { RxFileText } from "react-icons/rx"
+import { LuTableProperties } from "react-icons/lu"
 import { FiBriefcase, FiUser } from "react-icons/fi"
 
 export default function Menu() {
@@ -20,6 +21,11 @@ export default function Menu() {
                 title="Candidaturas"
                 href="/dashboard/candidaturas"
                 icon={<RxFileText />}
+            />
+            <MenuButton
+                title="Vagas da Empresa"
+                href="/dashboard/vagas"
+                icon={<LuTableProperties />}
             />
         </div>
     )
