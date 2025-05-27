@@ -10,7 +10,7 @@ interface Props {
 
 export default function MenuButton({ title, href, icon }: Props) {
     const location = useLocation()
-    const active: string = location.pathname.includes(href) ? "active" : ""
+    const active: string = location.pathname === href ? "active" : ""
 
     return (
         <Link
