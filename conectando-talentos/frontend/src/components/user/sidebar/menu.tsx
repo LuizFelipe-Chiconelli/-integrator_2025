@@ -1,7 +1,7 @@
 import MenuButton from "./btn"
 
 import { RxFileText } from "react-icons/rx"
-import { LuTableProperties } from "react-icons/lu"
+import { FaRegAddressCard } from "react-icons/fa6"
 import { FiBriefcase, FiUser } from "react-icons/fi"
 
 export default function Menu() {
@@ -9,23 +9,23 @@ export default function Menu() {
         <div className="d-flex flex-column mt-4">
             <MenuButton
                 title="Perfil"
-                href="/minha-empresa"
+                href="/usuario"
                 icon={<FiUser />}
             />
             <MenuButton
-                title="Publicar Vaga"
-                href="/minha-empresa/publicar-vaga"
-                icon={<FiBriefcase />}
+                title="Meu Currículo"
+                href="/usuario/curriculo"
+                icon={<FaRegAddressCard />}
             />
             <MenuButton
-                title="Candidaturas"
-                href="/minha-empresa/candidaturas"
+                title="Minhas Candidaturas"
+                href="/usuario/candidaturas"
                 icon={<RxFileText />}
             />
             <MenuButton
-                title="Vagas da Empresa"
-                href="/minha-empresa/vagas"
-                icon={<LuTableProperties />}
+                title="Vagas Recomendadas"
+                href="/usuario/vagas-recomendadas"
+                icon={<FiBriefcase />}
             />
         </div>
     )

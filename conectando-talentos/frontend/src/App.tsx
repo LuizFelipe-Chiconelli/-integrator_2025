@@ -1,6 +1,6 @@
 import './App.css'
 
-import { BrowserRouter, Routes, Route,} from 'react-router-dom'
+import { BrowserRouter, Routes, Route, } from 'react-router-dom'
 
 // Páginas padrão
 import Home from './pages/(default)/home/page'
@@ -25,9 +25,10 @@ import PageNotFound from './pages/errors/404/page'
 import Unauthorized from './pages/errors/403/page'
 
 // Layouts
-import DefaultLayout from './components/layouts/default'
-import DashboardLayout from './components/layouts/dashboard'
+import UserLayout from './components/layouts/user'
 import AuthLayout from './components/layouts/auth'
+import DefaultLayout from './components/layouts/default'
+import CompanyLayout from './components/layouts/company'
 
 function App() {
   return (
@@ -44,20 +45,26 @@ function App() {
             <Route path='*' element={<PageNotFound />} />
           </Route>
 
-          {/* Rotas para layout Dashboard */}
-          <Route path='/dashboard' element={<DashboardLayout />}>
+          {/* Rotas para layout Company */}
+          <Route path='/minha-empresa' element={<CompanyLayout />}>
             <Route index element={<Profile />} />
             <Route path='publicar-vaga' element={<PublishVacancy />} />
             <Route path='candidaturas' element={<Application />} />
             <Route path='vagas' element={<CompanyJobs />} />
+            <Route path='*' element={<PageNotFound />} />
+          </Route>
+
+          {/* Rotas para layout User */}
+          <Route path='/usuario' element={<UserLayout />}>
+            <Route path='*' element={<PageNotFound />} />
           </Route>
 
           {/* Rotas para layout Login/Register */}
           <Route path='/auth' element={<AuthLayout />}>
-            <Route path='login-usuario' element={<Login />}/>
-            <Route path='register-usuario' element={<Register />}/>
-            <Route path='login-empresa' element={<EmpresaLogin />}/>
-            <Route path='register-empresa' element={<EmpresaRegister />}/>
+            <Route path='login-usuario' element={<Login />} />
+            <Route path='register-usuario' element={<Register />} />
+            <Route path='login-empresa' element={<EmpresaLogin />} />
+            <Route path='register-empresa' element={<EmpresaRegister />} />
           </Route>
         </Routes>
       </BrowserRouter>

@@ -1,8 +1,8 @@
 import { Outlet } from "react-router-dom"
 
-import Sidebar from "../company/sidebar/sidebar"
+import Sidebar from "../user/sidebar/sidebar"
 
-export default function DashboardLayout() {
+export default function UserLayout() {
     return (
         <div
             className="bg-light d-flex justify-content-start overflow-hidden"
