@@ -8,11 +8,14 @@ import Jobs from './pages/(default)/jobs/page'
 import About from './pages/(default)/abouts/page'
 import Business from './pages/(default)/business/page'
 
-// Páginas do Dashboard
-import Profile from './pages/(dashboard)/profile/page'
-import Application from './pages/(dashboard)/application/page'
-import PublishVacancy from './pages/(dashboard)/publish-vacancy/page'
-import CompanyJobs from './pages/(dashboard)/Jobs/page'
+// Páginas de Empresa
+import Profile from './pages/(company)/profile/page'
+import Application from './pages/(company)/application/page'
+import PublishVacancy from './pages/(company)/publish-vacancy/page'
+import CompanyJobs from './pages/(company)/Jobs/page'
+
+// Páginas de Usuário
+import UserProfile from './pages/(user)/profile/page'
 
 // Páginas Login e Registro
 import Login from './pages/(auth)/login-usuario/page'
@@ -56,6 +59,7 @@ function App() {
 
           {/* Rotas para layout User */}
           <Route path='/usuario' element={<UserLayout />}>
+            <Route index element={<UserProfile />} />
             <Route path='*' element={<PageNotFound />} />
           </Route>
 
