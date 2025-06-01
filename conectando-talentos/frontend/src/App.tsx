@@ -10,12 +10,13 @@ import Business from './pages/(default)/business/page'
 
 // Páginas de Empresa
 import Profile from './pages/(company)/profile/page'
-import Application from './pages/(company)/application/page'
+import Application from './pages/(company)/applications/page'
 import PublishVacancy from './pages/(company)/publish-vacancy/page'
 import CompanyJobs from './pages/(company)/Jobs/page'
 
 // Páginas de Usuário
 import UserProfile from './pages/(user)/profile/page'
+import UserApplication from './pages/(user)/applications/page'
 
 // Páginas Login e Registro
 import Login from './pages/(auth)/login-usuario/page'
@@ -60,6 +61,7 @@ function App() {
           {/* Rotas para layout User */}
           <Route path='/usuario' element={<UserLayout />}>
             <Route index element={<UserProfile />} />
+            <Route path='candidaturas' element={<UserApplication />} />
             <Route path='*' element={<PageNotFound />} />
           </Route>
 
