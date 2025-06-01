@@ -1,55 +1,67 @@
-/* Estilo para a página de registro de empresa */
-
-.step-indicator {
-  gap: 0.5rem;
+/*─────────────────────────────────────────────
+  CARD CENTRAL
+─────────────────────────────────────────────*/
+.min-vh-100 {          /* evita colar na navbar fixa */
+  padding-top: 72px;
 }
+
+.card {
+  border: none;
+  border-radius: 1rem;
+  box-shadow: 0 8px 28px rgba(0,0,0,.08);
+}
+
+/*─────────────────────────────────────────────
+  INDICADOR DE ETAPAS (●──●)
+─────────────────────────────────────────────*/
+.step-indicator { gap: .5rem; }
 
 .step {
-  width: 30px;
-  height: 30px;
-  background-color: #dee2e6;
-  color: #495057;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  width: 34px; height: 34px;
+  background:#e9ecef;  color:#495057;
+  border-radius:50%; font-weight:600;
+  display:flex; align-items:center; justify-content:center;
+  transition:.3s;
 }
-
-.step.active {
-  background-color: #0d6efd;
-  color: #fff;
-}
+.step.active { background:#0d6efd; color:#fff; }
 
 .line {
-  width: 40px;
-  height: 4px;
-  background-color: #dee2e6;
-  border-radius: 2px;
-  transition: background-color 0.3s ease;
+  flex:1; height:4px;
+  background:#e9ecef; border-radius:2px;
+  transition:.3s;
 }
 
-/* Quando o primeiro passo estiver ativo, a linha à direita fica azul; quando o segundo estiver, a linha à esquerda já foi azulada (mantém cor) */
-.step.active + .line {
-  background-color: #0d6efd;
-}
+.step.active + .line,
+.line + .step.active ~ .line { background:#0d6efd; }
 
-.logo-infojobs {
-  font-family: 'Segoe UI', sans-serif;
-}
+/*─────────────────────────────────────────────
+  TIPOGRAFIA & CAMPOS
+─────────────────────────────────────────────*/
+.logo-infojobs      { font-family:'Segoe UI',sans-serif; }
 
-.card .form-label {
-  font-weight: 500;
-  color: #343a40;
-}
+.card .form-label   { font-weight:500; color:#343a40; }
 
 .card .form-control,
-.card .form-select {
-  font-size: 0.95rem;
-  padding: 0.6rem 0.75rem;
+.card .form-select  {
+  font-size:.95rem;
+  padding:.6rem .75rem;
+  border-radius:.5rem;
 }
 
-.card .form-control::placeholder {
-  color: #adb5bd;
+.card .form-control:focus,
+.card .form-select:focus {
+  box-shadow:0 0 0 .2rem rgba(13,110,253,.25);
+}
+
+.card .form-control::placeholder { color:#adb5bd; }
+
+/* botão com transição suave */
+.card .btn-primary { transition:.25s; }
+.card .btn-primary:disabled { opacity:.7; }
+
+/*─────────────────────────────────────────────
+  RESPONSIVO (XS) – menos sombras/padding
+─────────────────────────────────────────────*/
+@media (max-width: 575.98px){
+  .card { box-shadow:0 4px 16px rgba(0,0,0,.06); padding:1.5rem; }
 }

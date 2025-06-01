@@ -1,27 +1,41 @@
-/* Estilo para a página de login da empresa */
+/*─────────────────────────────────────────────
+  CARD & LAYOUT (igual ao cadastro)
+─────────────────────────────────────────────*/
+.min-vh-100 { padding-top: 72px; }
 
-.logo-infojobs {
-  font-family: 'Segoe UI', sans-serif;
+.card {
+  border:none;
+  border-radius:1rem;
+  box-shadow:0 8px 28px rgba(0,0,0,.08);
 }
 
-.card .form-label {
-  font-weight: 500;
-  color: #343a40;
-}
+.logo-infojobs      { font-family:'Segoe UI',sans-serif; }
+
+.card .form-label   { font-weight:500; color:#343a40; }
 
 .card .form-control {
-  font-size: 0.95rem;
-  padding: 0.6rem 0.75rem;
+  font-size:.95rem;
+  padding:.6rem .75rem;
+  border-radius:.5rem;
+}
+.card .form-control:focus {
+  box-shadow:0 0 0 .2rem rgba(13,110,253,.25);
 }
 
-.card .form-control::placeholder {
-  color: #adb5bd;
-}
+.card .form-control::placeholder { color:#adb5bd; }
 
+.card .btn-primary   { transition:.25s; }
+.card .btn-primary:disabled { opacity:.7; }
+
+/* link mini abaixo do título */
 .text-muted a {
-  text-decoration: none;
+  text-decoration:none;
+}
+.text-muted a:hover {
+  text-decoration:underline;
 }
 
-.text-muted a:hover {
-  text-decoration: underline;
+/* responsivo xs */
+@media (max-width:575.98px){
+  .card{box-shadow:0 4px 16px rgba(0,0,0,.06); padding:1.5rem;}
 }
