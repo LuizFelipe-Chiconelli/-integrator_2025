@@ -16,6 +16,7 @@ import CompanyJobs from './pages/(company)/Jobs/page'
 
 // Páginas de Usuário
 import UserProfile from './pages/(user)/profile/page'
+import Curriculum from './pages/(user)/curriculum/page'
 import UserApplication from './pages/(user)/applications/page'
 
 // Páginas Login e Registro
@@ -61,6 +62,7 @@ function App() {
           {/* Rotas para layout User */}
           <Route path='/usuario' element={<UserLayout />}>
             <Route index element={<UserProfile />} />
+            <Route path='curriculo' element={<Curriculum />} />
             <Route path='candidaturas' element={<UserApplication />} />
             <Route path='*' element={<PageNotFound />} />
           </Route>
