@@ -2,15 +2,15 @@ import { Button, Container } from "react-bootstrap"
 
 import { FaPlus } from "react-icons/fa6"
 
-import EducationForm from "../../../user/curriculum/forms/education"
+import QualificationForm from "../../../user/curriculum/forms/qualification"
 
-export default function EducationSection() {
+export default function QualificationSection() {
     return (
         <Container className="bg-white border rounded-3 p-4 shadow-sm">
             <div className="row row-cols-lg-2 justify-content-between">
                 <div>
-                    <h2 className="fs-3 fw-bold m-0">Escolaridade</h2>
-                    <span>Registre cada nível/curso concluído ou em andamento</span>
+                    <h2 className="fs-3 fw-bold m-0">Cursos / Qualificações</h2>
+                    <span>Registre cursos livres, workshops e certificações</span>
                 </div>
 
                 <div className="d-flex justify-content-lg-end align-items-start">
@@ -20,7 +20,7 @@ export default function EducationSection() {
                 </div>
             </div>
 
-            <EducationForm />
+            <QualificationForm />
         </Container>
     )
 }

@@ -40,7 +40,7 @@ export default function Header() {
                     <div className="col-3 d-none d-lg-flex justify-content-end align-items-center gap-2">
                         <Dropdown>
                             <Dropdown.Toggle variant="outline-primary">Login</Dropdown.Toggle>
-                            <Dropdown.Menu>
+                            <Dropdown.Menu className="translate-middle-x">
                                 <Dropdown.Item as={Link} to="/auth/login-usuario">Login para Candidatos</Dropdown.Item>
                                 <Dropdown.Item as={Link} to="/auth/login-empresa">Login para Empresas</Dropdown.Item>
                             </Dropdown.Menu>

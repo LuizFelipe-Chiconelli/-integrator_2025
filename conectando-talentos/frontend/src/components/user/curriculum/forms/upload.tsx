@@ -8,7 +8,7 @@ export default function UploadCurriculumForm() {
     return (
         <Form className="mt-3">
             <div className="row row-cols-lg-2">
-                <div className="pe-0">
+                <div className="pe-lg-0">
                     <FileInput
                         controlId="curriculumUpload"
                     />

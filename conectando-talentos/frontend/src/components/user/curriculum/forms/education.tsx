@@ -8,9 +8,7 @@ import TextInput from "../../../all/textinput"
 export default function EducationForm() {
     return (
         <Form className="border rounded-2 mt-3 p-4">
-            <div className="row">
-                <h3 className="fs-5 fw-bold">Escolaridade 1</h3>
-            </div>
+            <h3 className="fs-5 fw-bold">Escolaridade 1</h3>
 
             <div className="row row-cols-lg-2">
                 <Select
@@ -21,7 +19,7 @@ export default function EducationForm() {
 
                 <TextInput
                     controlId="education1Cargo"
-                    label="Cargo / Descrição *"
+                    label="Curso / Descrição *"
                     placeholder="Análise e Desenvolvimento de Sistemas"
                 />
             </div>
