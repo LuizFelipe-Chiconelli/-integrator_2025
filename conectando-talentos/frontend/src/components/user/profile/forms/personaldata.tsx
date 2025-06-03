@@ -99,10 +99,11 @@ export default function PersonalDataForm() {
                 />
             </div>
 
-            <div className="row row-cols-1 row-cols-lg-2">
+            <div className="row row-cols-1 row-cols-lg-4">
                 <FileInput
                     controlId="pessoalFoto"
                     label="Foto (upload)"
+                    text="Enviar Foto"
                 />
             </div>
 

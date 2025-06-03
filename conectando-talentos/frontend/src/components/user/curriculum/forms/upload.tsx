@@ -1,25 +1,26 @@
 import { Button, Form } from "react-bootstrap"
 
-import { IoDownloadOutline } from "react-icons/io5"
+import { LuDownload } from "react-icons/lu"
 
 import FileInput from "../../../all/fileinput"
 
 export default function UploadCurriculumForm() {
     return (
         <Form className="mt-3">
-            <div className="row row-cols-lg-2">
+            <div className="d-flex flex-column flex-lg-row gap-2">
                 <div className="pe-lg-0">
                     <FileInput
+                        text="Enviar Currículo"
                         controlId="curriculumUpload"
                     />
                 </div>
 
-                <div>
+                <div className="">
                     <Button
                         className="border"
                         variant="light"
                     >
-                        <IoDownloadOutline /> Baixar Currículo
+                        <LuDownload /> Baixar Currículo
                     </Button>
                 </div>
             </div>
