@@ -2,7 +2,7 @@ import { Button, Card } from "react-bootstrap"
 
 import { IoTimeOutline } from "react-icons/io5"
 import { IoLocationOutline } from "react-icons/io5"
-import { LuBuilding, LuUser, LuDollarSign } from "react-icons/lu"
+import { LuBuilding, LuDollarSign } from "react-icons/lu"
 
 export default function JobCard() {
     return (
@@ -40,17 +40,12 @@ export default function JobCard() {
                         <div className="d-flex align-items-center gap-2">
                             <IoTimeOutline /> 1 dia atrás
                         </div>
-
-                        {/* Número de candidatos */}
-                        <div className="d-flex align-items-center gap-2">
-                            <LuUser /> 50 candidatos
-                        </div>
                     </div>
                 </div>
 
                 {/* Direita */}
                 <div className="w-25 d-flex justify-content-end align-items-start">
-                    <Button style={{ fontSize: "15px" }}>Gerenciar Vaga</Button>
+                    <Button style={{ fontSize: "15px" }}>Inscrever-se</Button>
                 </div>
             </Card.Body>
         </Card>

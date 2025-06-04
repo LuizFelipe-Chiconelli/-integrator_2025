@@ -15,6 +15,7 @@ import PublishVacancy from './pages/(company)/publish-vacancy/page'
 import CompanyJobs from './pages/(company)/Jobs/page'
 
 // Páginas de Usuário
+import UserJobs from './pages/(user)/jobs/page'
 import UserProfile from './pages/(user)/profile/page'
 import Curriculum from './pages/(user)/curriculum/page'
 import UserApplication from './pages/(user)/applications/page'
@@ -64,6 +65,7 @@ function App() {
             <Route index element={<UserProfile />} />
             <Route path='curriculo' element={<Curriculum />} />
             <Route path='candidaturas' element={<UserApplication />} />
+            <Route path='vagas-recomendadas' element={<UserJobs />} />
             <Route path='*' element={<PageNotFound />} />
           </Route>
 
