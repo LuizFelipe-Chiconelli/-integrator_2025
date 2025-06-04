@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom"
 
 import Sidebar from "../user/sidebar/sidebar"
+import OffcanvasSidebar from "../user/sidebar/offcanvas"
 
 export default function UserLayout() {
     return (
@@ -8,6 +9,7 @@ export default function UserLayout() {
             className="bg-light d-flex justify-content-start overflow-hidden"
             style={{ height: "100vh", width: "100vw" }}
         >
+            <OffcanvasSidebar/>
             <Sidebar />
             <Outlet />
         </div>
