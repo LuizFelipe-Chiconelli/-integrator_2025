@@ -11,8 +11,8 @@ export default function Footer() {
         <footer className='d-flex flex-column align-items-center justify-content-center py-5 mt-5 border-top'>
             <Container className='justify-content-center row'>
                 <div className="col-lg-2 mb-3">
-                    <Link to='/' className='d-flex align-items-center text-black text-decoration-none gap-2'>
-                        <FaInfoCircle id='logo' /> <span className='fw-bold fs-3'>InfoJobs</span>
+                    <Link to='/' className='d-flex flex-column text-black text-decoration-none gap-2'>
+                        <FaInfoCircle id='logo' /> <span className='fw-bold fs-4'>InformJobs</span>
                     </Link>
 
                     <div className='d-flex fs-4 gap-4 mt-2'>
@@ -35,7 +35,7 @@ export default function Footer() {
                 </div>
 
                 <div className="col-lg-2 mb-3">
-                    <h5 className="fw-bold">Sobre a InfoJobs</h5>
+                    <h5 className="fw-bold">Sobre Nós</h5>
                     <Nav className='d-flex flex-column'>
                         <Nav.Link as={Link} to="/">Saiba mais</Nav.Link>
                         <Nav.Link as={Link} to="#">Trabalhe conosco</Nav.Link>
@@ -67,7 +67,7 @@ export default function Footer() {
             </Container>
 
             <Container className='text-center border-top pt-5'>
-                <span className="text-body-secondary">© 2025 InfoJobs. Todos os direitos reservados.</span>
+                <span className="text-body-secondary">© 2025 InformJobs. Todos os direitos reservados.</span>
             </Container>
         </footer>
     )

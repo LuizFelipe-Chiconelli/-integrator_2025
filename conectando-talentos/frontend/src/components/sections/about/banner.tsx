@@ -17,7 +17,7 @@ export default function Banner() {
                 </div>
 
                 <div className="text-center">
-                    <h2 className="fw-bold text-primary">Sobre a InfoJobs</h2>
+                    <h2 className="fw-bold text-primary">Sobre a InformJobs</h2>
                     <p className="">
                         Conectando talentos locais com as melhores oportunidades da região
                     </p>

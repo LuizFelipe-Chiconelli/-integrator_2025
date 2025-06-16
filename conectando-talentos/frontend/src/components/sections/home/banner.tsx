@@ -21,7 +21,7 @@ export default function Banner() {
                     className="col-lg-6 d-flex flex-column justify-content-center align-items-center gap-5"
                 >
                     <div className="text-center">
-                        <h1 className="fw-bold">Bem-vindo ao InfoJobs</h1>
+                        <h1 className="fw-bold">Bem-vindo ao InformJobs</h1>
                         <span className="fs-3">Conquiste sua primeira vaga de emprego com facilidade!</span>
                     </div>
                     <Button>Acesse sua conta</Button>

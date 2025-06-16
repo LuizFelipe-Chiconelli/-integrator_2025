@@ -51,7 +51,7 @@ export default function Login() {
             <div className="text-center mb-4">
               <div className="d-flex justify-content-center align-items-center gap-2 mb-3">
                 <FaInfoCircle size={25} className="text-dark" />
-                <span className="logo-infojobs text-dark fs-3">InfoJobs</span>
+                <span className="logo-infojobs text-dark fs-3">InformJobs</span>
               </div>
 
               <h5 className="mt-3 fw-bold">Entre na sua conta</h5>

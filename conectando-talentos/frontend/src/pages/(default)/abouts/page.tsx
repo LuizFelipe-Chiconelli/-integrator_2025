@@ -13,7 +13,7 @@ export default function About() {
         <Card className="p-4 my-4 text-center shadow-sm border-0">
           <h5 className="fw-bold text-primary">Nossa Missão</h5>
           <p className="text-muted">
-            Na <strong>InfoJobs</strong>, acreditamos no potencial da nossa região e no talento dos profissionais locais.
+            Na <strong>InformJobs</strong>, acreditamos no potencial da nossa região e no talento dos profissionais locais.
             Nossa missão é facilitar o encontro entre empresas e candidatos qualificados, promovendo o crescimento regional e a inclusão.
           </p>
         </Card>
@@ -24,7 +24,7 @@ export default function About() {
             <Card className="p-4 h-100 shadow-sm border-0">
               <h5 className="fw-bold text-primary">Quem Somos</h5>
               <p className="text-muted">
-                A <strong>InfoJobs</strong> nasceu em 2025 com o objetivo de aproximar empresas e talentos da região.
+                A <strong>InformJobs</strong> nasceu em 2025 com o objetivo de aproximar empresas e talentos da região.
                 Com uma plataforma prática e acessível, oferecemos soluções que atendem tanto candidatos quanto empregadores.
               </p>
               <p className="text-muted">
@@ -49,7 +49,7 @@ export default function About() {
         <div className="equipe-container">
           <h4 className="text-center mb-4">Nossa Equipe</h4>
           <p className="text-center text-muted">
-            A <strong>InfoJobs</strong> é formada por um time de sócios visionários e comprometidos com o desenvolvimento regional.
+            A <strong>InformJobs</strong> é formada por um time de sócios visionários e comprometidos com o desenvolvimento regional.
           </p>
           <p className="text-center text-muted mb-4">
             Conheça os fundadores que tornaram esta plataforma possível:
@@ -70,7 +70,7 @@ export default function About() {
               {
                 nome: "Letícia",
                 cargo: "Co-fundadora e UX/UI Designer",
-                descricao: "Cuida da experiência do usuário e da identidade visual da InfoJobs.",
+                descricao: "Cuida da experiência do usuário e da identidade visual da InformJobs.",
               },
               {
                 nome: "Matheus",

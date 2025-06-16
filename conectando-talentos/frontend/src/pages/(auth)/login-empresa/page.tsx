@@ -57,7 +57,7 @@ export default function EmpresaLogin() {
             <header className="text-center mb-4">
               <div className="d-flex justify-content-center gap-2 mb-2">
                 <FaInfoCircle size={25} className="text-dark"/>
-                <span className="logo-infojobs fs-4 fw-bold text-dark">InfoJobs</span>
+                <span className="logo-infojobs fs-4 fw-bold text-dark">InformJobs</span>
               </div>
               <h4 className="fw-bold mb-0">Área da Empresa</h4>
               <small className="text-muted">

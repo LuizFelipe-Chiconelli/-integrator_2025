@@ -13,7 +13,7 @@ export default function Header() {
 
                     <div className="col-3">
                         <Navbar.Brand className="d-flex align-items-center fw-bold gap-2">
-                            <FaInfoCircle /> InfoJobs
+                            <FaInfoCircle /> InformJobs
                         </Navbar.Brand>
                     </div>
 
