@@ -1,10 +1,13 @@
 
 import { Container } from "react-bootstrap"
+
 import JobCard from "../../jobs/jobcard"
+import CardPlaceholder from "../../jobs/cardplaceholder"
 
 // Hooks
 import { useEffect, useState } from "react"
 
+// Actions
 import type { Job } from "../../../types/job"
 import { getJobs } from "../../../actions/jobs"
 
@@ -34,6 +37,15 @@ export default function FeaturedJobs() {
                         </div>
                     )
                 })}
+
+                {/* Placeholders */}
+                {!jobs && (
+                    <>
+                        <div className="col-lg-4 px-1"><CardPlaceholder /></div>
+                        <div className="col-lg-4 px-1"><CardPlaceholder /></div>
+                        <div className="col-lg-4 px-1"><CardPlaceholder /></div>
+                    </>
+                )}
             </div>
         </Container>
     )
