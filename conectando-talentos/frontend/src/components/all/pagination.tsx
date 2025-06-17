@@ -6,7 +6,12 @@ export default function PaginationButtons() {
     const [_, setSearchParams] = useSearchParams()
 
     const changePage = (page: string): void => {
-        setSearchParams({ page })
+        setSearchParams((prev: URLSearchParams) => {
+            const updatedParams = new URLSearchParams(prev)
+            updatedParams.set("page", page)
+
+            return updatedParams
+        })
     }
 
     return (

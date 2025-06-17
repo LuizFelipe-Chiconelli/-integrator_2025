@@ -1,6 +1,53 @@
 import { Button, Container, Form } from "react-bootstrap"
 
+// Hooks
+import { useRef } from "react"
+import { useSearchParams } from "react-router-dom"
+
+// Tipos
+import type { SyntheticEvent } from "react"
+
 export default function TopSearch() {
+    const [_, setSearchParams] = useSearchParams()
+
+    const inputRef = useRef<HTMLInputElement>(null)
+
+    // Setar parâmetros
+    const setSearch = (query: string): void => {
+        setSearchParams((prev: URLSearchParams) => {
+            const updatedParams = new URLSearchParams(prev)
+
+            updatedParams.set("query", query)
+
+            if (updatedParams.get("page")) updatedParams.delete("page")
+
+            return updatedParams
+        })
+    }
+
+    // Remover Parâmetros
+    const removeSearch = (): void => {
+        setSearchParams((prev: URLSearchParams) => {
+            const updatedParams = new URLSearchParams(prev)
+            updatedParams.delete("query")
+            if (updatedParams.get("page")) updatedParams.delete("page")
+
+            return updatedParams
+        })
+    }
+
+    // Submit Event
+    const handleSearch = (e: SyntheticEvent) => {
+        e.preventDefault()
+
+        // Setar ou remover query e página
+        if (inputRef.current?.value) {
+            setSearch(inputRef.current?.value)
+        } else {
+            removeSearch()
+        }
+    }
+
     return (
         <Container
             fluid
@@ -12,12 +59,14 @@ export default function TopSearch() {
 
                 <Container>
                     <Form
+                        onSubmit={handleSearch}
                         className="bg-white rounded-4 p-4"
                     >
                         <div className="row gap-2 justify-content-center">
 
                             <Form.Group className="col-lg-9 mx-0 px-0" controlId="formVaga">
                                 <Form.Control
+                                    ref={inputRef}
                                     type="text"
                                     size="lg"
                                     className="rounded-3 w-100 border fs-6"
