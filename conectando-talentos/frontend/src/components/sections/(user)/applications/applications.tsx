@@ -18,7 +18,7 @@ export default function ApplicationsGrid() {
                 <Select
                     controlId="filtroStatus"
                     label="Filtrar por Status"
-                    placeholder="Select"
+                    options={[ { id: "null", displayName: "Selecione" } ]}
                 />
             </div>
 

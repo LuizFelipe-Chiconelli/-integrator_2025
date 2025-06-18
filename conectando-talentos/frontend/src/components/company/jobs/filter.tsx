@@ -20,7 +20,7 @@ export default function JobFilters() {
                     bg="white"
                     controlId="filtroOrdem"
                     label="Ordem"
-                    placeholder="Maior para menor"
+                    options={[ { id: "null", displayName: "Selecione" } ]}
                 />
             </div>
         </Form>

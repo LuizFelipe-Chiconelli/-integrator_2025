@@ -45,7 +45,11 @@ export default function JobCard() {
 
                 {/* Direita */}
                 <div className="w-25 d-flex justify-content-end align-items-start">
-                    <Button style={{ fontSize: "15px" }}>Inscrever-se</Button>
+                    <Button
+                        style={{ fontSize: "14px", paddingLeft: "9px", paddingRight: "9px" }}
+                    >
+                        Inscrever-se
+                    </Button>
                 </div>
             </Card.Body>
         </Card>

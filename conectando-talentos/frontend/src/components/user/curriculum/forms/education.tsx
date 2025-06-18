@@ -14,7 +14,7 @@ export default function EducationForm() {
                 <Select
                     controlId="education1Grau"
                     label="Grau escolar *"
-                    placeholder="Superior"
+                    options={[ { id: "null", displayName: "Selecione" } ]}
                 />
 
                 <TextInput
@@ -42,7 +42,7 @@ export default function EducationForm() {
                 <Select
                     controlId="education1InicioMes"
                     label="Mês de Início *"
-                    placeholder="Fevereiro"
+                    options={[ { id: "null", displayName: "Selecione" } ]}
                 />
 
                 <TextInput
@@ -54,7 +54,7 @@ export default function EducationForm() {
                 <Select
                     controlId="education1FimMes"
                     label="Mês de Fim *"
-                    placeholder="Fevereiro"
+                    options={[ { id: "null", displayName: "Selecione" } ]}
                 />
 
                 <TextInput

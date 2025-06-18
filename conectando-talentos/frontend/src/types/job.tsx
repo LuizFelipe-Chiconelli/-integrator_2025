@@ -9,7 +9,7 @@ export interface Job {
     employment_type: string,
     application_deadline: Date,
     qualifications: string,
-    contact: string
+    contact: string,
     job_category: string,
     is_remote_work: 0 | 1,
     number_of_opening: number,

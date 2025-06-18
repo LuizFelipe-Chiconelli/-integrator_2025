@@ -6,6 +6,18 @@ import DateInput from "../../../all/dateinput"
 import FileInput from "../../../all/fileinput"
 import TextArea from "../../../all/textarea"
 
+// Tipos
+import type { Option } from "../../../../types/inputs"
+
+// Options
+const ufOptions: Option[] = [
+    { id: "null", displayName: "Selecione" }
+]
+
+const genderOptions: Option[] = [
+    { id: "null", displayName: "Selecione" }
+]
+
 export default function PersonalDataForm() {
     return (
         <Form className="mt-3">
@@ -75,7 +87,7 @@ export default function PersonalDataForm() {
                 <Select
                     controlId="pessoalUF"
                     label="UF *"
-                    placeholder="Selecione o estado"
+                    options={ufOptions}
                 />
 
                 <TextInput
@@ -95,7 +107,7 @@ export default function PersonalDataForm() {
                 <Select
                     controlId="pessoalSexo"
                     label="Sexo *"
-                    placeholder="Selecione o sexo"
+                    options={genderOptions}
                 />
             </div>
 

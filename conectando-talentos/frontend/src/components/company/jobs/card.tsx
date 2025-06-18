@@ -50,7 +50,7 @@ export default function JobCard() {
 
                 {/* Direita */}
                 <div className="w-25 d-flex justify-content-end align-items-start">
-                    <Button style={{ fontSize: "15px" }}>Gerenciar Vaga</Button>
+                    <Button style={{ fontSize: "15px" }}>Gerenciar</Button>
                 </div>
             </Card.Body>
         </Card>

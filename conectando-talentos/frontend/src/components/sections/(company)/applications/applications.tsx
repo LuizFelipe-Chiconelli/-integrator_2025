@@ -18,7 +18,7 @@ export default function ApplicationsGrid() {
                 <Select
                     controlId="filtroVaga"
                     label="Filtrar por Vaga"
-                    placeholder="Select"
+                    options={[ { id: "null", displayName: "Selecione" } ]}
                 />
             </div>
 

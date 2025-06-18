@@ -37,7 +37,7 @@ export default function QualificationForm() {
                     <Select
                         controlId="curso1FimMes"
                         label="Mês de conclusão *"
-                        placeholder="Fevereiro"
+                        options={[ { id: "null", displayName: "Selecione" } ]}
                     />
                 </div>
 

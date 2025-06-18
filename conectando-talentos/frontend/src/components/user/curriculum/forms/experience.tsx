@@ -30,7 +30,7 @@ export default function ExperienceForm() {
                     <Select
                         controlId="exp1InícioMes"
                         label="Mês de Início *"
-                        placeholder="Fevereiro"
+                        options={[ { id: "null", displayName: "Selecione" } ]}
                     />
                 </div>
 
@@ -46,7 +46,7 @@ export default function ExperienceForm() {
                     <Select
                         controlId="exp1FimMes"
                         label="Mês de conclusão *"
-                        placeholder="Fevereiro"
+                        options={[ { id: "null", displayName: "Selecione" } ]}
                     />
                 </div>
 

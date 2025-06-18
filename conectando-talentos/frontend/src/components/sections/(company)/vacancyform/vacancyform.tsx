@@ -38,7 +38,7 @@ export default function VacancyForm() {
                     <Select
                         controlId="vagaTipo"
                         label="Tipo de Contratação *"
-                        placeholder="Selecione"
+                        options={[ { id: "null", displayName: "Selecione" } ]}
                         required
                     />
                 </div>
@@ -68,7 +68,7 @@ export default function VacancyForm() {
                     <Select
                         controlId="vagaExp"
                         label="Nivel de experiência"
-                        placeholder="Selecione"
+                        options={[ { id: "null", displayName: "Selecione" } ]}
                         required
                     />
                 </div>
