@@ -1,6 +1,6 @@
 import { Container } from "react-bootstrap"
 
-import ProfileForms from "../../../components/sections/(company)/profile/profile"
+import ProfileForms from "@/components/sections/(company)/profile/profile"
 
 export default function Profile() {
     return (

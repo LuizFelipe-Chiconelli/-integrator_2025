@@ -8,7 +8,7 @@ import { useSearchParams } from "react-router-dom"
 
 // Tipos
 import type { SyntheticEvent } from "react"
-import type { Option, InputHandler } from "../../types/inputs"
+import type { Option, InputHandler } from "@/types/inputs"
 
 // Options
 const typeOptions: Option[] = [

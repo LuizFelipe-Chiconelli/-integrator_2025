@@ -7,6 +7,7 @@ import Home from './pages/(default)/home/page'
 import Jobs from './pages/(default)/jobs/page'
 import About from './pages/(default)/abouts/page'
 import Business from './pages/(default)/business/page'
+import SingleVacancy from './pages/(default)/single-vacancy/page'
 
 // Páginas de Empresa
 import Profile from './pages/(company)/profile/page'
@@ -47,6 +48,9 @@ function App() {
             <Route path='/vagas' element={<Jobs />} />
             <Route path='/sobre' element={<About />} />
             <Route path='/empresa' element={<Business />} />
+
+            <Route path='/vagas/:id' element={<SingleVacancy />} />
+
             <Route path='/unauthorized' element={<Unauthorized />} />
             <Route path='*' element={<PageNotFound />} />
           </Route>

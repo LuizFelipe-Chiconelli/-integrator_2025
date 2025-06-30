@@ -1,5 +1,6 @@
 import { Button, Form } from "react-bootstrap"
-import TextInput from "../../../all/textinput"
+
+import TextInput from "@/components/all/textinput"
 
 export default function SocialForm() {
     return (

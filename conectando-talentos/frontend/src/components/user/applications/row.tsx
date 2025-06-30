@@ -10,7 +10,7 @@ export default function ApplicationRow() {
             <td className="col-3"><LuBuilding className="mb-1"/> Tech Corp</td>
             <td className="col-2"><MdOutlineDateRange className="mb-1" /> {new Date().toLocaleDateString('pt-br')}</td>
             <td><Badge bg="warning" className="text-warning-emphasis">Pendente</Badge></td>
-            <td className="text-end pe-3"><Button className="btn-light border">Vizualizar</Button></td>
+            <td className="text-end pe-3"><Button className="btn-light border">Visualizar</Button></td>
         </tr>
     )
 }

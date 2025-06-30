@@ -2,7 +2,7 @@ import { Button, Container } from "react-bootstrap"
 
 import { FaPlus } from "react-icons/fa6"
 
-import EducationForm from "../../../user/curriculum/forms/education"
+import EducationForm from "@/components/user/curriculum/forms/education"
 
 export default function EducationSection() {
     return (

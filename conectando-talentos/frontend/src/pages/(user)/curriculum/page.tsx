@@ -1,9 +1,9 @@
 import { Container } from "react-bootstrap"
 
-import UploadSection from "../../../components/sections/(user)/curriculum/upload"
-import EducationSection from "../../../components/sections/(user)/curriculum/education"
-import ExperienceSection from "../../../components/sections/(user)/curriculum/experience"
-import QualificationSection from "../../../components/sections/(user)/curriculum/qualification"
+import UploadSection from "@/components/sections/(user)/curriculum/upload"
+import EducationSection from "@/components/sections/(user)/curriculum/education"
+import ExperienceSection from "@/components/sections/(user)/curriculum/experience"
+import QualificationSection from "@/components/sections/(user)/curriculum/qualification"
 
 export default function Curriculum() {
     return (

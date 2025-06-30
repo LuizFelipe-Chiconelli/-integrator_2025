@@ -1,18 +1,18 @@
 import { Container } from "react-bootstrap"
 
-import JobCard from "../../jobs/jobcard"
-import JobsFilter from "../../jobs/filter"
-import Pagination from "../../all/pagination"
-import CardPlaceholder from "../../jobs/cardplaceholder"
+import JobCard from "@/components/jobs/jobcard"
+import JobsFilter from "@/components/jobs/filter"
+import Pagination from "@/components/all/pagination"
+import CardPlaceholder from "@/components/jobs/cardplaceholder"
 
-import type { Job } from "../../../types/job"
+import type { Job } from "@/types/job"
 
 // Hooks
 import { useEffect, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 
 // Actions
-import { getJobs } from "../../../actions/jobs"
+import { getJobs } from "@/actions/jobs"
 
 export default function JobsGrid() {
     const [searchParams] = useSearchParams()

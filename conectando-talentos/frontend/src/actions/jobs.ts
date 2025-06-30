@@ -9,3 +9,11 @@ export async function getJobs(page: string): Promise<Array<Job>> {
 
     return data
 }
+
+export async function getSingleVacancy(): Promise<Job> {
+    // ID será usado na busca com a API real
+    const res: AxiosResponse = await axios.get("https://jsonfakery.com/jobs/random")
+    const data: Job = res.data
+
+    return data
+}

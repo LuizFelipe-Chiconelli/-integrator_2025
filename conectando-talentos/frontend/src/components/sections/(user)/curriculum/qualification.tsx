@@ -2,7 +2,7 @@ import { Button, Container } from "react-bootstrap"
 
 import { FaPlus } from "react-icons/fa6"
 
-import QualificationForm from "../../../user/curriculum/forms/qualification"
+import QualificationForm from "@/components/user/curriculum/forms/qualification"
 
 export default function QualificationSection() {
     return (

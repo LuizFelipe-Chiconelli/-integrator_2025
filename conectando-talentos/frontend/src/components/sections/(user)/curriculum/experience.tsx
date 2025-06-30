@@ -2,7 +2,7 @@ import { Button, Container } from "react-bootstrap"
 
 import { FaPlus } from "react-icons/fa6"
 
-import ExperienceForm from "../../../user/curriculum/forms/experience"
+import ExperienceForm from "@/components/user/curriculum/forms/experience"
 
 export default function ExperienceSection() {
     return (

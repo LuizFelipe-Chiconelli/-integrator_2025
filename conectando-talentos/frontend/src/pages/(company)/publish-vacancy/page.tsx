@@ -1,6 +1,6 @@
 import { Container } from "react-bootstrap"
 
-import VacancyForm from "../../../components/sections/(company)/vacancyform/vacancyform"
+import VacancyForm from "@/components/sections/(company)/vacancyform/vacancyform"
 
 export default function PublishVacancy() {
     return (

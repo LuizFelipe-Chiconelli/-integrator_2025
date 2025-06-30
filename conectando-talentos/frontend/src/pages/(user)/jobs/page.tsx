@@ -1,5 +1,5 @@
 import { Container } from "react-bootstrap"
-import JobList from "../../../components/sections/(user)/jobs/joblist"
+import JobList from "@/components/sections/(user)/jobs/joblist"
 
 export default function UserJobs() {
     return (

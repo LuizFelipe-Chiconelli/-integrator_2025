@@ -1,7 +1,7 @@
 import { Button, Form } from "react-bootstrap"
 
-import TextArea from "../../../all/textarea"
-import TextInput from "../../../all/textinput"
+import TextArea from "@/components/all/textarea"
+import TextInput from "@/components/all/textinput"
 
 export default function InfoForm() {
     return (

@@ -4,7 +4,7 @@ import { MdOutlineWorkOutline } from "react-icons/md"
 import { IoBusinessOutline, IoNewspaperOutline } from "react-icons/io5"
 import { RiRoadMapLine } from "react-icons/ri"
 
-import InfoCard from "../../all/card"
+import InfoCard from "@/components/all/card"
 
 export default function Presentation() {
     return (

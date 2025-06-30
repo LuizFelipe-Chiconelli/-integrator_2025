@@ -5,7 +5,7 @@ import { useRef, useImperativeHandle } from "react"
 
 // Tipos
 import type { Color } from "react-bootstrap/esm/types"
-import type { InputHandler } from "../../types/inputs"
+import type { InputHandler } from "@/types/inputs"
 
 // Definição de Props
 interface Props {

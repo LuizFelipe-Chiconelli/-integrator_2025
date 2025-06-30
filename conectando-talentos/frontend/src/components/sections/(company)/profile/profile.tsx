@@ -2,10 +2,10 @@ import { Container } from "react-bootstrap"
 
 import { useSearchParams } from "react-router-dom"
 
-import ProfileTabs from "../../../company/profile/tabs"
-import InfoForm from "../../../company/profile/forms/info"
-import SocialForm from "../../../company/profile/forms/social"
-import AccountForm from "../../../company/profile/forms/account"
+import ProfileTabs from "@/components/company/profile/tabs"
+import InfoForm from "@/components/company/profile/forms/info"
+import SocialForm from "@/components/company/profile/forms/social"
+import AccountForm from "@/components/company/profile/forms/account"
 
 export default function ProfileForms() {
     const [searchParams, _] = useSearchParams()

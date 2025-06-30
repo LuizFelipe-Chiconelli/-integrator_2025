@@ -2,9 +2,9 @@ import { Button, Form } from "react-bootstrap"
 
 import { BsTrash } from "react-icons/bs"
 
-import Check from "../../../all/check"
-import Select from "../../../all/select"
-import TextInput from "../../../all/textinput"
+import Check from "@/components/all/check"
+import Select from "@/components/all/select"
+import TextInput from "@/components/all/textinput"
 
 export default function ExperienceForm() {
     return (

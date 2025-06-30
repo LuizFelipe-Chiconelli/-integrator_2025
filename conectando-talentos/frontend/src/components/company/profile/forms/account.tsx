@@ -1,7 +1,7 @@
 import { Button, Form } from "react-bootstrap"
 
-import TextInput from "../../../all/textinput"
-import PasswordInput from "../../../all/passwordinput"
+import TextInput from "@/components/all/textinput"
+import PasswordInput from "@/components/all/passwordinput"
 
 export default function AccountForm() {
     return (

@@ -1,6 +1,6 @@
 import { Container, Row, Col, Card } from "react-bootstrap";
 import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaClock } from "react-icons/fa";
-import Banner from "../../../components/sections/about/banner.tsx";
+import Banner from "@/components/sections/about/banner.tsx";
 import "./abouts.css";
 
 export default function About() {

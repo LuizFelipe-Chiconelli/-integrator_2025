@@ -1,6 +1,6 @@
 import { Container } from "react-bootstrap"
 
-import ApplicationsGrid from "../../../components/sections/(company)/applications/applications"
+import ApplicationsGrid from "@/components/sections/(company)/applications/applications"
 
 export default function Application() {
     return (

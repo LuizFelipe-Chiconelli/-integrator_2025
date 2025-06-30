@@ -5,7 +5,7 @@ import { useImperativeHandle, useRef } from "react"
 
 // Tipos
 import type { Color } from "react-bootstrap/esm/types"
-import type { Option, InputHandler } from "../../types/inputs"
+import type { Option, InputHandler } from "@/types/inputs"
 
 interface Props {
     controlId: string,

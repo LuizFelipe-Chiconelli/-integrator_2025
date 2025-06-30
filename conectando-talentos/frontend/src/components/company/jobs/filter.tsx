@@ -1,7 +1,7 @@
 import { Form } from "react-bootstrap"
 
-import TextInput from "../../all/textinput"
-import Select from "../../all/select"
+import TextInput from "@/components/all/textinput"
+import Select from "@/components/all/select"
 
 export default function JobFilters() {
     return (

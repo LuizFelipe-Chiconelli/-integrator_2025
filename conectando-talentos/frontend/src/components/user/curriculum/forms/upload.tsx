@@ -2,7 +2,7 @@ import { Button, Form } from "react-bootstrap"
 
 import { LuDownload } from "react-icons/lu"
 
-import FileInput from "../../../all/fileinput"
+import FileInput from "@/components/all/fileinput"
 
 export default function UploadCurriculumForm() {
     return (

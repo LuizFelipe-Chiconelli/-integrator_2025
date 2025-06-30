@@ -1,13 +1,13 @@
 import { Button, Form } from "react-bootstrap"
 
-import TextInput from "../../../all/textinput"
-import Select from "../../../all/select"
-import DateInput from "../../../all/dateinput"
-import FileInput from "../../../all/fileinput"
-import TextArea from "../../../all/textarea"
+import TextInput from "@/components/all/textinput"
+import Select from "@/components/all/select"
+import DateInput from "@/components/all/dateinput"
+import FileInput from "@/components/all/fileinput"
+import TextArea from "@/components/all/textarea"
 
 // Tipos
-import type { Option } from "../../../../types/inputs"
+import type { Option } from "@/types/inputs"
 
 // Options
 const ufOptions: Option[] = [

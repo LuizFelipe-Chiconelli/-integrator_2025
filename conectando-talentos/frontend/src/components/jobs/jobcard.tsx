@@ -1,7 +1,7 @@
 import { Badge, Button, Card } from "react-bootstrap"
 import { Link } from "react-router-dom"
 
-import type { Job } from "../../types/job"
+import type { Job } from "@/types/job"
 
 interface Props {
     job: Job

@@ -1,8 +1,8 @@
 import { Container } from "react-bootstrap"
 
-import List from "../../../company/jobs/list"
-import JobFilters from "../../../company/jobs/filter"
-import PaginationButtons from "../../../all/pagination"
+import List from "@/components/company/jobs/list"
+import JobFilters from "@/components/company/jobs/filter"
+import PaginationButtons from "@/components/all/pagination"
 
 export default function JobList() {
     return (

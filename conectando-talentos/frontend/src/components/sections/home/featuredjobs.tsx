@@ -1,15 +1,15 @@
 
 import { Container } from "react-bootstrap"
 
-import JobCard from "../../jobs/jobcard"
-import CardPlaceholder from "../../jobs/cardplaceholder"
+import JobCard from "@/components/jobs/jobcard"
+import CardPlaceholder from "@/components/jobs/cardplaceholder"
 
 // Hooks
 import { useEffect, useState } from "react"
 
 // Actions
-import type { Job } from "../../../types/job"
-import { getJobs } from "../../../actions/jobs"
+import type { Job } from "@/types/job"
+import { getJobs } from "@/actions/jobs"
 
 export default function FeaturedJobs() {
     const [jobs, setJobs] = useState<Array<Job> | null>(null)

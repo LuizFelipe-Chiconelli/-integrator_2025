@@ -1,6 +1,6 @@
 import { Container } from "react-bootstrap"
 
-import PersonalDataForm from "../../../components/user/profile/forms/personaldata"
+import PersonalDataForm from "@/components/user/profile/forms/personaldata"
 
 export default function UserProfile() {
     return (

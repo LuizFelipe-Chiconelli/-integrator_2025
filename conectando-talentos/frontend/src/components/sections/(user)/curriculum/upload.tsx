@@ -1,6 +1,6 @@
 import { Container } from "react-bootstrap"
 
-import UploadCurriculumForm from "../../../user/curriculum/forms/upload"
+import UploadCurriculumForm from "@/components/user/curriculum/forms/upload"
 
 export default function UploadSection() {
     return (

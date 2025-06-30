@@ -1,10 +1,10 @@
 import { Container } from "react-bootstrap"
 
-import ApplicationTable from "../../../company/applications/table"
-import PaginationButtons from "../../../all/pagination"
+import ApplicationTable from "@/components/company/applications/table"
+import PaginationButtons from "@/components/all/pagination"
 
-import Select from "../../../all/select"
-import TextInput from "../../../all/textinput"
+import Select from "@/components/all/select"
+import TextInput from "@/components/all/textinput"
 
 export default function ApplicationsGrid() {
     return (
