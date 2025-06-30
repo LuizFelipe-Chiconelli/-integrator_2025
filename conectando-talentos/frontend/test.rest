@@ -1,2 +1,0 @@
-GET https://jsonfakery.com/jobs/paginated?page=1 HTTP/1.1
-Accept: application/json
