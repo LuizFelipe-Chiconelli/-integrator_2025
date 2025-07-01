@@ -82,6 +82,11 @@ export default function About() {
                 cargo: "Co-fundador e Gestor de Projetos",
                 descricao: "Responsável pela organização das etapas, prazos e estratégia da plataforma.",
               },
+              {
+                nome: "Paulo Henrique",
+                cargo: "Co-fundador e Gestor de Projetos",
+                descricao: "Responsável pela organização das etapas, prazos e estratégia da plataforma.",
+              },
             ].map((membro, index) => (
               <Col xs={12} sm={6} md={4} lg={3} className="d-flex justify-content-center" key={index}>
                 <Card className="p-3 h-100 equipe-card w-100" style={{ maxWidth: '270px' }}>

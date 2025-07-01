@@ -1,5 +1,5 @@
 import { Container, Row, Col, Button, Card } from "react-bootstrap";
-import { FaBuilding, FaCheckCircle } from "react-icons/fa";
+import { FaBuilding } from "react-icons/fa";
 import { BsBuildings } from "react-icons/bs";
 import "./business.css";
 
