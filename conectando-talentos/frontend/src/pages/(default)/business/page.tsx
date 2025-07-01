@@ -84,58 +84,6 @@ export default function Business() {
           </Col>
         </Row>
       </div>
-
-      {/* Planos */}
-      <div className="p-4 bg-light rounded plan-section">
-        <h4 className="text-center fw-bold text-primary">Planos para Empresas</h4>
-        <p className="text-center text-muted">
-          Escolha o plano mais adequado para o porte e necessidades da sua empresa
-        </p>
-
-        <Row className="mt-4 g-4 justify-content-center">
-          <Col md={4}>
-            <Card className="h-100 text-center p-4 shadow-sm pricing-card">
-              <h6 className="fw-bold">Básico</h6>
-              <h3 className="fw-bold">Grátis</h3>
-              <ul className="text-start list-unstyled mt-3 text-muted small">
-                <li><FaCheckCircle className="text-success me-2" />3 vagas por mês</li>
-                <li><FaCheckCircle className="text-success me-2" />Filtros básicos</li>
-                <li><FaCheckCircle className="text-success me-2" />30 dias de exibição</li>
-              </ul>
-              <Button variant="outline-primary">Começar agora</Button>
-            </Card>
-          </Col>
-          <Col md={4}>
-            <Card className="h-100 text-center p-4 shadow-sm border-primary border-2 pricing-card featured">
-              <h6 className="fw-bold">Empresarial</h6>
-              <h3 className="fw-bold">R$ 199</h3>
-              <span className="text-muted">/mês</span>
-              <ul className="text-start list-unstyled mt-3 text-muted small">
-                <li><FaCheckCircle className="text-success me-2" />15 vagas por mês</li>
-                <li><FaCheckCircle className="text-success me-2" />Filtros avançados</li>
-                <li><FaCheckCircle className="text-success me-2" />60 dias de exibição</li>
-                <li><FaCheckCircle className="text-success me-2" />Destaque nas buscas</li>
-              </ul>
-              <Button variant="primary">Escolher plano</Button>
-            </Card>
-          </Col>
-          <Col md={4}>
-            <Card className="h-100 text-center p-4 shadow-sm pricing-card">
-              <h6 className="fw-bold">Premium</h6>
-              <h3 className="fw-bold">R$ 399</h3>
-              <span className="text-muted">/mês</span>
-              <ul className="text-start list-unstyled mt-3 text-muted small">
-                <li><FaCheckCircle className="text-success me-2" />Vagas ilimitadas</li>
-                <li><FaCheckCircle className="text-success me-2" />Filtros exclusivos</li>
-                <li><FaCheckCircle className="text-success me-2" />90 dias de exibição</li>
-                <li><FaCheckCircle className="text-success me-2" />Destaque principal</li>
-                <li><FaCheckCircle className="text-success me-2" />Suporte prioritário</li>
-              </ul>
-              <Button variant="outline-success">Escolher plano</Button>
-            </Card>
-          </Col>
-        </Row>
-      </div>
     </Container>
   );
 }
