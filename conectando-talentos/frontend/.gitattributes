@@ -1,0 +1,7 @@
+# força todo texto a usar LF no repositório
+* text=auto eol=lf
+
+# opcional: mantém arquivos binários intactos
+*.png  binary
+*.jpg  binary
+*.pdf  binary

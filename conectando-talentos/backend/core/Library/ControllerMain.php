@@ -37,7 +37,44 @@ class ControllerMain
         $this->request      = new Request();
 
         // carregar helper padrão
-        $this->loadHelper("utilits");
+        $this->loadHelper(["formulario", "utilits"]);
+
+        // Verifida os controllers autorizados sem login efetuado, permitindo passar controller Api que serão validados a parte
+        if (substr($this->controller, 0, 3) != "Api") {
+            if (!$this->isPublicRoute() && !Session::get('usuario_id')) {
+        return Redirect::page('login', ['msgError' => 'Para acessar a rotina favor antes efetuar o login.']);
+        }
+    }
+        
+    }
+
+    private function isPublicRoute(): bool
+    {
+    // controllers inteiros liberados
+    if (in_array($this->controller, \CONTROLLER_AUTH, true)) {
+        return true;
+    }
+
+    // verifica se a action atual está listada na constante PUBLIC_ACTIONS
+    $class = "App\\Controller\\{$this->controller}";
+    if (defined("$class::PUBLIC_ACTIONS")) {
+        return in_array($this->method, $class::PUBLIC_ACTIONS, true);
+    }
+
+    return false;
+    }
+
+    /**
+     * validaNivelAcesso
+     *
+     * @param int $nivelMinino 
+     * @return void
+     */
+    public function validaNivelAcesso(int $nivelMinino = 20)
+    {
+        if (!((int)Session::get("userNivel") <= $nivelMinino)) {
+            return Redirect::page("sistema", ["msgError" => "Você não possui permissão neste programa"]);
+        }
     }
 
     /**
@@ -100,15 +137,23 @@ class ControllerMain
             require_once $pathView . "Comuns" . DIRECTORY_SEPARATOR . "cabecalho.php";
         }
 
-        // Será utilizado futuramente para recuperar valores quando idenficado
         // erros na validação do formulário
         if (Session::get("inputs") != false) {
-            $aDados = Session::getDestroy("inputs");
+            $dados['data'] = Session::getDestroy("inputs");
         }
 
         // Será utilizado para recuperar valores e preencher o formulário
-        if (count($aDados) > 0) {
-            $_POST = $aDados;
+        if (isset($dados['data'])) {
+			$_POST = $dados['data'];
+		} else {
+			if (count($dados) > 0) {
+				$_POST = $dados;
+			}
+		}
+        
+        // Será utilizado futuramente para recuperar valores quando idenficado
+        if (Session::get("errors") != false) {
+            $_POST['formErrors'] = Session::getDestroy('errors');
         }
 
         // carrega a página

@@ -13,8 +13,8 @@ class Routes
      */
     public static function rota()
     {
-        $pathContr      = "App\\Controller\\";
-        $aParametros    = self::getRotaParametros();
+        $pathContr      = "App\Controller\\";
+        $aParametros    = Self::getRotaParametros();
         $controller     = $pathContr . $aParametros['controller'];
 
         if (!class_exists($controller)) {
@@ -24,10 +24,7 @@ class Routes
                 Erros::methodNotFound();
             } else {
                 $instance = new $controller();
-                call_user_func_array(
-                    [$instance, $aParametros['method']],
-                    array_merge([$aParametros['action'], $aParametros['id']], $aParametros['outrosPar'])
-                );
+                call_user_func_array([$instance, $aParametros['method']], array_merge([$aParametros['action'], $aParametros["id"]], $aParametros['outrosPar']));
                 return;
             }
         }

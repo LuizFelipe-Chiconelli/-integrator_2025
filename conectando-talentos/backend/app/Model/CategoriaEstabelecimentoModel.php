@@ -10,7 +10,7 @@ class CategoriaEstabelecimentoModel extends ModelMain
 
     /**
      * Cria a ligação empresa ↔ categoria.
-     * @return int  PK gerada (0 se falhar)
+     * @return int  PK gerada (0 se falhar) 
      */
     public function vincular(int $estabId, int $catId): int
     {

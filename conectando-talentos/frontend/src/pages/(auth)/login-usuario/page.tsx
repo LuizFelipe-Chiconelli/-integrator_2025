@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { Container, Row, Col, Form, Button, Card } from "react-bootstrap";
 import { FaGoogle, FaFacebook, FaInfoCircle } from "react-icons/fa";
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";       //  ✅  agora importa o axios
+import api from "@/services/api";
 import "./login-usuario.css";
-
-const API_URL = "http://integrador/usuario/login";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -16,27 +15,25 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const { data } = await axios.post(API_URL, {
-        email,
-        senha
-      });
+      const { data } = await api.post("/usuario/login", { email, senha });
 
       alert(data.mensagem);
 
       // salva login no localStorage
-      localStorage.setItem("usuario_id", data.usuario.id);
+      localStorage.setItem("usuario_id",  String(data.usuario.id));
       localStorage.setItem("usuario_tipo", data.usuario.tipo);
       localStorage.setItem("usuario_email", data.usuario.email);
 
       // redireciona para o dashboard
-      window.location.href = "/";
-
+      window.location.href = "/usuario";
     } catch (err: unknown) {
       let msg = "Erro ao tentar logar.";
+
       if (axios.isAxiosError(err)) {
         const axiosErr = err as AxiosError<{ mensagem?: string }>;
         msg = axiosErr.response?.data?.mensagem ?? msg;
       }
+
       alert(msg);
     } finally {
       setLoading(false);
@@ -56,7 +53,7 @@ export default function Login() {
 
               <h5 className="mt-3 fw-bold">Entre na sua conta</h5>
               <p className="text-muted mb-0">
-                Ou <a href="/register">crie uma conta gratuita</a>
+                Ou <a href="/auth/register-usuario">crie uma conta gratuita</a>
               </p>
             </div>
 

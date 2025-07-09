@@ -17,3 +17,4 @@ export default function Check({ controlId, label, required }: Props) {
         </Form.Group>
     )
 }
+

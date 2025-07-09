@@ -1,47 +1,54 @@
-import { Form } from "react-bootstrap"
+import { forwardRef, useImperativeHandle, useRef } from "react";
+import { Form } from "react-bootstrap";
+import type { Option, InputHandler } from "@/types/inputs";
 
-// Hooks
-import { useImperativeHandle, useRef } from "react"
-
-// Tipos
-import type { Color } from "react-bootstrap/esm/types"
-import type { Option, InputHandler } from "@/types/inputs"
-
-interface Props {
-    controlId: string,
-    options: Option[],
-    label?: string,
-    required?: boolean,
-    ref?: React.Ref<InputHandler>,
-    bg?: Color
+export interface SelectProps {
+  controlId : string;
+  label     : string;
+  options   : Option[];
+  required ?: boolean;
+  onChange ?: (value: string) => void;   // ← adicionado
 }
 
-export default function Select({ ref, controlId, label, bg, required, options }: Props) {
-    const selectRef = useRef<HTMLSelectElement>(null)
+const Select = forwardRef<InputHandler, SelectProps>(
+  ({ controlId, label, options, required, onChange }, ref) => {
 
-    useImperativeHandle(ref, () => {
-        return {
-            getValue() { return selectRef.current?.value ?? "" }
+    const selectRef = useRef<HTMLSelectElement>(null);
+
+    /* ❶ — expõe getValue **e** setValue */
+    useImperativeHandle(ref, () => ({
+      getValue: () => selectRef.current?.value ?? "",
+      setValue: (val: string) => {
+        if (selectRef.current) {
+          selectRef.current.value = val;
         }
-    })
+      }
+    }));
 
+    /* ❷ — dispara callback opcional */
+    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+      onChange?.(e.target.value);
+    };
+
+    /* ❸ — JSX */
     return (
-        <Form.Group controlId={controlId} className="mb-3">
-            {label && (
-                <Form.Label className="fw-semibold mb-1 ms-1" style={{ fontSize: "14px" }}>{label}</Form.Label>
-            )}
-            <Form.Select
-                ref={selectRef}
-                className={`bg-${bg ?? "light"}`}
-                defaultValue="null"
-                {...required ? { required } : {}}
-            >
-                {options.map((opt: Option) => {
-                    return (
-                        <option key={opt.id} value={opt.id}>{opt.displayName}</option>
-                    )
-                })}
-            </Form.Select>
-        </Form.Group>
-    )
-}
+      <Form.Group controlId={controlId} className="mb-3">
+        {label && <Form.Label>{label}</Form.Label>}
+
+        <Form.Select
+          ref={selectRef}
+          required={required}
+          onChange={handleChange}
+        >
+          {options.map((opt) => (
+            <option key={opt.id} value={opt.id}>
+              {opt.displayName}
+            </option>
+          ))}
+        </Form.Select>
+      </Form.Group>
+    );
+  }
+);
+
+export default Select;

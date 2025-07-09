@@ -1,27 +1,43 @@
-import { Form } from "react-bootstrap"
-import type { Color } from "react-bootstrap/esm/types"
+import { forwardRef, useImperativeHandle, useRef } from "react";
+import { Form } from "react-bootstrap";
+import type { InputHandler } from "@/types/inputs";
 
-interface Props {
-    controlId: string,
-    label?: string,
-    placeholder: string,
-    required?: boolean,
-    bg?: Color
+interface TextAreaProps {
+  controlId : string;
+  label     : string;
+  placeholder?: string;
+  required ?: boolean;
 }
 
-export default function TextArea({ controlId, label, placeholder, bg, required }: Props) {
+const TextArea = forwardRef<InputHandler, TextAreaProps>(
+  ({ controlId, label, placeholder, required }, ref) => {
+
+    const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+    /* ❶ — agora expõe ambos os métodos */
+    useImperativeHandle(ref, () => ({
+      getValue: () => textAreaRef.current?.value ?? "",
+      setValue: (val: string) => {
+        if (textAreaRef.current) {
+          textAreaRef.current.value = val;
+        }
+      }
+    }));
+
+    /* ❷ — JSX */
     return (
-        <Form.Group controlId={controlId} className="mb-3">
-            {label && (
-                <Form.Label className="fw-semibold mb-1 ms-1" style={{ fontSize: "14px" }}>{label}</Form.Label>
-            )}
-            <Form.Control
-                as="textarea"
-                placeholder={placeholder}
-                className={`bg-${bg ?? "light"}`}
-                style={{ height: "100px" }}
-                {...required ? { required } : {}}
-            />
-        </Form.Group>
-    )
-}
+      <Form.Group controlId={controlId} className="mb-3">
+        {label && <Form.Label>{label}</Form.Label>}
+        <Form.Control
+          as="textarea"
+          ref={textAreaRef}
+          placeholder={placeholder}
+          required={required}
+          rows={4}
+        />
+      </Form.Group>
+    );
+  }
+);
+
+export default TextArea;

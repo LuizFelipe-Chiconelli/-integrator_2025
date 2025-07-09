@@ -37,7 +37,7 @@ export default function Presentation() {
                 <div className="col-lg-3">
                     <InfoCard
                         icon={<IoNewspaperOutline className="fs-1" />}
-                        title="Parocesso Simplificado"
+                        title="Processo Simplificado"
                         text="Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum minus quidem aperiam consequuntur similique nam fuga voluptas officiis..."
                     />
                 </div>

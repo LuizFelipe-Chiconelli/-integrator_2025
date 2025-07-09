@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { Container, Row, Col, Form, Button, Card } from "react-bootstrap";
 import { FaInfoCircle } from "react-icons/fa";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 
-/** URL base do back-end */
-const API_URL = "http://integrador/usuario/cadastrar";
+import api from "@/services/api";                // ✅ instância global com withCredentials
 
 export default function Register() {
   /* ---------- estado do formulário ---------- */
   const [form, setForm] = useState({
-    nome: "",
+      nome: "",
     email: "",
     senha: "",
-    confirmarSenha: ""
+    confirmarSenha: "",
+    tipo: "CA"            // CA = Candidato; ajuste conforme sua regra
   });
 
   /* ---------- checkbox do termo ---------- */
@@ -31,30 +31,27 @@ export default function Register() {
     }
 
     try {
-      const { data } = await axios.post(API_URL, {
+      const { data } = await api.post("/usuario/cadastrar", {
         nome:   form.nome,
         email:  form.email,
         senha:  form.senha,
-        aceite
+        aceite,
+        tipo:   form.tipo          // CA (candidato) ou CL (empresa) se precisar
       });
 
-      alert(data.mensagem);
+      alert(data.mensagem ?? "Usuário cadastrado com sucesso!");
+
       /* limpa o formulário */
-      setForm({ nome: "", email: "", senha: "", confirmarSenha: "" });
+      setForm({ nome: "", email: "", senha: "", confirmarSenha: "", tipo: "CA" });
       setAceite(false);
 
     } catch (err: unknown) {
-      /* erro vindo do Axios */
-      if (axios.isAxiosError(err)) {
-        const axiosErr = err as AxiosError<{ mensagem?: string }>;
-        const msg =
-          axiosErr.response?.data?.mensagem ??
-          "Erro inesperado ao cadastrar.";
-        alert(msg);
-      } else {
-        /* outro tipo de falha (JS, rede, etc.) */
-        alert("Erro inesperado. Tente novamente.");
+
+      let msg = "Erro inesperado ao cadastrar.";
+      if (err instanceof AxiosError) {
+        msg = err.response?.data?.mensagem ?? msg;
       }
+      alert(msg);
     }
   };
 

@@ -62,7 +62,7 @@ export default function EmpresaLogin() {
               <h4 className="fw-bold mb-0">Área da Empresa</h4>
               <small className="text-muted">
                 Ou&nbsp;
-                <a href="/empresa/register" className="fw-semibold">cadastre sua empresa</a>
+                <a href="/auth/register-empresa" className="fw-semibold">cadastre sua empresa</a>
               </small>
             </header>
 

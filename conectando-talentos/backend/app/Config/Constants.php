@@ -3,6 +3,12 @@
 // Controller Padrão
 defined('DEFAULT_CONTROLLER') || define("DEFAULT_CONTROLLER", 'Home');
 
+/* -- NOVA constante: rotas que não exigem login -- */
+defined('CONTROLLER_AUTH')    || define('CONTROLLER_AUTH', [
+    'login'          // <- mantenha em minúsculo, igual à rota
+    /* se tiver outras rotas públicas, adicione aqui */
+]);
+
 // Método padrão
 defined('DEFAULT_METODO') || define("DEFAULT_METODO", 'index');
 

@@ -77,12 +77,15 @@ class Request
     }
 
     /**
-     * Retorna todos os dados recebidos via POST (como array associativo)
+     * getJson - Lê dados recebidos no corpo da requisição
      *
      * @return array
      */
-    public static function all()
+    public static function getJson(): array
     {
-        return $_POST;
+        $input = file_get_contents('php://input');  // Lê dados enviados no corpo da requisição
+        $data   = json_decode($input, true);
+
+        return is_array($data) ? $data : [];
     }
 }

@@ -9,7 +9,6 @@ use Core\Library\ModelMain;
  */
 class TermoUsoModel extends ModelMain
 {
-    /* Nome da tabela para o ModelMain */
     protected $table = 'termodeuso';
 
     /**
