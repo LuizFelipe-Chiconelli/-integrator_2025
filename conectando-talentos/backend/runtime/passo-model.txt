@@ -11,3 +11,6 @@
 [01:55:00] entrou em CurriculumModel::updateByPessoaFisica
 [02:07:34] entrou em CurriculumModel::updateByPessoaFisica
 [02:13:52] entrou em CurriculumModel::updateByPessoaFisica
+[02:00:44] entrou em CurriculumModel::updateByPessoaFisica
+[16:32:26] entrou em CurriculumModel::updateByPessoaFisica
+[16:34:50] entrou em CurriculumModel::updateByPessoaFisica

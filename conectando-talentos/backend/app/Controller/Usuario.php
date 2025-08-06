@@ -5,6 +5,7 @@ use Core\Library\ControllerMain;
 use Core\Library\Session;
 use Core\Library\Response;
 
+
 /**
  * End-points de Usuário: cadastro, login, perfil.
  */
