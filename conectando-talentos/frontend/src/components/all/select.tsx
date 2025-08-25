@@ -1,54 +1,82 @@
+// src/components/all/select.tsx
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import { Form } from "react-bootstrap";
 import type { Option, InputHandler } from "@/types/inputs";
 
 export interface SelectProps {
-  controlId : string;
-  label     : string;
-  options   : Option[];
-  required ?: boolean;
-  onChange ?: (value: string) => void;   // ← adicionado
+  controlId: string;                 // usado no Form.Group (sem warning)
+  label: string;
+  options: Option[] | readonly Option[];
+  required?: boolean;
+  onChange?: (value: string) => void;
+
+  // ✅ novos (controlado e UX)
+  value?: string | number;           // permite <Select value={...} />
+  placeholder?: string;              // ex.: "Selecione"
+  disabled?: boolean;
+  className?: string;
+  isInvalid?: boolean;
+  feedback?: string;                 // mensagem de erro
 }
 
-const Select = forwardRef<InputHandler, SelectProps>(
-  ({ controlId, label, options, required, onChange }, ref) => {
+const Select = forwardRef<InputHandler, SelectProps>(function Select(
+  {
+    controlId,
+    label,
+    options,
+    required,
+    onChange,
 
-    const selectRef = useRef<HTMLSelectElement>(null);
+    value,
+    placeholder,
+    disabled,
+    className,
+    isInvalid,
+    feedback,
+  },
+  ref
+) {
+  const selectRef = useRef<HTMLSelectElement>(null);
 
-    /* ❶ — expõe getValue **e** setValue */
-    useImperativeHandle(ref, () => ({
-      getValue: () => selectRef.current?.value ?? "",
-      setValue: (val: string) => {
-        if (selectRef.current) {
-          selectRef.current.value = val;
-        }
-      }
-    }));
+  // expõe getValue / setValue
+  useImperativeHandle(ref, () => ({
+    getValue: () => selectRef.current?.value ?? "",
+    setValue: (val: string) => {
+      if (selectRef.current) selectRef.current.value = val;
+    },
+  }));
 
-    /* ❷ — dispara callback opcional */
-    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      onChange?.(e.target.value);
-    };
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    onChange?.(e.currentTarget.value);
+  };
 
-    /* ❸ — JSX */
-    return (
-      <Form.Group controlId={controlId} className="mb-3">
-        {label && <Form.Label>{label}</Form.Label>}
+  return (
+    <Form.Group controlId={controlId} className={`mb-3 ${className ?? ""}`.trim()}>
+      {label && <Form.Label>{label}</Form.Label>}
 
-        <Form.Select
-          ref={selectRef}
-          required={required}
-          onChange={handleChange}
-        >
-          {options.map((opt) => (
-            <option key={opt.id} value={opt.id}>
-              {opt.displayName}
-            </option>
-          ))}
-        </Form.Select>
-      </Form.Group>
-    );
-  }
-);
+      <Form.Select
+        ref={selectRef}
+        value={value ?? ""}          // ✅ componente controlado
+        onChange={handleChange}
+        required={required}
+        disabled={disabled}
+        isInvalid={isInvalid}
+      >
+        {placeholder && <option value="">{placeholder}</option>}
+        {options.map((opt) => (
+          <option key={String(opt.id)} value={String(opt.id)}>
+            {opt.displayName}
+          </option>
+        ))}
+      </Form.Select>
+
+      {feedback && (
+        <Form.Control.Feedback type="invalid" style={{ display: "block" }}>
+          {feedback}
+        </Form.Control.Feedback>
+      )}
+    </Form.Group>
+  );
+});
 
 export default Select;

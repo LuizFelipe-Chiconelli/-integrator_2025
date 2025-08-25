@@ -3,69 +3,39 @@ namespace App\Model;
 
 use Core\Library\ModelMain;
 
+/**
+ * Model da tabela base 'escolaridade' (id + descricao).
+ * - NÃO grava histórico do usuário (isso é no CurriculumEscolaridadeModel).
+ */
 class EscolaridadeModel extends ModelMain
 {
-    /** tabela no banco */
-    protected $table = 'curriculum_escolaridade';
+    protected $table      = 'escolaridade';
+    protected $primaryKey = 'escolaridade_id';
 
-    /** PK real */
-    protected $primaryKey = 'curriculum_escolaridade_id';
-
-    /** campos permitidos */
-    protected $allowedFields = [
-        'curriculum_curriculum_id',
-        'inicioMes', 'inicioAno',
-        'fimMes', 'fimAno',
-        'descricao', 'instituicao'
-    ];
-
-    /** regras de validação */
-    public $validationRules = [
-        'curriculum_curriculum_id' => [
-            'rules' => 'required|int',
-            'label' => 'Currículo'
-        ],
-        'inicioMes' => [
-            'rules' => 'required|int|min:1|max:12',
-            'label' => 'Mês de início'
-        ],
-        'inicioAno' => [
-            'rules' => 'required|int',
-            'label' => 'Ano de início'
-        ],
-        'fimMes' => [
-            'rules' => 'required|int|min:1|max:12',
-            'label' => 'Mês de término'
-        ],
-        'fimAno' => [
-            'rules' => 'required|int',
-            'label' => 'Ano de término'
-        ],
-        'descricao' => [
-            'rules' => 'required|max:60',
-            'label' => 'Descrição'
-        ],
-        'instituicao' => [
-            'rules' => 'required|max:60',
-            'label' => 'Instituição'
-        ]
-    ];
-
-    /** Busca um registro pela PK */
-    public function getById($id)
+    /**
+     * Busca um registro por descricao (case-insensitive).
+     * Ex.: 'medio', 'graduação', etc.
+     *
+     * @return array|null
+     */
+    public function findByDescricao(string $descricao): ?array
     {
-        return $this->db
-                    ->where($this->primaryKey, $id)
-                    ->first();
+        $row = $this->db
+            ->table($this->table)
+            ->where('LOWER(descricao)', mb_strtolower(trim($descricao)))
+            ->first();
+
+        return $row ?: null;
     }
 
-    /** Lista com JOIN (usa campo existente em curriculum) */
-    public function listaJoinCurriculum()
+    /**
+     * Retorna todos ordenados por descricao (opcional).
+     */
+    public function listarTodos(): array
     {
         return $this->db
-            ->select('e.*, c.apresentacaoPessoal AS curriculum_info') // ajuste se quiser outro campo
-            ->table("{$this->table} e")
-            ->join('curriculum c', 'c.curriculum_id = e.curriculum_curriculum_id')
+            ->table($this->table)
+            ->orderBy('descricao', 'ASC')
             ->findAll();
     }
 }

@@ -182,7 +182,7 @@ class Usuario extends ControllerMain
             'cpf'  => preg_replace('/\D/','', $dados['cpf'])
         ]);
 
-        /* --- curriculum ----------------------------------- */
+        /* --- PERFIL ----------------------------------- */
         try {
             $curriculumId = $this->loadModel('Curriculum')
                 ->updateByPessoaFisica($pfId, [

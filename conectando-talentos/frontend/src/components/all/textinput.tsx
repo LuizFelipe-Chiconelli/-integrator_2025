@@ -1,46 +1,50 @@
+// src/components/all/textinput.tsx
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import { Form } from "react-bootstrap";
 import type { Color } from "react-bootstrap/esm/types";
 import type { InputHandler } from "@/types/inputs";
 
-/* props nativos de Form.Control,
-   menos size (sm / lg) e id (vamos declarar de novo) */
+/** Props nativas de Form.Control, mas sem size, id e ref */
 type BootstrapProps = Omit<
   React.ComponentProps<typeof Form.Control>,
-  "size" | "id"
+  "size" | "id" | "ref"
 >;
 
 interface Props extends BootstrapProps {
-  /** id único do campo  –  agora realmente obrigatório */
+  /** id único do campo – obrigatório */
   id: string;
   label?: string;
   bg?: Color;
   htmlSize?: number;
+  /** vai no Form.Group (não vaza pro DOM) */
+  controlId?: string;
+  /** mensagem de erro/validação opcional */
+  feedback?: string;
 }
 
-/* -------------------------------------------------- */
-
-function TextInput(
-  { id, label, bg = "light", htmlSize, className, ...rest }: Props,
-  ref: React.Ref<InputHandler>
+/**
+ * TextInput com forwardRef:
+ * - getValue/setValue via ref
+ * - usa Form.Group para controlId (sem warning)
+ * - aceita isInvalid/feedback
+ */
+const TextInput = forwardRef<InputHandler, Props>(function TextInput(
+  { id, label, bg = "light", htmlSize, className, controlId, feedback, isInvalid, ...rest },
+  ref
 ) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useImperativeHandle(ref, () => ({
     getValue: () => inputRef.current?.value ?? "",
-    setValue: val => {
+    setValue: (val: string) => {
       if (inputRef.current) inputRef.current.value = val;
-    }
+    },
   }));
 
   return (
-    <Form.Group className="mb-3">
+    <Form.Group controlId={controlId} className="mb-3">
       {label && (
-        <Form.Label
-          htmlFor={id}
-          className="fw-semibold mb-1 ms-1"
-          style={{ fontSize: 14 }}
-        >
+        <Form.Label htmlFor={id} className="fw-semibold mb-1 ms-1" style={{ fontSize: 14 }}>
           {label}
         </Form.Label>
       )}
@@ -49,12 +53,19 @@ function TextInput(
         id={id}
         ref={inputRef}
         type="text"
+        isInvalid={isInvalid}
         {...rest}
         {...(htmlSize !== undefined ? { htmlSize } : {})}
         className={`bg-${bg} ${className ?? ""}`.trim()}
       />
+
+      {feedback && (
+        <Form.Control.Feedback type="invalid" style={{ display: "block" }}>
+          {feedback}
+        </Form.Control.Feedback>
+      )}
     </Form.Group>
   );
-}
+});
 
-export default forwardRef<InputHandler, Props>(TextInput);
+export default TextInput;
