@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Container, Spinner } from "react-bootstrap";
 import api from "@/services/api";
-import ExperienceForm, { type Option } from "@/components/user/curriculum/forms/experience";
+import ExperienceForm from "@/components/user/curriculum/forms/experience";
 
-/* ---------- helpers de narrowing (sem any) ---------- */
+/* helpers iguais education */
 function isObj(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null;
 }
@@ -15,63 +15,28 @@ function toNum(v: unknown): number | null {
   }
   return null;
 }
-
-/** Extrai curriculum_id de /usuario/perfil */
-function pickCurriculumId(payload: unknown): number | null {
-  if (!isObj(payload)) return null;
-
+function pickCurriculumId(data: unknown): number | null {
+  if (!isObj(data)) return null;
   const c =
-    (isObj(payload.curriculum) ? payload.curriculum : undefined) ??
-    (isObj(payload.data) && isObj((payload.data as Record<string, unknown>).curriculum)
-      ? (payload.data as Record<string, unknown>).curriculum
-      : undefined);
-
+    (isObj(data.curriculum) ? data.curriculum : undefined) ??
+    (isObj(data.data) && isObj(data.data.curriculum) ? data.data.curriculum : undefined);
   if (!isObj(c)) return null;
-  return toNum((c as Record<string, unknown>).curriculum_id) ?? toNum((c as Record<string, unknown>).id);
-}
-
-/** Converte resposta de cargos em Options para <Select> */
-function toCargoOptions(payload: unknown): Option[] {
-  const d = isObj(payload) ? payload : {};
-  const root = isObj((d as Record<string, unknown>).data)
-    ? ((d as Record<string, unknown>).data as Record<string, unknown>)
-    : (d as Record<string, unknown>);
-
-  const list = Array.isArray(root.cargos) ? (root.cargos as unknown[]) : [];
-
-  const out: Option[] = [];
-  for (const item of list) {
-    if (isObj(item)) {
-      const id = toNum((item as Record<string, unknown>).cargo_id);
-      const desc = (item as Record<string, unknown>).descricao;
-      if (id && typeof desc === "string" && desc.trim() !== "") {
-        out.push({ id: String(id), displayName: desc });
-      }
-    }
-  }
-  return [{ id: "", displayName: "Selecione" }, ...out];
+  return toNum(c.curriculum_id) ?? toNum(c.id);
 }
 
 export default function ExperienceSection() {
   const [loadingHead, setLoadingHead] = useState(true);
   const [curriculumId, setCurriculumId] = useState<number>(0);
-  const [cargoOptions, setCargoOptions] = useState<Option[]>([]);
 
   useEffect(() => {
     (async () => {
       try {
-        // 1) curriculum_id
-        const perfil = await api.get("/usuario/perfil", { withCredentials: true });
-        const id = pickCurriculumId(perfil.data);
+        const { data } = await api.get("/usuario/perfil", { withCredentials: true });
+        const id = pickCurriculumId(data);
         if (id) setCurriculumId(id);
-        else console.warn("[perfil] curriculum_id não encontrado:", perfil.data);
-
-        // 2) lista de cargos (AGORA via /experiencia/cargos)
-        const cargosResp = await api.get("/experiencia/cargos", { withCredentials: true });
-        setCargoOptions(toCargoOptions(cargosResp.data));
+        else console.warn("[perfil] curriculum_id não encontrado:", data);
       } catch (e) {
-        console.error("Falha ao carregar página de experiência:", e);
-        setCargoOptions([{ id: "", displayName: "Selecione" }]);
+        console.error("Falha ao obter /usuario/perfil", e);
       } finally {
         setLoadingHead(false);
       }
@@ -84,8 +49,7 @@ export default function ExperienceSection() {
         <h2 className="fs-3 fw-bold m-0">Experiência Profissional</h2>
         {loadingHead && <Spinner size="sm" animation="border" />}
       </div>
-
-      <ExperienceForm curriculumId={curriculumId} cargoOptions={cargoOptions} />
+      <ExperienceForm curriculumId={curriculumId} />
     </Container>
   );
 }
