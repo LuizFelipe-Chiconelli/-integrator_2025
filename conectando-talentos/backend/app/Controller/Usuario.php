@@ -2,26 +2,20 @@
 namespace App\Controller;
 
 use Core\Library\ControllerMain;
-use Core\Library\Session;
 use Core\Library\Response;
+use Core\Library\Session;
 
-
-/**
- * End-points de Usuário: cadastro, login, perfil.
- */
 class Usuario extends ControllerMain
 {
     /** Métodos que não exigem sessão */
-    public const PUBLIC_ACTIONS = ['cadastrar', 'login'];
+    public const PUBLIC_ACTIONS = ['cadastrar', 'login', 'logout'];
 
-    /* =========================================================
-     *  CADASTRO  (POST /usuario/cadastrar)
-     * =======================================================*/
+    /* ================= CADASTRO ================= */
     public function cadastrar(): void
     {
         $dados = json_decode(file_get_contents('php://input'), true) ?? [];
 
-        $tipo = $dados['tipo'] ?? 'CL';          // CL = candidato (padrão)
+        $tipo = $dados['tipo'] ?? 'CL'; // CL = candidato
 
         if (
             empty($dados['nome'])  ||
@@ -38,13 +32,11 @@ class Usuario extends ControllerMain
             return;
         }
 
-        /* ---------- pessoa_fisica ---------- */
         $pfId = $this->loadModel('PessoaFisica')->inserir([
             'nome' => trim($dados['nome']),
             'cpf'  => $dados['cpf'] ?? null
         ]);
 
-        /* ---------- credencial de usuário -- */
         $userId = $this->model->cadastrarUsuario([
             'login'            => $dados['email'],
             'senha'            => password_hash($dados['senha'], PASSWORD_DEFAULT),
@@ -57,7 +49,6 @@ class Usuario extends ControllerMain
             return;
         }
 
-        /* ---------- registra aceite do termo */
         if ($termo = $this->loadModel('TermoUso')->ultimo()) {
             $this->loadModel('TermoUsoAceite')->registrarAceite([
                 'termodeuso_id'  => $termo['id'],
@@ -69,9 +60,7 @@ class Usuario extends ControllerMain
         Response::json(['status'=>200,'mensagem'=>'Usuário cadastrado com sucesso!']);
     }
 
-    /* =========================================================
-     *  LOGIN  (POST /usuario/login)
-     * =======================================================*/
+    /* ================= LOGIN ================= */
     public function login(): void
     {
         $dados = json_decode(file_get_contents('php://input'), true) ?? [];
@@ -103,121 +92,112 @@ class Usuario extends ControllerMain
     }
 
     /* =========================================================
-     *  PERFIL  (GET /usuario/perfil)
-     * =======================================================*/
-    public function perfil(): void
+    *  LOGOUT  (POST /usuario/logout)
+    * =======================================================*/
+    public function logout(): void
     {
-    /* ---------- 1. segurança ---------- */
-    $usuarioId = Session::get('usuario_id');
-    if (!$usuarioId) {
-        Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado.']);
-        return;
-    }
-
-    /* ---------- 2. identifica verbo ---------- */
-    $metodo = $_SERVER['REQUEST_METHOD'];
-
-    /* =====================================================
-       GET  →  apenas devolve dados
-    ==================================================== */
-    if ($metodo === 'GET') {
-
-        $usuario = $this->model->findById($usuarioId);
-        if (!$usuario) {
-            Response::json(['status'=>404,'mensagem'=>'Usuário não encontrado.']);
-            return;
-        }
-
-        $pfId       = (int) $usuario['pessoa_fisica_id'];
-        $pessoa     = $this->loadModel('PessoaFisica')->findById($pfId);
-        $curriculum = $this->loadModel('Curriculum')->getByPessoaFisica($pfId) ?? [];
-
-        /* ---------- ADIÇÃO: devolve cidade + UF --------- */
-        if (!empty($curriculum['cidade_id'])) {
-            $cidade = $this->loadModel('Cidade')->findById((int)$curriculum['cidade_id']);
-            if ($cidade) {
-                $curriculum['cidade'] = $cidade['cidade'];   // nome da cidade   // ⇐ adição
-                $curriculum['uf']     = $cidade['uf'];       // UF               // ⇐ adição
-            }
-        }
-
-        /* ------------------------------------------------- */
+        Session::destroy('usuario_id');
+        Session::destroy('usuario_tipo');
+        session_destroy();
 
         Response::json([
-            'status'        => 200,
-            'usuario'       => [
-                'id'    => $usuario['usuario_id'],
-                'login' => $usuario['login'],
-                'tipo'  => $usuario['tipo']
-            ],
-            'pessoa_fisica' => $pessoa,
-            'curriculum'    => $curriculum
+            'status'  => 200,
+            'mensagem'=> 'Logout realizado com sucesso!'
         ]);
-        return;
     }
 
-    /* =====================================================
-       POST →  grava / atualiza
-    ==================================================== */
-    if ($metodo === 'POST') {
 
-        $dados = json_decode(file_get_contents('php://input'), true) ?? [];
+    /* ================= PERFIL ================= */
+    public function perfil(): void
+    {
+        $usuarioId = Session::get('usuario_id');
+        $metodo = $_SERVER['REQUEST_METHOD'];
 
-        if (empty($dados['nome']) || empty($dados['cpf'])) {
-            Response::json(['status'=>422,'mensagem'=>'Nome e CPF são obrigatórios.']);
-            return;
-        }
+        if ($metodo === 'GET') {
+            $usuario = $this->model->findById($usuarioId);
+            if (!$usuario) {
+                Response::json(['status'=>404,'mensagem'=>'Usuário não encontrado.']);
+                return;
+            }
 
-        $usuario = $this->model->findById($usuarioId);
-        if (!$usuario) {
-            Response::json(['status'=>404,'mensagem'=>'Usuário não encontrado.']);
-            return;
-        }
+            $pfId       = (int) $usuario['pessoa_fisica_id'];
+            $pessoa     = $this->loadModel('PessoaFisica')->findById($pfId);
+            $curriculum = $this->loadModel('Curriculum')->getByPessoaFisica($pfId) ?? [];
 
-        $pfId = (int) $usuario['pessoa_fisica_id'];
+            if (!empty($curriculum['cidade_id'])) {
+                $cidade = $this->loadModel('Cidade')->findById((int)$curriculum['cidade_id']);
+                if ($cidade) {
+                    $curriculum['cidade'] = $cidade['cidade'];
+                    $curriculum['uf']     = $cidade['uf'];
+                }
+            }
 
-        /* --- pessoa_fisica -------------------------------- */
-        $this->loadModel('PessoaFisica')->updateById($pfId, [
-            'nome' => trim($dados['nome']),
-            'cpf'  => preg_replace('/\D/','', $dados['cpf'])
-        ]);
-
-        /* --- PERFIL ----------------------------------- */
-        try {
-            $curriculumId = $this->loadModel('Curriculum')
-                ->updateByPessoaFisica($pfId, [
-                    'logradouro'          => $dados['logradouro']          ?? '',
-                    'bairro'              => $dados['bairro']              ?? '',
-                    'cep'                 => preg_replace('/\D/','', $dados['cep'] ?? ''),
-                    'cidade_id'           => (int) ($dados['cidade_id']    ?? 0),
-                    'celular'             => preg_replace('/\D/','', $dados['telefone'] ?? ''),
-                    'dataNascimento'      => $dados['data_nascimento']     ?? '1900-01-01',
-                    'sexo'                => $dados['sexo']                ?? '',
-                    'email'               => $dados['email']               ?? $usuario['login'],
-                    'numero'              => $dados['numero']              ?? '',
-                    'complemento'         => $dados['complemento']         ?? '',
-                    'apresentacaoPessoal' => $dados['apresentacao']        ?? ''
-                ]);
-        } catch (\PDOException $e) {
             Response::json([
-                'status'   => 500,
-                'mensagem' => 'Erro ao gravar currículo.',
-                'erroSQL'  => $e->getMessage()
+                'status'        => 200,
+                'usuario'       => [
+                    'id'    => $usuario['usuario_id'],
+                    'login' => $usuario['login'],
+                    'tipo'  => $usuario['tipo']
+                ],
+                'pessoa_fisica' => $pessoa,
+                'curriculum'    => $curriculum
             ]);
             return;
         }
 
-        Response::json([
-            'status'        => 200,
-            'mensagem'      => 'Perfil atualizado com sucesso!',
-            'curriculum_id' => $curriculumId
-        ]);
-        return;
+        if ($metodo === 'POST') {
+            $dados = json_decode(file_get_contents('php://input'), true) ?? [];
+
+            if (empty($dados['nome']) || empty($dados['cpf'])) {
+                Response::json(['status'=>422,'mensagem'=>'Nome e CPF são obrigatórios.']);
+                return;
+            }
+
+            $usuario = $this->model->findById($usuarioId);
+            if (!$usuario) {
+                Response::json(['status'=>404,'mensagem'=>'Usuário não encontrado.']);
+                return;
+            }
+
+            $pfId = (int) $usuario['pessoa_fisica_id'];
+
+            $this->loadModel('PessoaFisica')->updateById($pfId, [
+                'nome' => trim($dados['nome']),
+                'cpf'  => preg_replace('/\D/','', $dados['cpf'])
+            ]);
+
+            try {
+                $curriculumId = $this->loadModel('Curriculum')
+                    ->updateByPessoaFisica($pfId, [
+                        'logradouro'          => $dados['logradouro']          ?? '',
+                        'bairro'              => $dados['bairro']              ?? '',
+                        'cep'                 => preg_replace('/\D/','', $dados['cep'] ?? ''),
+                        'cidade_id'           => (int) ($dados['cidade_id']    ?? 0),
+                        'celular'             => preg_replace('/\D/','', $dados['telefone'] ?? ''),
+                        'dataNascimento'      => $dados['data_nascimento']     ?? '1900-01-01',
+                        'sexo'                => $dados['sexo']                ?? '',
+                        'email'               => $dados['email']               ?? $usuario['login'],
+                        'numero'              => $dados['numero']              ?? '',
+                        'complemento'         => $dados['complemento']         ?? '',
+                        'apresentacaoPessoal' => $dados['apresentacao']        ?? ''
+                    ]);
+            } catch (\PDOException $e) {
+                Response::json([
+                    'status'   => 500,
+                    'mensagem' => 'Erro ao gravar currículo.',
+                    'erroSQL'  => $e->getMessage()
+                ]);
+                return;
+            }
+
+            Response::json([
+                'status'        => 200,
+                'mensagem'      => 'Perfil atualizado com sucesso!',
+                'curriculum_id' => $curriculumId
+            ]);
+            return;
+        }
+
+        Response::json(['status'=>405,'mensagem'=>'Método não permitido.']);
     }
-
-    /* ---------- verbo não aceito ---------- */
-    Response::json(['status'=>405,'mensagem'=>'Método não permitido.']);
 }
-
-}
-

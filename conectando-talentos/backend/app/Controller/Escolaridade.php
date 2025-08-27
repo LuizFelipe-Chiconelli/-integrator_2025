@@ -3,18 +3,20 @@ namespace App\Controller;
 
 use Core\Library\ControllerMain;
 use Core\Library\Response;
-use Core\Library\Session;
 
 /**
  * CRUD da tabela curriculum_escolaridade
- * Rotas sugeridas:
- *   GET  /escolaridade/lista/{curriculumId}
- *   POST /escolaridade/criar
- *   PUT  /escolaridade/atualizar/{id}
+ * Rotas:
+ *   GET    /escolaridade/lista/{curriculumId}
+ *   POST   /escolaridade/criar
+ *   PUT    /escolaridade/atualizar/{id}
  *   DELETE /escolaridade/remover/{id}
  */
 class Escolaridade extends ControllerMain
 {
+    /** Todas as rotas exigem login */
+    public const PUBLIC_ACTIONS = [];
+
     /** slug → id (tabela escolaridade) */
     private const MAP_SLUG_TO_ID = [
         'fundamental' => 1,
@@ -57,7 +59,6 @@ class Escolaridade extends ControllerMain
 
         $rows = $this->loadModel('CurriculumEscolaridade')->findByCurriculum($curriculumId);
 
-        // normaliza para o front atual (campo 'grau' como slug)
         $data = array_map(function(array $r) {
             $slug = self::MAP_ID_TO_SLUG[(int)($r['escolaridade_id'] ?? 0)] ?? '';
             return [
