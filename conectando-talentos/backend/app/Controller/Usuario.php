@@ -56,7 +56,7 @@ class Usuario extends ControllerMain
                 'dataHoraAceite' => date('Y-m-d H:i:s')
             ]);
         }
-
+        
         Response::json(['status'=>200,'mensagem'=>'Usuário cadastrado com sucesso!']);
     }
 

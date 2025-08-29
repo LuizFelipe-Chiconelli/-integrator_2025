@@ -2,107 +2,163 @@
 namespace App\Controller;
 
 use Core\Library\ControllerMain;
+use Core\Library\Session;
+use Core\Library\Response;
 
 /**
- * Endpoints de EMPRESA (cadastro e login)
+ * Controller para gestão de Empresas (tabela estabelecimento).
+ * Endpoints:
+ *   POST   /empresa/cadastrar
+ *   POST   /empresa/login
+ *   GET    /empresa/perfil
+ *   POST   /empresa/perfil
+ *   POST   /empresa/logout
  */
 class Empresa extends ControllerMain
 {
-    /*----------------------------------------------------
-     | POST /empresa/cadastrar
-     *---------------------------------------------------*/
-    public function cadastrar()
+    /** Métodos públicos (não exigem sessão) */
+    public const PUBLIC_ACTIONS = ['cadastrar', 'login'];
+
+    /* =========================================================
+     * CADASTRO  (POST /empresa/cadastrar)
+     * =======================================================*/
+    public function cadastrar(): void
     {
-        header('Content-Type: application/json');
+        $dados = json_decode(file_get_contents('php://input'), true) ?? [];
+        $empresaModel = $this->loadModel('Estabelecimento'); // ✅ model certo
 
-        $d = json_decode(file_get_contents('php://input'), true) ?? [];
-
-        // 1. Verifica campos obrigatórios
-        if (empty($d['nome_fantasia']) || empty($d['cnpj']) ||
-            empty($d['email'])         || empty($d['senha'])) {
-            echo json_encode(["status"=>"erro","mensagem"=>"Preencha todos os campos obrigatórios."]);
+        if (
+            empty($dados['nome'])  ||
+            empty($dados['cnpj'])  ||
+            empty($dados['email']) ||
+            empty($dados['senha'])
+        ) {
+            Response::json(['status'=>400,'mensagem'=>'Preencha todos os campos obrigatórios.']);
             return;
         }
 
-        $empresaModel = $this->loadModel('Empresa');
-
-        // 2. Verifica duplicidade de CNPJ e e-mail
-        if ($empresaModel->existeCnpj($d['cnpj'])) {
-            echo json_encode(["status"=>"erro","mensagem"=>"CNPJ já cadastrado."]); return;
+        if ($empresaModel->verificarEmailExistente($dados['email'])) {
+            Response::json(['status'=>409,'mensagem'=>'E-mail já cadastrado.']);
+            return;
         }
-        if ($empresaModel->existeEmail($d['email'])) {
-            echo json_encode(["status"=>"erro","mensagem"=>"E-mail já utilizado."]); return;
-        }
-
-        // 3. Insere a empresa na tabela estabelecimento
-        $estabId = $empresaModel->inserir([
-            'nome'      => trim($d['nome_fantasia']),
-            'cnpj'      => preg_replace('/\D/','', $d['cnpj']),
-            'email'     => trim($d['email']),
-            'senha'     => password_hash(trim($d['senha']), PASSWORD_DEFAULT),
-            'descricao' => $d['descricao'] ?? null,
-            'endereco'  => $d['endereco']  ?? null
-        ]);
-
-        if ($estabId <= 0) {
-            echo json_encode(["status"=>"erro","mensagem"=>"Falha ao salvar empresa."]); return;
+        if ($empresaModel->verificarCnpjExistente($dados['cnpj'])) {
+            Response::json(['status'=>409,'mensagem'=>'CNPJ já cadastrado.']);
+            return;
         }
 
-        // 3.1 Telefone (opcional)
-        if (!empty($d['telefone'])) {
-            $this->loadModel('Telefone')->inserir([
-                'estabelecimento_id' => $estabId,
-                'numero'             => preg_replace('/\D/','', $d['telefone']),
-                'tipo'               => $d['tipo_telefone'] ?? 'm'
-            ]);
+        $payload = [
+            'nome'     => trim($dados['nome']),
+            'cnpj'     => preg_replace('/\D/', '', $dados['cnpj']),
+            'endereco' => $dados['endereco'] ?? '',
+            'email'    => strtolower(trim($dados['email'])),
+            'descricao'=> $dados['descricao'] ?? '',
+            'senha'    => password_hash($dados['senha'], PASSWORD_DEFAULT)
+        ];
+
+        try {
+            $id = $empresaModel->cadastrar($payload);
+            Response::json(['status'=>201,'mensagem'=>'Empresa cadastrada com sucesso!','id'=>$id]);
+        } catch (\Throwable $e) {
+            Response::json(['status'=>500,'mensagem'=>'Erro ao cadastrar empresa.','erro'=>$e->getMessage()]);
+        }
+    }
+
+    /* =========================================================
+     * LOGIN  (POST /empresa/login)
+     * =======================================================*/
+    public function login(): void
+    {
+        $dados = json_decode(file_get_contents('php://input'), true) ?? [];
+        $empresaModel = $this->loadModel('Estabelecimento');
+
+        if (empty($dados['email']) || empty($dados['senha'])) {
+            Response::json(['status'=>400,'mensagem'=>'Informe e-mail e senha.']);
+            return;
         }
 
-        // 3.2 Categoria (opcional)
-        if (!empty($d['categoria_id'])) {
-            $this->loadModel('CategoriaEstabelecimento')
-                 ->vincular($estabId, (int) $d['categoria_id']);
+        $empresa = $empresaModel->verificarEmailExistente($dados['email']);
+        if (!$empresa || !password_verify($dados['senha'], $empresa['senha'])) {
+            Response::json(['status'=>401,'mensagem'=>'E-mail ou senha inválidos.']);
+            return;
         }
 
-        // 4. Sucesso
-        echo json_encode([
-            "status"   => "sucesso",
-            "mensagem" => "Empresa cadastrada com sucesso!",
-            "empresa"  => ["id" => $estabId]
+        Session::set('empresa_id', $empresa['estabelecimento_id']);
+        Session::set('empresa_nome', $empresa['nome']);
+        session_regenerate_id(true);
+
+        Response::json([
+            'status'  => 200,
+            'mensagem'=> 'Login realizado com sucesso!',
+            'empresa' => [
+                'id'    => $empresa['estabelecimento_id'],
+                'nome'  => $empresa['nome'],
+                'email' => $empresa['email']
+            ]
         ]);
     }
 
-    /*----------------------------------------------------
-     | POST /empresa/login
-     *---------------------------------------------------*/
-    public function login()
+    /* =========================================================
+     * PERFIL  (GET/POST /empresa/perfil)
+     * =======================================================*/
+    public function perfil(): void
     {
-        header('Content-Type: application/json');
-
-        $d = json_decode(file_get_contents('php://input'), true) ?? [];
-
-        // 1. Validação
-        if (empty($d['email']) || empty($d['senha'])) {
-            echo json_encode(["status"=>"erro","mensagem"=>"Informe e-mail e senha."]);
+        $empresaId = Session::get('empresa_id');
+        if (!$empresaId) {
+            Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado.']);
             return;
         }
 
-        // 2. Autentica usando a tabela estabelecimento
-        $emp = $this->loadModel('Empresa')
-                    ->autenticar(trim($d['email']), trim($d['senha']));
+        $empresaModel = $this->loadModel('Estabelecimento');
+        $metodo = $_SERVER['REQUEST_METHOD'];
 
-        if (!$emp) {
-            echo json_encode(["status"=>"erro","mensagem"=>"E-mail ou senha inválidos."]); return;
+        if ($metodo === 'GET') {
+            $empresa = $empresaModel->buscarPorId((int)$empresaId);
+            if (!$empresa) {
+                Response::json(['status'=>404,'mensagem'=>'Empresa não encontrada.']);
+                return;
+            }
+
+            unset($empresa['senha']);
+            Response::json(['status'=>200,'empresa'=>$empresa]);
+            return;
         }
 
-        // 3. Sucesso
-        echo json_encode([
-            "status"   => "sucesso",
-            "mensagem" => "Login realizado com sucesso!",
-            "empresa"  => [
-                "id"    => $emp['estabelecimento_id'],
-                "nome"  => $emp['nome'],
-                "email" => $emp['email']
-            ]
-        ]);
+        if ($metodo === 'POST') {
+            $dados = json_decode(file_get_contents('php://input'), true) ?? [];
+
+            $payload = [
+                'nome'     => trim($dados['nome'] ?? ''),
+                'cnpj'     => preg_replace('/\D/', '', $dados['cnpj'] ?? ''),
+                'endereco' => $dados['endereco'] ?? '',
+                'email'    => strtolower(trim($dados['email'] ?? '')),
+                'descricao'=> $dados['descricao'] ?? ''
+            ];
+
+            if (!empty($dados['senha'])) {
+                $payload['senha'] = password_hash($dados['senha'], PASSWORD_DEFAULT);
+            }
+
+            try {
+                $linhas = $empresaModel->atualizarPorId((int)$empresaId, $payload);
+                Response::json(['status'=>200,'mensagem'=>'Perfil atualizado com sucesso!','linhas'=>$linhas]);
+            } catch (\Throwable $e) {
+                Response::json(['status'=>500,'mensagem'=>'Erro ao atualizar perfil.','erro'=>$e->getMessage()]);
+            }
+            return;
+        }
+
+        Response::json(['status'=>405,'mensagem'=>'Método não permitido.']);
+    }
+
+    /* =========================================================
+     * LOGOUT  (POST /empresa/logout)
+     * =======================================================*/
+    public function logout(): void
+    {
+        Session::destroy('empresa_id');
+        Session::destroy('empresa_nome');
+        session_regenerate_id(true);
+
+        Response::json(['status'=>200,'mensagem'=>'Sessão encerrada com sucesso!']);
     }
 }

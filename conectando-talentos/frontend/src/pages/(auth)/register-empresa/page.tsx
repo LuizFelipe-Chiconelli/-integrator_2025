@@ -1,203 +1,197 @@
 'use client';
 
-import { useState, type FormEvent, type ChangeEvent } from 'react';
-import {
-  Container, Row, Col, Card, Form, Button, Spinner
-} from 'react-bootstrap';
-import { FaInfoCircle } from 'react-icons/fa';
-import axios, { AxiosError } from 'axios';
-import './register-empresa.css';
+import { useState } from "react";
+import { Container, Row, Col, Form, Button, Card } from "react-bootstrap";
+import { FaInfoCircle } from "react-icons/fa";
+import { AxiosError } from "axios";
 
-/* ─── endpoint do back-end ─── */
-const API_URL = 'http://integrador/empresa/cadastrar';
-
-/* ─── tipos dos formulários ─── */
-interface FormEtapa1 {
-  nome_fantasia: string;
-  cnpj: string;
-  categoria_id: string;
-  descricao: string;
-  endereco: string;
-}
-interface FormEtapa2 {
-  email: string;
-  senha: string;
-  confirmarSenha: string;
-  telefone: string;
-}
+import api from "@/services/api";    // mesma instância global que já funciona no usuário
+import { maskCNPJ } from "@/utils/masks"; // máscara para CNPJ
 
 export default function EmpresaRegister() {
-  /* wizard step */
-  const [step, setStep] = useState<1 | 2>(1);
-
-  /* estados separados por etapa */
-  const [f1, setF1] = useState<FormEtapa1>({
-    nome_fantasia:'', cnpj:'', categoria_id:'', descricao:'', endereco:''
+  /* ---------- estado do formulário ---------- */
+  const [form, setForm] = useState({
+    nome: "",
+    cnpj: "",
+    endereco: "",
+    descricao: "",
+    email: "",
+    senha: "",
+    confirmarSenha: ""
   });
-  const [f2, setF2] = useState<FormEtapa2>({
-    email:'', senha:'', confirmarSenha:'', telefone:''
-  });
-  const [loading, setLoading] = useState(false);
 
-  /* handlers genéricos */
-  const onF1 = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
-    setF1({ ...f1, [e.target.name]: e.target.value });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
 
-  const onF2 = (e: ChangeEvent<HTMLInputElement>) =>
-    setF2({ ...f2, [e.target.name]: e.target.value });
-
-  /* navegação */
-  const goNext = (e: FormEvent) => { e.preventDefault(); setStep(2); };
-  const goBack = () => setStep(1);
-
-  /* envio final */
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (f2.senha !== f2.confirmarSenha) {
-      alert('As senhas não conferem!'); return;
+    if (name === "cnpj") {
+      setForm({ ...form, [name]: maskCNPJ(value) }); // aplica máscara
+    } else {
+      setForm({ ...form, [name]: value });
     }
-    setLoading(true);
-
-    try {
-      const { data } = await axios.post(API_URL, {
-        ...f1,
-        email: f2.email,
-        senha: f2.senha,
-        telefone: f2.telefone,
-        tipo_telefone: 'm'
-      });
-
-      alert(data.mensagem);                  // TODO: toast/mensagem bonita
-      window.location.href = '/empresa/login';
-
-      /* limpa formulário caso volte aqui */
-      setStep(1);
-      setF1({ nome_fantasia:'', cnpj:'', categoria_id:'', descricao:'', endereco:'' });
-      setF2({ email:'', senha:'', confirmarSenha:'', telefone:'' });
-
-    } catch (err) {
-      const msg = axios.isAxiosError(err)
-        ? (err as AxiosError<{mensagem?:string}>).response?.data?.mensagem
-          ?? 'Erro inesperado.'
-        : 'Erro inesperado.';
-      alert(msg);
-    } finally { setLoading(false); }
   };
 
-  /* ────────────────────────── UI ────────────────────────── */
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (form.senha !== form.confirmarSenha) {
+      alert("As senhas não conferem!");
+      return;
+    }
+
+    try {
+      const { data } = await api.post("/empresa/cadastrar", {
+        nome: form.nome,
+        cnpj: form.cnpj,
+        endereco: form.endereco,
+        descricao: form.descricao,
+        email: form.email,
+        senha: form.senha
+      });
+
+      alert(data.mensagem ?? "Empresa cadastrada com sucesso!");
+
+      /* limpa o formulário */
+      setForm({
+        nome: "",
+        cnpj: "",
+        endereco: "",
+        descricao: "",
+        email: "",
+        senha: "",
+        confirmarSenha: ""
+      });
+
+    } catch (err: unknown) {
+      let msg = "Erro inesperado ao cadastrar empresa.";
+      if (err instanceof AxiosError) {
+        msg = err.response?.data?.mensagem ?? msg;
+      }
+      alert(msg);
+    }
+  };
+
   return (
     <Container className="d-flex justify-content-center align-items-center min-vh-100">
       <Row className="w-100 justify-content-center">
-        <Col md={6} lg={5}>
+        <Col md={7} lg={6}>
           <Card className="shadow p-4">
-
-            {/* cabeçalho + indicador */}
-            <header className="text-center mb-4">
-              <div className="d-flex justify-content-center gap-2 mb-2">
-                <FaInfoCircle size={25} className="text-dark"/>
-                <span className="logo-infojobs fs-4 fw-bold text-dark">InformJobs</span>
+            {/* ---------- cabeçalho ---------- */}
+            <div className="text-center mb-4">
+              <div className="d-flex justify-content-center align-items-center gap-2 mb-3">
+                <FaInfoCircle size={25} className="text-dark" />
+                <span className="logo-infojobs text-dark fs-3">InformJobs</span>
               </div>
-              <h4 className="fw-bold mb-0">Cadastre sua empresa</h4>
-              <small className="text-muted">
-                Já tem conta?&nbsp;
-                <a href="/empresa/login" className="fw-semibold">Faça login</a>
-              </small>
+              <h4 className="fw-bold">Cadastre sua empresa</h4>
+              <p className="text-muted">
+                Já tem uma conta?{" "}
+                <a href="/empresa/login" className="text-primary">
+                  Faça login
+                </a>
+              </p>
+            </div>
 
-              <div className="d-flex justify-content-center step-indicator mt-3">
-                <div className={`step ${step===1?'active':''}`}>1</div>
-                <div className="line"/>
-                <div className={`step ${step===2?'active':''}`}>2</div>
-              </div>
-            </header>
+            {/* ---------- formulário ---------- */}
+            <Form onSubmit={handleSubmit}>
+              <Form.Group controlId="formNome" className="mb-3">
+                <Form.Label>Nome da Empresa *</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Ex: Padaria Central"
+                  name="nome"
+                  value={form.nome}
+                  onChange={handleChange}
+                  required
+                />
+              </Form.Group>
 
-            {/* ─── ETAPA 1 ─── */}
-            {step === 1 && (
-              <Form onSubmit={goNext}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Nome da Empresa *</Form.Label>
-                  <Form.Control type="text" name="nome_fantasia" required
-                                value={f1.nome_fantasia} onChange={onF1}/>
-                </Form.Group>
+              <Form.Group controlId="formCnpj" className="mb-3">
+                <Form.Label>CNPJ *</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="00.000.000/0000-00"
+                  name="cnpj"
+                  value={form.cnpj}
+                  maxLength={18}
+                  onKeyPress={(e) => {
+                    if (!/[0-9]/.test(e.key)) e.preventDefault();
+                  }}
+                  onChange={handleChange}
+                  required
+                />
+              </Form.Group>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>CNPJ *</Form.Label>
-                  <Form.Control type="text" name="cnpj" required
-                                value={f1.cnpj} onChange={onF1}
-                                placeholder="00.000.000/0000-00"/>
-                </Form.Group>
+              <Form.Group controlId="formEndereco" className="mb-3">
+                <Form.Label>Endereço</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Rua, nº, cidade, UF"
+                  name="endereco"
+                  value={form.endereco}
+                  onChange={handleChange}
+                />
+              </Form.Group>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>Setor de Atuação *</Form.Label>
-                  {/* TODO: substituir por lista dinâmica via API */}
-                  <Form.Select name="categoria_id" required
-                               value={f1.categoria_id} onChange={onF1}>
-                    <option value="">Selecione</option>
-                    <option value="1">Comércio</option>
-                    <option value="2">Serviços</option>
-                    <option value="3">Indústria</option>
-                    <option value="4">Outros</option>
-                  </Form.Select>
-                </Form.Group>
+              <Form.Group controlId="formDescricao" className="mb-3">
+                <Form.Label>Descrição da Empresa</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  placeholder="Fale um pouco sobre sua empresa"
+                  name="descricao"
+                  value={form.descricao}
+                  onChange={handleChange}
+                />
+              </Form.Group>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>Endereço</Form.Label>
-                  <Form.Control type="text" name="endereco"
-                                value={f1.endereco} onChange={onF1}
-                                placeholder="Rua, nº, cidade, UF"/>
-                </Form.Group>
+              <Form.Group controlId="formEmail" className="mb-3">
+                <Form.Label>Email Corporativo *</Form.Label>
+                <Form.Control
+                  type="email"
+                  placeholder="empresa@email.com"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
+                />
+              </Form.Group>
 
-                <Form.Group className="mb-4">
-                  <Form.Label>Descrição da Empresa</Form.Label>
-                  <Form.Control as="textarea" rows={3} name="descricao"
-                                value={f1.descricao} onChange={onF1}/>
-                </Form.Group>
+              <Row>
+                <Col md={6}>
+                  <Form.Group controlId="formSenha" className="mb-3">
+                    <Form.Label>Senha *</Form.Label>
+                    <Form.Control
+                      type="password"
+                      placeholder="********"
+                      name="senha"
+                      value={form.senha}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group controlId="formConfirmarSenha" className="mb-3">
+                    <Form.Label>Confirmar Senha *</Form.Label>
+                    <Form.Control
+                      type="password"
+                      placeholder="********"
+                      name="confirmarSenha"
+                      value={form.confirmarSenha}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
 
-                <Button type="submit" className="w-100" variant="primary">
-                  Continuar
-                </Button>
-              </Form>
-            )}
-
-            {/* ─── ETAPA 2 ─── */}
-            {step === 2 && (
-              <Form onSubmit={handleSubmit}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Email Corporativo *</Form.Label>
-                  <Form.Control type="email" name="email" required
-                                value={f2.email} onChange={onF2}/>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Senha *</Form.Label>
-                  <Form.Control type="password" name="senha" required
-                                value={f2.senha} onChange={onF2}/>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Confirmar Senha *</Form.Label>
-                  <Form.Control type="password" name="confirmarSenha" required
-                                value={f2.confirmarSenha} onChange={onF2}/>
-                </Form.Group>
-
-                <Form.Group className="mb-4">
-                  <Form.Label>Telefone</Form.Label>
-                  <Form.Control type="text" name="telefone"
-                                value={f2.telefone} onChange={onF2}
-                                placeholder="(00) 0000-0000"/>
-                </Form.Group>
-
-                <div className="d-flex gap-2">
-                  <Button variant="outline-secondary" className="w-50" onClick={goBack}>
-                    Voltar
-                  </Button>
-                  <Button type="submit" variant="primary" className="w-50" disabled={loading}>
-                    {loading
-                      ? <><Spinner size="sm"/> Cadastrando…</>
-                      : 'Cadastrar Empresa'}
-                  </Button>
-                </div>
-              </Form>
-            )}
+              <Button
+                type="submit"
+                variant="primary"
+                className="w-100"
+              >
+                Cadastrar Empresa
+              </Button>
+            </Form>
           </Card>
         </Col>
       </Row>

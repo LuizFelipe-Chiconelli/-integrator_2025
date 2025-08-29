@@ -8,32 +8,26 @@ import { FaInfoCircle } from 'react-icons/fa';
 import axios, { AxiosError } from 'axios';
 import './login-empresa.css';
 
-/* ─── endpoint do back-end ─── */
 const API_URL = 'http://integrador/empresa/login';
 
 export default function EmpresaLogin() {
-  /* estado do formulário */
   const [form, setForm] = useState({ email: '', senha: '' });
   const [loading, setLoading] = useState(false);
 
-  /* input genérico */
   const handleChange = (e: ChangeEvent<HTMLInputElement>) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  /* envio */
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const { data } = await axios.post(API_URL, form);
+      const { data } = await axios.post(API_URL, form, { withCredentials: true });
 
-      /** sucesso → guarda sessão “rápida” */
-      localStorage.setItem('empresa_id',    String(data.empresa.id));
-      localStorage.setItem('empresa_nome',  data.empresa.nome);
-      localStorage.setItem('empresa_email', data.empresa.email);
+      // guarda info leve no localStorage (apenas para UI)
+      localStorage.setItem('empresa_nome', data.empresa.nome);
 
-      /* redireciona para o dashboard */
+      // redireciona para dashboard
       window.location.href = '/minha-empresa';
     }
     catch (err) {
@@ -41,19 +35,16 @@ export default function EmpresaLogin() {
         ? (err as AxiosError<{mensagem?:string}>).response?.data?.mensagem
           ?? 'Erro ao tentar logar.'
         : 'Erro ao tentar logar.';
-      alert(msg);                      
+      alert(msg);
     }
     finally { setLoading(false); }
   };
 
-  /* ────────────────────────── UI ────────────────────────── */
   return (
     <Container className="d-flex justify-content-center align-items-center min-vh-100">
       <Row className="w-100 justify-content-center">
         <Col md={6} lg={4}>
           <Card className="shadow p-4">
-
-            {/* cabeçalho */}
             <header className="text-center mb-4">
               <div className="d-flex justify-content-center gap-2 mb-2">
                 <FaInfoCircle size={25} className="text-dark"/>
@@ -66,7 +57,6 @@ export default function EmpresaLogin() {
               </small>
             </header>
 
-            {/* formulário */}
             <Form onSubmit={handleSubmit}>
               <Form.Group className="mb-3">
                 <Form.Label>Email Corporativo</Form.Label>
@@ -88,7 +78,6 @@ export default function EmpresaLogin() {
                   : 'Entrar'}
               </Button>
             </Form>
-
           </Card>
         </Col>
       </Row>
