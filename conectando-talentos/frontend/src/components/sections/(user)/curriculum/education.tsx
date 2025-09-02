@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Container, Spinner } from "react-bootstrap";
 import api from "@/services/api";
+import Education from "@/components/user/curriculum/forms/education_old";
+
 import EducationForm from "@/components/user/curriculum/forms/education";
 
 /** Helpers de narrowing (sem any) */
@@ -33,22 +35,22 @@ function pickCurriculumId(data: unknown): number | null {
 
 export default function EducationSection() {
   const [loadingHead, setLoadingHead] = useState(true);
-  const [curriculumId, setCurriculumId] = useState<number>(0);
+  // const [curriculumId, setCurriculumId] = useState<number>(0);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const { data } = await api.get("/usuario/perfil", { withCredentials: true });
-        const id = pickCurriculumId(data);
-        if (id) setCurriculumId(id);
-        else console.warn("[perfil] curriculum_id não encontrado:", data);
-      } catch (e) {
-        console.error("Falha ao obter /usuario/perfil", e);
-      } finally {
-        setLoadingHead(false);
-      }
-    })();
-  }, []);
+  // useEffect(() => {
+  //   (async () => {
+  //     try {
+  //       const { data } = await api.get("/usuario/perfil", { withCredentials: true });
+  //       const id = pickCurriculumId(data);
+  //       if (id) setCurriculumId(id);
+  //       else console.warn("[perfil] curriculum_id não encontrado:", data);
+  //     } catch (e) {
+  //       console.error("Falha ao obter /usuario/perfil", e);
+  //     } finally {
+  //       setLoadingHead(false);
+  //     }
+  //   })();
+  // }, []);
 
   return (
     <Container className="bg-white border rounded-3 p-4 shadow-sm">
@@ -58,7 +60,8 @@ export default function EducationSection() {
       </div>
 
       {/* passa 0 até carregar; o form só habilita SALVAR quando houver ID */}
-      <EducationForm curriculumId={curriculumId} />
+      <EducationForm />
+      {/* <Education curriculumId={curriculumId} /> */}
     </Container>
   );
 }
