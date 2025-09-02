@@ -16,9 +16,10 @@ interface Props {
 	placeholder?: string
 	className?: string
 	required?: boolean
+	initialValue?: string
 }
 
-export default function TextField({ ref, id, bg = "light", name, label, placeholder = "", className, required }: Props) {
+export default function TextField({ ref, id, bg = "light", name, label, placeholder = "", className, required, initialValue }: Props) {
 
 	// Hooks
 	const inputRef = useRef<HTMLInputElement>(null)
@@ -59,6 +60,10 @@ export default function TextField({ ref, id, bg = "light", name, label, placehol
 	}, [])
 
 	useEffect(() => {
+		if (initialValue) setValue(initialValue)
+	}, [])
+
+	useEffect(() => {
 		const fieldRef: FieldRef = {
 			current: {
 				getValue,
@@ -76,25 +81,25 @@ export default function TextField({ ref, id, bg = "light", name, label, placehol
 
 	return (
 		<Form.Group className="mb-3">
-      {label && (
-        <Form.Label htmlFor={id} className="fw-semibold mb-1 ms-1" style={{ fontSize: 14 }}>
-          {label}
-        </Form.Label>
-      )}
+			{label && (
+				<Form.Label htmlFor={id} className="fw-semibold mb-1 ms-1" style={{ fontSize: 14 }}>
+					{label}
+				</Form.Label>
+			)}
 
-      <Form.Control
-        id={id}
-        ref={inputRef}
-        type="text"
+			<Form.Control
+				id={id}
+				ref={inputRef}
+				type="text"
 				placeholder={placeholder}
-        className={`bg-${bg} ${className ?? ""}`.trim()}
-      />
+				className={`bg-${bg} ${className ?? ""}`.trim()}
+			/>
 
-      {error && (
-        <Form.Control.Feedback type="invalid" style={{ display: "block" }}>
-          {error}
-        </Form.Control.Feedback>
-      )}
-    </Form.Group>
+			{error && (
+				<Form.Control.Feedback type="invalid" style={{ display: "block" }}>
+					{error}
+				</Form.Control.Feedback>
+			)}
+		</Form.Group>
 	)
 }
