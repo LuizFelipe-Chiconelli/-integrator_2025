@@ -3,7 +3,7 @@ export interface Scholarity {
     grau: string
     descricao: string
     instituicao: string
-    cidade_id: string | number
+    cidade_id: string
     inicio_mes: string
     inicio_ano: string
     fim_mes: string

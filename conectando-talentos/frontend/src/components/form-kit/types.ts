@@ -25,5 +25,4 @@ export interface SelectDropdownRef {
 export interface Option {
     id: string | number
     label: string
-    sublabel?: string
 }
