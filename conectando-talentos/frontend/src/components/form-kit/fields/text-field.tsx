@@ -15,11 +15,12 @@ interface Props {
 	label?: string
 	placeholder?: string
 	className?: string
+	disabled?: boolean
 	required?: boolean
 	initialValue?: string
 }
 
-export default function TextField({ ref, id, bg = "light", name, label, placeholder = "", className, required, initialValue }: Props) {
+export default function TextField({ ref, id, bg = "light", name, label, placeholder = "", className, disabled = false, required, initialValue }: Props) {
 
 	// Hooks
 	const inputRef = useRef<HTMLInputElement>(null)
@@ -30,7 +31,7 @@ export default function TextField({ ref, id, bg = "light", name, label, placehol
 	// Funções internas
 
 	const validate = (): boolean => {
-		if (required && !inputRef.current?.value) {
+		if (required && !disabled && !inputRef.current?.value) {
 			setError('Este campo não pode ficar vazio!')
 			return false
 		}
@@ -93,6 +94,7 @@ export default function TextField({ ref, id, bg = "light", name, label, placehol
 				type="text"
 				placeholder={placeholder}
 				className={`bg-${bg} ${className ?? ""}`.trim()}
+				disabled={disabled}
 			/>
 
 			{error && (

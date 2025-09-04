@@ -1,19 +1,25 @@
 'use client'
 
-import { FieldMethods, FieldRef } from "@/types/form"
-
+import { Form } from "react-bootstrap"
 import { useFormContext } from "../context"
-import { useRef, useImperativeHandle, useEffect, useState } from "react"
+import { useRef, useImperativeHandle, useState, useEffect } from "react"
+
+import type { Color } from "react-bootstrap/esm/types"
+import type { FieldMethods, FieldRef } from "../types"
 
 interface Props {
     ref?: React.Ref<FieldMethods>
+    id: string
+    bg?: Color
     name: string
     label?: string
     placeholder?: string
+    className?: string
     required?: boolean
+    initialValue?: string
 }
 
-export default function TextAreaField({ ref, name, label, placeholder = "", required }: Props) {
+export default function TextArea({ ref, id, bg = "light", name, label, placeholder = "", className, required, initialValue }: Props) {
 
     // Hooks
     const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -54,6 +60,10 @@ export default function TextAreaField({ ref, name, label, placeholder = "", requ
     }, [])
 
     useEffect(() => {
+        if (initialValue) setValue(initialValue)
+    }, [])
+
+    useEffect(() => {
         const fieldRef: FieldRef = {
             current: {
                 getValue,
@@ -70,21 +80,26 @@ export default function TextAreaField({ ref, name, label, placeholder = "", requ
     }, [name, registerField, unregisterField])
 
     return (
-        <div className="flex flex-col">
+        <Form.Group className="mb-3">
             {label && (
-                <label htmlFor={`input-${name}`} className="ml-2">{label}</label>
+                <Form.Label htmlFor={id} className="fw-semibold mb-1 ms-1" style={{ fontSize: 14 }}>
+                    {label}
+                </Form.Label>
             )}
-            <textarea
-                id={`input-${name}`}
+
+            <Form.Control
+                as="textarea"
                 ref={inputRef}
-                name={name}
                 placeholder={placeholder}
-                className={`min-h-28 border rounded-sm focus:outline-1 px-4 py-1
-                ${error ? "border-red-500 outline-red-500 outline-1" : ""}`}
+                className={`bg-${bg} ${className ? {className} : ""}`.trim()}
+                rows={4}
             />
+
             {error && (
-                <span className="text-red-500 text-sm mt-1 ml-2">{error}</span>
+                <Form.Control.Feedback type="invalid" style={{ display: "block" }}>
+                    {error}
+                </Form.Control.Feedback>
             )}
-        </div>
+        </Form.Group>
     )
 }

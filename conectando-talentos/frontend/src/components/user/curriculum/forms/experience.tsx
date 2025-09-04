@@ -1,302 +1,169 @@
-import { useEffect, useState, type ChangeEvent } from "react";
-import { Button, Form, Spinner, Alert } from "react-bootstrap";
-import { BsTrash } from "react-icons/bs";
-import api from "@/services/api";
-import Select from "@/components/all/select";
-import TextInput from "@/components/all/textinput";
+'use client'
 
-/* ---------- tipos ---------- */
-export interface ExperienceData {
-  curriculum_id: number;
-  inicioMes: number;
-  inicioAno: number;
-  fimMes: number | null;
-  fimAno: number | null;
-  estabelecimento: string;
-  cargo_id: number | null;
-  cargoDescricao: string;
-  atividadesExercidas: string;
-}
-type Exp = ExperienceData & { id: number | string };
+import { useState, useRef } from "react"
 
-interface RawExp {
-  curriculum_experiencia_id?: number | string;
-  curriculum_id?: number | string;
-  inicioMes?: number | string | null;
-  inicioAno?: number | string | null;
-  fimMes?: number | string | null;
-  fimAno?: number | string | null;
-  estabelecimento?: string;
-  cargo_id?: number | string | null;
-  cargoDescricao?: string;
-  atividadesExercidas?: string;
+import short, { type SUUID } from "short-uuid"
+import type { Experience } from "@/types/user"
+import type { FieldMethods, Option } from "@/components/form-kit/types"
+
+import { BsTrash } from "react-icons/bs"
+import { Button, FormCheck } from "react-bootstrap"
+
+import FormProvider from "@/components/form-kit/context"
+import TextField from "@/components/form-kit/fields/text-field"
+import SelectField from "@/components/form-kit/fields/select-field"
+import TextArea from "@/components/form-kit/fields/text-area"
+
+interface Props {
+    info?: Experience
+    refreshList: () => Promise<void>
+    setNewFormVisible?: (val: boolean) => void
 }
 
-interface ExperienceFormProps {
-  id: number | string;
-  initialData: ExperienceData;
-  canSave: boolean;
-  onChange?: (id: number | string, data: Partial<ExperienceData>) => void;
-  onSave?:   (id: number | string, data: ExperienceData) => void;
-  onDelete?: (id: number | string) => void;
-}
+const monthOptions: Option[] = [
+    { id: "", label: "Selecione" },
+    { id: "1", label: "01" },
+    { id: "2", label: "02" },
+    { id: "3", label: "03" },
+    { id: "4", label: "04" },
+    { id: "5", label: "05" },
+    { id: "6", label: "06" },
+    { id: "7", label: "07" },
+    { id: "8", label: "08" },
+    { id: "9", label: "09" },
+    { id: "10", label: "10" },
+    { id: "11", label: "11" },
+    { id: "12", label: "12" }
+]
 
-/* ---------- constantes ---------- */
-const defaultYear = new Date().getFullYear();
+export default function ExperienceForm({ info, refreshList, setNewFormVisible }: Props) {
+    const formId: string = useRef<SUUID>(short().generate()).current.toString()
 
-const monthOptions = [
-  { id: "", displayName: "Selecione" },
-  ...["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"].map((m,i)=>({ id: String(i+1), displayName: m }))
-];
+    const fimMesRef = useRef<FieldMethods>(null)
+    const fimAnoRef = useRef<FieldMethods>(null)
 
-const numericFields: (keyof ExperienceData)[] = ["inicioMes","inicioAno","fimMes","fimAno","cargo_id"];
-const toStr = (v: number | undefined | null) => (v ? String(v) : "");
-const toSel = (n: number | undefined | null) => (n && n > 0 ? String(n) : "");
+    const [currentWorking, setCurrentWorking] = useState<boolean>(info?.fim_ano ? true : false)
 
-/* ---------- item ---------- */
-function ExperienceItemForm({ id, initialData, canSave, onChange, onSave, onDelete }: ExperienceFormProps) {
-  const [form, setForm] = useState<ExperienceData>(initialData);
+    const onChangeCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setCurrentWorking(e.target.checked)
+    }
 
-  const empregoAtual = form.fimMes === null && form.fimAno === null;
+    const handleDelete = (e: React.MouseEvent<HTMLButtonElement>): void => {
+        e.preventDefault()
+        if (setNewFormVisible) return setNewFormVisible(false)
+    }
 
-  useEffect(() => { onChange?.(id, form); }, [form]);
+    const onSubmit = (formData: Record<string, any>): void => {
+        console.log(formData)
 
-  const handleSelect = <K extends keyof ExperienceData>(field: K) =>
-    (value: string) => {
-      const v = numericFields.includes(field) && value !== "" ? Number(value) : (value as unknown as ExperienceData[K]);
-      setForm(prev => ({ ...prev, [field]: v }));
-    };
+        if (!info) {
+            refreshList()
+        }
 
-  const handleText = <K extends keyof ExperienceData>(field: K) =>
-    (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const raw = e.currentTarget.value;
-      const v = numericFields.includes(field)
-        ? (raw === "" ? (null as unknown as ExperienceData[K]) : (Number(raw) as unknown as ExperienceData[K]))
-        : (raw as unknown as ExperienceData[K]);
-      setForm(prev => ({ ...prev, [field]: v }));
-    };
+        setNewFormVisible?.(false)
+    }
 
-  const requiredOk =
-    Number(form.inicioMes) > 0 && Number(form.inicioAno) > 0 &&
-    !!form.estabelecimento && (!!form.cargoDescricao || form.cargo_id !== null);
-
-  return (
-    <Form className="border rounded-2 mt-3 p-4 shadow-sm bg-body">
-      <h3 className="fs-5 fw-bold mb-4">Experiência</h3>
-
-      {!canSave && (
-        <Alert variant="warning" className="py-2">
-          Identificando seu currículo... O botão <b>Salvar</b> só habilita quando houver <i>curriculumId</i>.
-        </Alert>
-      )}
-
-      <div className="row row-cols-lg-2 g-3">
-        <TextInput
-          id={`estab-${id}`}
-          label="Empresa / Estabelecimento *"
-          placeholder="Tech Company"
-          value={String(form.estabelecimento ?? "")}
-          onChange={handleText("estabelecimento")}
-          required
-        />
-        <TextInput
-          id={`cargoDesc-${id}`}
-          label="Cargo ou descrição livre"
-          placeholder="Desenvolvedor React"
-          value={String(form.cargoDescricao ?? "")}
-          onChange={handleText("cargoDescricao")}
-        />
-      </div>
-
-      <div className="row g-3 mt-2">
-        <Form.Group controlId={`ativ-${id}`}>
-          <Form.Label>Atividades exercidas</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={3}
-            placeholder="Principais responsabilidades / tecnologias"
-            value={String(form.atividadesExercidas ?? "")}
-            onChange={handleText("atividadesExercidas")}
-          />
-        </Form.Group>
-      </div>
-
-      <div className="row row-cols-lg-4 g-3 mt-2">
-        <Select
-          controlId={`inicioMes-${id}`}
-          label="Mês de Início *"
-          options={monthOptions}
-          value={toSel(form.inicioMes)}
-          onChange={handleSelect("inicioMes")}
-          required
-        />
-        <TextInput
-          id={`inicioAno-${id}`}
-          label="Ano de Início *"
-          type="number"
-          min={1900}
-          max={defaultYear}
-          value={toStr(Number(form.inicioAno))}
-          onChange={handleText("inicioAno")}
-          required
-        />
-        <Select
-          controlId={`fimMes-${id}`}
-          label="Mês de Fim"
-          options={monthOptions}
-          value={empregoAtual ? "" : toSel(form.fimMes)}
-          onChange={handleSelect("fimMes")}
-          disabled={empregoAtual}
-        />
-        <TextInput
-          id={`fimAno-${id}`}
-          label="Ano de Fim"
-          type="number"
-          min={1900}
-          max={defaultYear + 10}
-          value={empregoAtual ? "" : toStr(Number(form.fimAno))}
-          onChange={handleText("fimAno")}
-          disabled={empregoAtual}
-        />
-      </div>
-
-      <Form.Check
-        className="mt-2"
-        type="checkbox"
-        label="Emprego atual"
-        checked={empregoAtual}
-        onChange={() => setForm(prev => ({
-          ...prev,
-          fimMes: empregoAtual ? 0 : null,
-          fimAno: empregoAtual ? defaultYear : null
-        }))}
-      />
-
-      <div className="d-flex justify-content-end gap-2 mt-3">
-        <Button variant="danger" onClick={() => onDelete?.(id)}>
-          <BsTrash /> Excluir
-        </Button>
-        <Button
-          variant="success"
-          onClick={() => onSave?.(id, {
-            ...form,
-            inicioMes: Number(form.inicioMes),
-            inicioAno: Number(form.inicioAno),
-            fimMes: empregoAtual ? null : Number(form.fimMes),
-            fimAno: empregoAtual ? null : Number(form.fimAno),
-            cargo_id: form.cargo_id ? Number(form.cargo_id) : null
-          })}
-          disabled={!requiredOk || !canSave}
+    return (
+        <FormProvider
+            id={formId}
+            onSubmit={onSubmit}
+            className="border rounded-2 mt-3 p-4 shadow-sm bg-body"
         >
-          Salvar
-        </Button>
-      </div>
-    </Form>
-  );
-}
+            <h3 className="fs-5 fw-bold mb-4">Experiência</h3>
 
-/* ---------- lista/CRUD ---------- */
-export default function ExperienceForm({ curriculumId }: { curriculumId: number }) {
-  const [items, setItems] = useState<Exp[]>([]);
-  const [loading, setLoading] = useState(false);
+            <div className="row row-cols-lg-2 g-3">
+                <TextField
+                    id={`estabelecimento-${formId}`}
+                    name="estabelecimento"
+                    label="Empresa / Estabelecimento *"
+                    placeholder="Ex: Tech Company"
+                    initialValue={info?.estabelecimento || ""}
+                    required
+                />
 
-  const addEmpty = () => {
-    setItems(prev => [
-      ...prev,
-      {
-        id: `tmp_${Date.now()}`,
-        curriculum_id: curriculumId,
-        inicioMes: 0,
-        inicioAno: defaultYear,
-        fimMes: null,
-        fimAno: null,
-        estabelecimento: "",
-        cargo_id: null,
-        cargoDescricao: "",
-        atividadesExercidas: ""
-      }
-    ]);
-  };
+                <TextField
+                    id={`desc-${formId}`}
+                    name="cargo_descricao"
+                    label="Cargo ou descrição livre *"
+                    placeholder="Ex: Análise e Desenvolvimento de Sistemas"
+                    initialValue={info?.cargo_descricao || ""}
+                    required
+                />
+            </div>
 
-  useEffect(() => {
-    if (!curriculumId) { if (items.length === 0) addEmpty(); return; }
+            <div className="row g-3">
+                <TextArea
+                    id={`atividades-${formId}`}
+                    name="atividades_exercidas"
+                    label="Atividades exercidas"
+                    placeholder="Fale um pouco sobre o que fazia na empresa"
+                    initialValue={info?.atividades_exercidas || ""}
+                />
+            </div>
 
-    setLoading(true);
-    api.get(`/experiencia/lista/${curriculumId}`, { withCredentials: true })
-      .then(r => {
-        const raw: unknown = r.data?.data ?? r.data;
-        const arr: RawExp[] = Array.isArray(raw) ? raw : [];
+            <div className="row row-cols-lg-4 g-3">
+                <SelectField
+                    id={`inicio-mes-${formId}`}
+                    name="inicio_mes"
+                    label="Mês de início *"
+                    options={monthOptions}
+                    initialValue={info?.inicio_mes || ""}
+                    required
+                />
 
-        const normalizado: Exp[] = arr.map(e => ({
-          id: Number(e.curriculum_experiencia_id ?? Date.now()),
-          curriculum_id: Number(e.curriculum_id ?? curriculumId),
-          inicioMes: Number(e.inicioMes ?? 0),
-          inicioAno: Number(e.inicioAno ?? defaultYear),
-          fimMes: e.fimMes === null ? null : Number(e.fimMes ?? 0),
-          fimAno: e.fimAno === null ? null : Number(e.fimAno ?? defaultYear),
-          estabelecimento: e.estabelecimento ?? "",
-          cargo_id: e.cargo_id === null ? null : Number(e.cargo_id ?? 0),
-          cargoDescricao: e.cargoDescricao ?? "",
-          atividadesExercidas: e.atividadesExercidas ?? ""
-        }));
+                <TextField
+                    id={`inicio-ano-${formId}`}
+                    name="inicio_ano"
+                    label="Ano de início *"
+                    placeholder="Ex: 2025"
+                    initialValue={info?.inicio_ano || ""}
+                    required
+                />
 
-        setItems(normalizado.length ? normalizado : []);
-        if (!normalizado.length) addEmpty();
-      })
-      .catch(err => { console.error("Falha ao listar experiências", err); addEmpty(); })
-      .finally(() => setLoading(false));
-  }, [curriculumId]);
+                {!currentWorking && (
+                    <>
+                        <SelectField
+                            ref={fimMesRef}
+                            id={`fim-mes-${formId}`}
+                            name="fim_mes"
+                            label="Mês de fim *"
+                            options={monthOptions}
+                            initialValue={info?.fim_mes || ""}
+                            required
+                        />
 
-  const handleChange = (id: Exp["id"], data: Partial<ExperienceData>) =>
-    setItems(prev => prev.map(e => e.id === id ? { ...e, ...data } : e));
+                        <TextField
+                            ref={fimAnoRef}
+                            id={`fim-ano-${formId}`}
+                            name="fim_ano"
+                            label="Ano de fim *"
+                            placeholder="Ex: 2025"
+                            initialValue={info?.fim_ano || ""}
+                            required
+                        />
+                    </>
+                )}
+            </div>
 
-  const handleSave = async (id: Exp["id"], data: ExperienceData) => {
-    if (!curriculumId) return;
-    const payload = { ...data, curriculum_id: curriculumId };
+            <div className="row row-cols-lg-2 g-3 px-2">
+                <FormCheck
+                    label="Emprego atual"
+                    defaultChecked={info?.fim_ano ? true : false}
+                    onChange={onChangeCheckbox}
+                />
+            </div>
 
-    try {
-      if (typeof id !== "number") {
-        const r = await api.post("/experiencia/criar", payload, { withCredentials: true });
-        const newId = r.data?.data?.curriculum_experiencia_id;
-        if (newId) setItems(prev => prev.map(e => e.id === id ? { ...e, id: Number(newId) } : e));
-      } else {
-        await api.put(`/experiencia/atualizar/${id}`, payload, { withCredentials: true });
-      }
-    } catch (err) {
-      console.error("Falha ao salvar experiência", err);
-    }
-  };
-
-  const handleDelete = async (id: Exp["id"]) => {
-    try {
-      if (typeof id === "number") {
-        await api.delete(`/experiencia/excluir/${id}`, { withCredentials: true });
-        setItems(prev => prev.filter(e => e.id !== id));
-      } else {
-        setItems(prev => prev.filter(e => e.id !== id));
-      }
-    } catch (err) {
-      console.error("Falha ao excluir experiência", err);
-    }
-  };
-
-  return (
-    <>
-      {loading && <div className="d-flex align-items-center gap-2"><Spinner size="sm" animation="border" /> <span>Carregando experiências...</span></div>}
-      {items.map(e => (
-        <ExperienceItemForm
-          key={e.id}
-          id={e.id}
-          initialData={e}
-          canSave={!!curriculumId}
-          onChange={handleChange}
-          onSave={handleSave}
-          onDelete={handleDelete}
-        />
-      ))}
-      <div className="d-flex justify-content-end mt-3">
-        <Button onClick={addEmpty}>+ Adicionar experiência</Button>
-      </div>
-    </>
-  );
+            <div className="d-flex justify-content-end gap-2 mt-3">
+                <Button variant="danger" onClick={handleDelete}>
+                    <BsTrash /> Excluir
+                </Button>
+                <Button
+                    type="submit"
+                    variant="success"
+                >
+                    Salvar
+                </Button>
+            </div>
+        </FormProvider>
+    )
 }

@@ -15,11 +15,12 @@ interface Props {
     label?: string
     className?: string
     options: Option[]
+    disabled?: boolean
     required?: boolean
     initialValue?: string
 }
 
-export default function SelectField({ ref, id, bg = "light", name, label, className, options, required, initialValue }: Props) {
+export default function SelectField({ ref, id, bg = "light", name, label, className, options, disabled = false, required, initialValue }: Props) {
 
     // Hooks
     const inputRef = useRef<HTMLSelectElement>(null)
@@ -90,6 +91,7 @@ export default function SelectField({ ref, id, bg = "light", name, label, classN
             <Form.Select
                 id={id}
                 ref={inputRef}
+                disabled={disabled}
                 className={`bg-${bg} ${className ?? ""}`.trim()}
             >
                 {options && options.map((opt, index) => {
