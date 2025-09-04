@@ -62,7 +62,11 @@ export default function EducationForm({ info, refreshList, setNewFormVisible }: 
 
     const onSubmit = (formData: Record<string, any>): void => {
         console.log(formData)
-        refreshList()
+
+        if (!info) {
+            refreshList()
+        }
+
         setNewFormVisible?.(false)
     }
 
@@ -72,7 +76,7 @@ export default function EducationForm({ info, refreshList, setNewFormVisible }: 
             onSubmit={onSubmit}
             className="border rounded-2 mt-3 p-4 shadow-sm bg-body"
         >
-            <h3 className="fs-5 fw-bold mb-4">Escolaridade</h3>
+            <h3 className="fs-5 fw-bold mb-4">Formação</h3>
 
             <div className="row row-cols-lg-2 g-3">
                 <SelectField
@@ -128,7 +132,7 @@ export default function EducationForm({ info, refreshList, setNewFormVisible }: 
                     id={`inicio-ano-${formId}`}
                     name="inicio_ano"
                     label="Ano de início *"
-                    placeholder="Selecione um ano"
+                    placeholder="Ex: 2025"
                     {...info?.inicio_ano ? { initialValue: info.inicio_ano } : {}}
                     required
                 />
@@ -146,7 +150,7 @@ export default function EducationForm({ info, refreshList, setNewFormVisible }: 
                     id={`fim-ano-${formId}`}
                     name="fim_ano"
                     label="Ano de fim *"
-                    placeholder="dd/mm/aa"
+                    placeholder="Ex: 2025"
                     {...info?.fim_ano ? { initialValue: info.fim_ano } : {}}
                     required
                 />

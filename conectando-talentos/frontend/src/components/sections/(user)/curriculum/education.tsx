@@ -1,8 +1,9 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button, Container, Spinner } from "react-bootstrap"
 
-import EducationForm from "@/components/user/curriculum/forms/education"
 import type { Scholarity } from "@/types/user"
+
+import EducationForm from "@/components/user/curriculum/forms/education"
 
 export default function EducationSection() {
 	const [loadingHead, setLoadingHead] = useState(false)
@@ -17,6 +18,10 @@ export default function EducationSection() {
 	const scholarity: Scholarity[] = [
 		{ id: 1, grau: "medio", cidade_id: "1", descricao: "Teste", inicio_mes: "8", inicio_ano: "2020", fim_mes: "9", fim_ano: "2024", instituicao: "Faculdade Santa Marcelina" }
 	]
+
+	useEffect(() => {
+		refreshList()
+	}, [])
 
 	return (
 		<Container className="bg-white border rounded-3 p-4 shadow-sm">

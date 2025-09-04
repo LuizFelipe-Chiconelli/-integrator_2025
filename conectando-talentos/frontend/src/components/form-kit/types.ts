@@ -3,7 +3,7 @@ import type { RefObject } from "react"
 export interface FieldMethods {
     getValue: () => any
     validate: () => boolean
-    setValue?: (val: string) => void
+    setValue?: (val: any) => void
 } 
 
 export type FieldRef = RefObject<FieldMethods>
