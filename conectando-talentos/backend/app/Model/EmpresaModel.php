@@ -3,7 +3,13 @@ namespace App\Model;
 
 use Core\Library\ModelMain;
 
-class EstabelecimentoModel extends ModelMain
+/**
+ * Model para a tabela "estabelecimento"
+ * 
+ * Responsável por operações de CRUD relacionadas às empresas.
+ * Segue o mesmo padrão do UsuarioModel.
+ */
+class EmpresaModel extends ModelMain
 {
     /** Nome da tabela e chave primária */
     protected $table      = 'estabelecimento';
@@ -15,7 +21,7 @@ class EstabelecimentoModel extends ModelMain
     public function verificarEmailExistente(string $email): ?array
     {
         return $this->db
-            ->where('email', $email)   // no banco o campo é "email"
+            ->where('email', $email)
             ->first();
     }
 
@@ -30,9 +36,9 @@ class EstabelecimentoModel extends ModelMain
     }
 
     /* =========================================================
-     * 3) INSERIR nova empresa  (retorna o ID gerado)
+     * 3) Cadastrar nova empresa (retorna o ID gerado)
      * =======================================================*/
-    public function cadastrar(array $dados): int
+    public function cadastrarEmpresa(array $dados): int
     {
         return $this->db->insert($dados);
     }
@@ -40,7 +46,7 @@ class EstabelecimentoModel extends ModelMain
     /* =========================================================
      * 4) Buscar empresa por ID
      * =======================================================*/
-    public function buscarPorId(int $id): ?array
+    public function findById(int $id): ?array
     {
         return $this->db
             ->where($this->primaryKey, $id)
@@ -55,5 +61,31 @@ class EstabelecimentoModel extends ModelMain
         return $this->db
             ->where($this->primaryKey, $id)
             ->update($dados);
+    }
+
+    /* =========================================================
+     * 6) Excluir empresa por ID
+     * =======================================================*/
+    public function excluir(int $id): int
+    {
+        return $this->db
+            ->where($this->primaryKey, $id)
+            ->delete();
+    }
+
+    /* =========================================================
+     * 7) Autenticar login (extra)
+     * =======================================================*/
+    public function autenticar(string $email, string $senha): ?array
+    {
+        $empresa = $this->db
+            ->where('email', $email)
+            ->first();
+
+        if ($empresa && password_verify($senha, $empresa['senha'])) {
+            unset($empresa['senha']); // segurança
+            return $empresa;
+        }
+        return null;
     }
 }
