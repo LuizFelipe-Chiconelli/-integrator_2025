@@ -20,3 +20,12 @@ export interface Experience {
     cargo_descricao: string
     atividades_exercidas: string
 }
+
+export interface Qualification {
+    id: number
+    mes: string
+    ano: string
+    carga_horaria: string
+    descricao: string
+    estabelecimento: string
+}

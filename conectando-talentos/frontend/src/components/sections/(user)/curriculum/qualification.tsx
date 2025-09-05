@@ -1,58 +1,46 @@
-import { useEffect, useState } from "react";
-import { Container, Spinner } from "react-bootstrap";
-import api from "@/services/api";
-import QualificationForm from "@/components/user/curriculum/forms/qualification";
+import { useEffect, useState } from "react"
+import { Button, Container, Spinner } from "react-bootstrap"
 
-/* helpers sem any */
-function isObj(v: unknown): v is Record<string, unknown> {
-  return typeof v === "object" && v !== null;
-}
-function toNum(v: unknown): number | null {
-  if (typeof v === "number" && Number.isFinite(v)) return v;
-  if (typeof v === "string") {
-    const n = Number(v);
-    if (Number.isFinite(n)) return n;
-  }
-  return null;
-}
-/** curriculum_id a partir de /usuario/perfil */
-function pickCurriculumId(payload: unknown): number | null {
-  if (!isObj(payload)) return null;
-  const c =
-    (isObj(payload.curriculum) ? payload.curriculum : undefined) ??
-    (isObj(payload.data) && isObj(payload.data.curriculum) ? payload.data.curriculum : undefined);
-  if (!isObj(c)) return null;
-  return toNum(c.curriculum_id) ?? toNum(c.id);
-}
+import type { Qualification } from "@/types/user"
+
+import QualificationForm from "@/components/user/curriculum/forms/qualification"
 
 export default function QualificationSection() {
-  const [loadingHead, setLoadingHead] = useState(true);
-  const [curriculumId, setCurriculumId] = useState<number>(0);
+	const [loadingHead, setLoadingHead] = useState(false)
+	const [newFormVisible, setNewFormVisible] = useState<boolean>(false)
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const { data } = await api.get("/usuario/perfil", { withCredentials: true });
-        const id = pickCurriculumId(data);
-        if (id) setCurriculumId(id);
-        else console.warn("[perfil] curriculum_id não encontrado:", data);
-      } catch (e) {
-        console.error("Falha ao obter /usuario/perfil", e);
-      } finally {
-        setLoadingHead(false);
-      }
-    })();
-  }, []);
+	const refreshList = async (): Promise<void> => {
+		setLoadingHead(true)
+		// chamar api
+		setLoadingHead(false)
+	}
 
-  return (
-    <Container className="bg-white border rounded-3 p-4 shadow-sm">
-      <div className="d-flex align-items-center gap-2 mb-2">
-        <h2 className="fs-3 fw-bold m-0">Cursos / Qualificações</h2>
-        {loadingHead && <Spinner size="sm" animation="border" />}
-      </div>
+	const scholarity: Qualification[] = [
+		{ id: 1, mes: "8", ano: "2020", carga_horaria: "120", descricao: "Descrição do curso", estabelecimento: "Faculdade Santa Marcelina" }
+	]
 
-      {/* passa 0 até carregar; o form só habilita SALVAR quando houver ID */}
-      <QualificationForm curriculumId={curriculumId} />
-    </Container>
-  );
+	useEffect(() => {
+		refreshList()
+	}, [])
+
+	return (
+		<Container className="bg-white border rounded-3 p-4 shadow-sm">
+			<div className="d-flex align-items-center gap-2 mb-2">
+				<h2 className="fs-3 fw-bold m-0">Cursos / Qualificações</h2>
+				{loadingHead && <Spinner size="sm" animation="border" />}
+			</div>
+
+			{scholarity.map((info, index) => {
+				return (<QualificationForm key={index} info={info} refreshList={refreshList} />)
+			})}
+
+			{newFormVisible && (
+				<QualificationForm refreshList={refreshList} setNewFormVisible={setNewFormVisible} />
+			)}
+
+			<div className="d-flex justify-content-end mt-3">
+				<Button onClick={() => { setNewFormVisible(true) }}>+ Adicionar formação</Button>
+			</div>
+		</Container>
+	)
 }

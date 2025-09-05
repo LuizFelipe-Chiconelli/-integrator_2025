@@ -1,6 +1,6 @@
 'use client'
 
-import { FieldMethods, FieldRef } from "@/types/form"
+import type { FieldMethods, FieldRef } from "../types"
 
 import { useFormContext } from "../context"
 import { useState, useRef, useImperativeHandle, useEffect } from "react"
