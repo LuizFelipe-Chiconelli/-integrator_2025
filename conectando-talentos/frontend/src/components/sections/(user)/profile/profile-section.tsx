@@ -1,8 +1,9 @@
 'use client'
 
-import ProfileForm from "@/components/user/profile/forms/profileform"
 import { useSessionContext } from "@/components/user/session/context"
 import { Container } from "react-bootstrap"
+
+import ProfileForm from "@/components/user/profile/forms/profileform"
 
 export default function ProfileSection() {
     const { userInfo } = useSessionContext()

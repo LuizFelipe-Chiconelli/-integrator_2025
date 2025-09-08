@@ -1,32 +1,68 @@
 'use client'
 
+import type { City } from "@/types/all"
 import type { UserInfo } from "@/types/user"
+import type { FieldMethods, Option } from "@/components/form-kit/types"
 
+import { useEffect, useRef, useState } from "react"
 import { Button } from "react-bootstrap"
+
+import api from "@/services/api"
 
 import FormProvider from "@/components/form-kit/context"
 import TextField from "@/components/form-kit/fields/text-field"
 import TextArea from "@/components/form-kit/fields/text-area"
+import SelectField from "@/components/form-kit/fields/select-field"
 
 interface Props {
-    info?: UserInfo | null
+    info: UserInfo
 }
 
 export default function ProfileForm({ info }: Props) {
+    const [cities, setCities] = useState<City[] | null>(null)
+    const [selectedUf, setSelectedUf] = useState<string>(info.curriculum.uf)
+
+    const ufRef = useRef<FieldMethods>(null)
+    const cityRef = useRef<FieldMethods>(null)
+
+    const ufOptions: Option[] = cities ? [
+        { id: "", label: "Selecione um estado" },
+        ...Array.from(new Set(cities.map(c => c.uf))).map((uf) => {
+            return { id: uf, label: uf }
+        })
+    ] : []
+
+    const cityOptions: Option[] = cities ? [
+        { id: "", label: "Selecione" },
+        ...Array.from(
+            cities.filter((c) => { return c.uf === selectedUf })
+        ).map((c) => { return { id: c.id, label: c.nome } })
+    ] : []
+
+    const fetchLocations = async () => {
+        const { status, data } = await api.get("/cidade/lista")
+        if (status == 200) setCities(data.cidades)
+    }
 
     const onSubmit = (formData: Record<string, any>) => {
         console.log(formData)
     }
 
+    useEffect(() => { fetchLocations() }, [])
+
+    useEffect(() => {
+        ufRef.current?.setValue?.(info.curriculum.uf)
+        cityRef.current?.setValue?.(info.curriculum.cidade_id)
+    }, [ufOptions, cityOptions, cities])
+
     return (
         <FormProvider className="d-flex flex-column mt-3" onSubmit={onSubmit}>
             <TextField
                 id={`nome`}
-                // ref={nameRef}
                 name="nome"
                 label="Nome Completo *"
                 placeholder="Digite seu nome completo"
-                initialValue={info?.pessoa_fisica.nome}
+                initialValue={info.pessoa_fisica.nome}
                 required
             />
 
@@ -36,7 +72,7 @@ export default function ProfileForm({ info }: Props) {
                     name="cpf"
                     label="CPF *"
                     placeholder="Ex: 000.000.000-00"
-                    initialValue={info?.pessoa_fisica.cpf || ""}
+                    initialValue={info.pessoa_fisica.cpf || ""}
                     required
                 />
 
@@ -45,7 +81,7 @@ export default function ProfileForm({ info }: Props) {
                     name="email"
                     label="Endereço de email *"
                     placeholder="Ex: teste@email.com"
-                    initialValue={info?.curriculum.email || ""}
+                    initialValue={info.curriculum.email || ""}
                     required
                 />
             </div>
@@ -56,7 +92,7 @@ export default function ProfileForm({ info }: Props) {
                     name="logradouro"
                     label="Logradouro *"
                     placeholder="Ex: Rua das graças"
-                    initialValue={info?.curriculum.logradouro || ""}
+                    initialValue={info.curriculum.logradouro || ""}
                     required
                 />
 
@@ -65,7 +101,7 @@ export default function ProfileForm({ info }: Props) {
                     name="numero"
                     label="Número"
                     placeholder="Ex: teste@email.com"
-                    initialValue={String(info?.curriculum.numero)}
+                    initialValue={String(info.curriculum.numero)}
                 />
             </div>
 
@@ -75,7 +111,7 @@ export default function ProfileForm({ info }: Props) {
                     name="complemento"
                     label="Complemento"
                     placeholder="Ex: Rua das graças"
-                    initialValue={info?.curriculum.complemento}
+                    initialValue={info.curriculum.complemento}
                 />
 
                 <TextField
@@ -83,7 +119,7 @@ export default function ProfileForm({ info }: Props) {
                     name="bairro"
                     label="Bairro *"
                     placeholder="Ex: Centro"
-                    initialValue={info?.curriculum.bairro}
+                    initialValue={info.curriculum.bairro}
                     required
                 />
             </div>
@@ -94,27 +130,28 @@ export default function ProfileForm({ info }: Props) {
                     name="cep"
                     label="CEP *"
                     placeholder="Ex: 00000-000"
-                    initialValue={info?.curriculum.cep}
+                    initialValue={info.curriculum.cep}
                     required
                 />
 
-                <TextField
+                <SelectField
                     id={`cidade`}
+                    ref={cityRef}
                     name="cidade"
-                    label="Bairro *"
-                    placeholder="Ex: Centro"
-                    initialValue={info?.curriculum.cidade}
+                    label="Cidade *"
+                    options={cityOptions}
+                    initialValue={String(info.curriculum.cidade_id)}
                     required
                 />
             </div>
 
             <div className="row row-cols-lg-2">
-                <TextField
+                <SelectField
                     id={`uf`}
+                    ref={ufRef}
                     name="uf"
                     label="UF *"
-                    placeholder="Ex: MG"
-                    initialValue={info?.curriculum.uf}
+                    options={ufOptions}
                     required
                 />
 
@@ -123,7 +160,7 @@ export default function ProfileForm({ info }: Props) {
                     name="celular"
                     label="Telefone *"
                     placeholder="Ex: (32) 99999-9999"
-                    initialValue={info?.curriculum.celular}
+                    initialValue={info.curriculum.celular}
                     required
                 />
             </div>
@@ -134,7 +171,7 @@ export default function ProfileForm({ info }: Props) {
                     name="dataNascimento"
                     label="Data de Nascimento *"
                     placeholder="dd/mm/aaaa"
-                    initialValue={info?.curriculum.dataNascimento}
+                    initialValue={info.curriculum.dataNascimento}
                     required
                 />
 
@@ -143,7 +180,7 @@ export default function ProfileForm({ info }: Props) {
                     name="sexo"
                     label="Sexo *"
                     placeholder="Selecione"
-                    initialValue={info?.curriculum.sexo}
+                    initialValue={info.curriculum.sexo}
                     required
                 />
             </div>
@@ -153,7 +190,7 @@ export default function ProfileForm({ info }: Props) {
                 name="apresentacaoPessoal"
                 label="Apresentação Pessoal *"
                 placeholder="Fale um pouco sobre você"
-                initialValue={info?.curriculum.apresentacaoPessoal}
+                initialValue={info.curriculum.apresentacaoPessoal}
                 required
             />
 
