@@ -2,10 +2,11 @@
 
 import type { UserInfo } from "@/types/user"
 
+import { Button } from "react-bootstrap"
+
 import FormProvider from "@/components/form-kit/context"
 import TextField from "@/components/form-kit/fields/text-field"
 import TextArea from "@/components/form-kit/fields/text-area"
-import { Button } from "react-bootstrap"
 
 interface Props {
     info?: UserInfo | null
