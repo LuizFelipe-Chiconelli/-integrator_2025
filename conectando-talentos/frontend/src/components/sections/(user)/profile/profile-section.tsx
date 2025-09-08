@@ -1,0 +1,20 @@
+'use client'
+
+import ProfileForm from "@/components/user/profile/forms/profileform"
+import { useSessionContext } from "@/components/user/session/context"
+import { Container } from "react-bootstrap"
+
+export default function ProfileSection() {
+    const { userInfo } = useSessionContext()
+
+    return (
+        <Container className="bg-white border rounded-3 p-4 shadow-sm">
+            <h1 className="fs-3 fw-bold m-0">Dados Pessoais</h1>
+            <span>Preencha suas informações pessoais</span>
+
+            {userInfo && (
+                <ProfileForm info={userInfo} />
+            )}
+        </Container>
+    )
+}
