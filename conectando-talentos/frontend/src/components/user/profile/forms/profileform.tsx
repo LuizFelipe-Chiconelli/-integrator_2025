@@ -16,7 +16,7 @@ import SelectField from "@/components/form-kit/fields/select-field"
 
 interface Props {
     info: UserInfo
-    updateInfo: (info: UserInfoPayload) => Promise<UserInfoPayload>
+    updateInfo: (info: UserInfoPayload) => Promise<void>
 }
 
 export default function ProfileForm({ info, updateInfo }: Props) {

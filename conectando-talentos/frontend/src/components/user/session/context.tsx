@@ -29,10 +29,9 @@ export default function SessionProvider({ children }: Props) {
         setUserInfo(data)
     }
 
-    const updateUserInfo = async (info: UserInfoPayload): Promise<UserInfoPayload> => {
+    const updateUserInfo = async (info: UserInfoPayload): Promise<void> => {
         const res = await api.post("/usuario/perfil", info)
-        console.log(res.data)
-        return res.data
+        fetchUserInfo()
     }
 
     useEffect(() => {

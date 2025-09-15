@@ -2,5 +2,5 @@ import type { UserInfo, UserInfoPayload } from "@/types/user"
 
 export interface SessionContextType {
     userInfo: UserInfo | null
-    updateUserInfo: (info: UserInfoPayload) => Promise<UserInfoPayload>
+    updateUserInfo: (info: UserInfoPayload) => Promise<void>
 }
