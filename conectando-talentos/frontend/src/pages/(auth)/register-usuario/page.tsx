@@ -8,7 +8,7 @@ import api from "@/services/api";                // ✅ instância global com wi
 export default function Register() {
   /* ---------- estado do formulário ---------- */
   const [form, setForm] = useState({
-      nome: "",
+    nome: "",
     email: "",
     senha: "",
     confirmarSenha: "",

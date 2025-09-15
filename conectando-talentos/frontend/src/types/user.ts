@@ -1,3 +1,20 @@
+export interface UserInfoPayload {
+    nome: string
+    cpf: string
+    logradouro: string
+    bairro: string
+    cep: string
+    cidade_id: string
+    telefone: string
+    data_nascimento: string
+    sexo: string
+    email: string
+    numero: string | number
+    complemento?: string
+    uf: string | number
+    apresentacao: string
+}
+
 export interface UserInfo {
     pessoa_fisica: {
         pessoa_fisica_id?: string | number
@@ -43,7 +60,7 @@ export interface Scholarity {
 }
 
 export interface Experience {
-    id: number
+    cargo_id: number | string
     inicio_mes: string
     inicio_ano: string
     fim_mes?: string

@@ -1,7 +1,7 @@
 'use client'
 
 import type { City } from "@/types/all"
-import type { UserInfo } from "@/types/user"
+import type { UserInfo, UserInfoPayload } from "@/types/user"
 import type { FieldMethods, Option } from "@/components/form-kit/types"
 
 import { useEffect, useRef, useState } from "react"
@@ -10,20 +10,27 @@ import { Button } from "react-bootstrap"
 import api from "@/services/api"
 
 import FormProvider from "@/components/form-kit/context"
-import TextField from "@/components/form-kit/fields/text-field"
 import TextArea from "@/components/form-kit/fields/text-area"
+import TextField from "@/components/form-kit/fields/text-field"
 import SelectField from "@/components/form-kit/fields/select-field"
 
 interface Props {
     info: UserInfo
+    updateInfo: (info: UserInfoPayload) => Promise<UserInfoPayload>
 }
 
-export default function ProfileForm({ info }: Props) {
+export default function ProfileForm({ info, updateInfo }: Props) {
     const [cities, setCities] = useState<City[] | null>(null)
     const [selectedUf, setSelectedUf] = useState<string>(info.curriculum.uf)
 
     const ufRef = useRef<FieldMethods>(null)
     const cityRef = useRef<FieldMethods>(null)
+
+    const genderOptions: Option[] = [
+        { id: "", label: "Selecione" },
+        { id: "M", label: "Masculino" },
+        { id: "F", label: "Feminino" }
+    ]
 
     const ufOptions: Option[] = cities ? [
         { id: "", label: "Selecione um estado" },
@@ -45,14 +52,29 @@ export default function ProfileForm({ info }: Props) {
     }
 
     const onSubmit = (formData: Record<string, any>) => {
-        console.log(formData)
+        const payload: UserInfoPayload = formData as UserInfoPayload
+        console.log(payload)
+
+        updateInfo(payload)
+    }
+
+    const handleSelectUf = (val: string) => {
+        setSelectedUf(val)
+        ufRef.current?.setValue?.(val)
     }
 
     useEffect(() => { fetchLocations() }, [])
 
     useEffect(() => {
-        ufRef.current?.setValue?.(info.curriculum.uf)
-        cityRef.current?.setValue?.(info.curriculum.cidade_id)
+        let exists: boolean = cityOptions.some(opt => opt.id === info.curriculum.cidade_id)
+
+        if (selectedUf != "" && exists) {
+            cityRef.current?.setValue?.(info.curriculum.cidade_id)
+        }
+
+        if (selectedUf != ufRef.current?.getValue()) {
+            ufRef.current?.setValue?.(info.curriculum.uf)
+        }
     }, [ufOptions, cityOptions, cities])
 
     return (
@@ -100,8 +122,8 @@ export default function ProfileForm({ info }: Props) {
                     id={`numero`}
                     name="numero"
                     label="Número"
-                    placeholder="Ex: teste@email.com"
-                    initialValue={String(info.curriculum.numero)}
+                    placeholder="Ex: 25"
+                    initialValue={info.curriculum.numero ? String(info.curriculum.numero) : ""}
                 />
             </div>
 
@@ -110,7 +132,7 @@ export default function ProfileForm({ info }: Props) {
                     id={`complemento`}
                     name="complemento"
                     label="Complemento"
-                    placeholder="Ex: Rua das graças"
+                    placeholder="Ex: Apartamento 404"
                     initialValue={info.curriculum.complemento}
                 />
 
@@ -137,7 +159,7 @@ export default function ProfileForm({ info }: Props) {
                 <SelectField
                     id={`cidade`}
                     ref={cityRef}
-                    name="cidade"
+                    name="cidade_id"
                     label="Cidade *"
                     options={cityOptions}
                     initialValue={String(info.curriculum.cidade_id)}
@@ -152,12 +174,14 @@ export default function ProfileForm({ info }: Props) {
                     name="uf"
                     label="UF *"
                     options={ufOptions}
+                    onChange={handleSelectUf}
+                    initialValue={info.curriculum.uf}
                     required
                 />
 
                 <TextField
                     id={`celular`}
-                    name="celular"
+                    name="telefone"
                     label="Telefone *"
                     placeholder="Ex: (32) 99999-9999"
                     initialValue={info.curriculum.celular}
@@ -168,18 +192,18 @@ export default function ProfileForm({ info }: Props) {
             <div className="row row-cols-lg-2">
                 <TextField
                     id={`nasc-data`}
-                    name="dataNascimento"
+                    name="data_nascimento"
                     label="Data de Nascimento *"
                     placeholder="dd/mm/aaaa"
                     initialValue={info.curriculum.dataNascimento}
                     required
                 />
 
-                <TextField
+                <SelectField
                     id={`sexo`}
                     name="sexo"
                     label="Sexo *"
-                    placeholder="Selecione"
+                    options={genderOptions}
                     initialValue={info.curriculum.sexo}
                     required
                 />
@@ -187,7 +211,7 @@ export default function ProfileForm({ info }: Props) {
 
             <TextArea
                 id={`apresentacao`}
-                name="apresentacaoPessoal"
+                name="apresentacao"
                 label="Apresentação Pessoal *"
                 placeholder="Fale um pouco sobre você"
                 initialValue={info.curriculum.apresentacaoPessoal}

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react"
 
-import type { UserInfo } from "@/types/user"
+import type { UserInfo, UserInfoPayload } from "@/types/user"
 import type { SessionContextType } from "./types"
 
 import api from "@/services/api"
@@ -29,16 +29,18 @@ export default function SessionProvider({ children }: Props) {
         setUserInfo(data)
     }
 
-    // const updateUserInfo = async (info: UserInfo): Promise<UserInfo> => {
-    //     // Lógica da API
-    // }
+    const updateUserInfo = async (info: UserInfoPayload): Promise<UserInfoPayload> => {
+        const res = await api.post("/usuario/perfil", info)
+        console.log(res.data)
+        return res.data
+    }
 
     useEffect(() => {
         fetchUserInfo()
     }, [])
 
     return (
-        <SessionContext.Provider value={{ userInfo }}>
+        <SessionContext.Provider value={{ userInfo, updateUserInfo }}>
             {children}
         </SessionContext.Provider>
     )

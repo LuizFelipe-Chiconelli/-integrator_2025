@@ -55,18 +55,18 @@ export default function ExperienceForm({
   const [currentWorking, setCurrentWorking] = useState<boolean>(() => !info?.fim_ano)
 
   const onChangeCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const checked = e.target.checked
-  setCurrentWorking(checked)
-  if (checked) {
-    // antes:
-    // fimMesRef.current?.setValue("")
-    // fimAnoRef.current?.setValue("")
+    const checked = e.target.checked
+    setCurrentWorking(checked)
+    if (checked) {
+      // antes:
+      // fimMesRef.current?.setValue("")
+      // fimAnoRef.current?.setValue("")
 
-    // depois (seguro p/ TS):
-    fimMesRef.current?.setValue?.("")
-    fimAnoRef.current?.setValue?.("")
+      // depois (seguro p/ TS):
+      fimMesRef.current?.setValue?.("")
+      fimAnoRef.current?.setValue?.("")
+    }
   }
-}
 
   const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
     e.preventDefault()
@@ -114,7 +114,7 @@ export default function ExperienceForm({
           name="cargo_id"
           label="Cargo (catálogo)"
           options={cargoOptions}
-          initialValue={info?.cargo_id || ""}
+          initialValue={String(info?.cargo_id )|| ""}
         />
       </div>
 
