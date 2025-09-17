@@ -1,31 +1,53 @@
-import { Button, Form } from "react-bootstrap"
+import { Button } from "react-bootstrap"
+import { useSessionContext } from "../../session/context"
 
-import TextInput from "@/components/all/textinput"
+import type { CompanyInfo } from "@/types/company"
 
-export default function SocialForm() {
+import FormProvider from "@/components/form-kit/context"
+import TextField from "@/components/form-kit/fields/text-field"
+
+interface Props {
+    info: CompanyInfo
+}
+
+export default function SocialForm({ info }: Props) {
+
+    const { updateCompanyInfo } = useSessionContext()
+
+    const onSubmit = (formData: Record<string, any>) => {
+        updateCompanyInfo(formData as CompanyInfo)
+    }
+
+
     return (
-        <Form className="mt-4">
-            <TextInput
-                controlId="socialLinkedIn"
+        <FormProvider onSubmit={onSubmit} className="mt-4">
+            <TextField
+                id="linkedin-empresa"
+                name="linkedin"
                 label="LinkedIn"
                 placeholder="Ex: https://linkedin.com/company/suaempresa"
+                initialValue={info.linkedin}
             />
 
-            <TextInput
-                controlId="socialInstagram"
-                label="Instragram"
+            <TextField
+                id="instagram-empresa"
+                name="instagram"
+                label="Instagram"
                 placeholder="Ex: @suaempresa"
+                initialValue={info.instagram}
             />
 
-            <TextInput
-                controlId="socialFacebook"
+            <TextField
+                id="facebook-empresa"
+                name="facebook"
                 label="Facebook"
                 placeholder="Ex: SuaEmpresa"
+                initialValue={info.facebook}
             />
 
             <div className="d-flex justify-content-end mt-4">
-                <Button>Salvar Alterações</Button>
+                <Button type="submit">Salvar Alterações</Button>
             </div>
-        </Form>
+        </FormProvider>
     )
 }

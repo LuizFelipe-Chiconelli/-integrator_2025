@@ -88,10 +88,11 @@ export default function TextArea({ ref, id, bg = "light", name, label, placehold
             )}
 
             <Form.Control
+                id={id}
                 as="textarea"
                 ref={inputRef}
                 placeholder={placeholder}
-                className={`bg-${bg} ${className ? {className} : ""}`.trim()}
+                className={`bg-${bg} ${className ? { className } : ""}`.trim()}
                 rows={4}
             />
 

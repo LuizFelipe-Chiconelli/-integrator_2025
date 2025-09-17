@@ -1,62 +1,96 @@
-import { Button, Form } from "react-bootstrap"
+'use client'
 
-import TextArea from "@/components/all/textarea"
-import TextInput from "@/components/all/textinput"
+import { Button } from "react-bootstrap"
+import { useSessionContext } from "../../session/context"
 
-export default function InfoForm() {
+import type { CompanyInfo } from "@/types/company"
+
+import FormProvider from "@/components/form-kit/context"
+import TextArea from "@/components/form-kit/fields/text-area"
+import TextField from "@/components/form-kit/fields/text-field"
+
+
+interface Props {
+    info: CompanyInfo
+}
+
+export default function InfoForm({ info }: Props) {
+
+    const { updateCompanyInfo } = useSessionContext()
+
+    const onSubmit = (formData: Record<string, any>) => {
+        updateCompanyInfo(formData as CompanyInfo)
+    }
+
     return (
-        <Form className="mt-4">
-            <TextInput
-                controlId="infoNome"
-                label="Nome da Empresa"
+        <FormProvider onSubmit={onSubmit} className="mt-4">
+            <TextField
+                id="nome-empresa"
+                name="nome"
+                label="Nome da Empresa *"
                 placeholder="Digite o nome da empresa"
+                initialValue={info.nome}
+                required
             />
 
-            <TextInput
-                controlId="infoCnpj"
-                label="CNPJ"
+            <TextField
+                id="cnpj-empresa"
+                name="cnpj"
+                label="CNPJ *"
                 placeholder="Ex: 12.345.678/0001-90"
+                initialValue={info.cnpj}
+                required
             />
 
-            <TextInput
-                controlId="infoSetor"
+            <TextField
+                id="setor-empresa"
+                name="setor"
                 label="Setor de Atuação"
                 placeholder="Ex: Tecnologia"
+                initialValue={info.setor}
             />
 
             <TextArea
-                controlId="infoDesc"
+                id="descricao-empresa"
+                name="descricao"
                 label="Descrição da Empresa"
                 placeholder="Insira uma descrição para sua empresa..."
+                initialValue={info.descricao}
             />
 
             <div className="row">
                 <div className="col-md-6">
-                    <TextInput
-                        controlId="infoWebsite"
+                    <TextField
+                        id="website-empresa"
+                        name="website"
                         label="Website"
                         placeholder="Ex: https://www.minhaempresa.com.br/"
+                        initialValue={info.website}
                     />
                 </div>
 
                 <div className="col-md-6">
-                    <TextInput
-                        controlId="infoTelefone"
+                    <TextField
+                        id="telefone-empresa"
+                        name="telefone"
                         label="Telefone"
                         placeholder="Ex: (32) 91234-5678"
                     />
                 </div>
             </div>
 
-            <TextInput
-                controlId="infoEndereço"
-                label="Endereço"
+            <TextField
+                id="endereco-empresa"
+                name="endereco"
+                label="Endereço *"
                 placeholder="Ex: Praça Irmã Annina Bisegna, 40 - Centro, Muriaé - MG"
+                initialValue={info.endereco}
+                required
             />
 
             <div className="d-flex justify-content-end mt-4">
-                <Button>Salvar Alterações</Button>
+                <Button type="submit">Salvar Alterações</Button>
             </div>
-        </Form>
+        </FormProvider>
     )
 }
