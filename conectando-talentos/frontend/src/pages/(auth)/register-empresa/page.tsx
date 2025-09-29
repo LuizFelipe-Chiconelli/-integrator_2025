@@ -84,7 +84,7 @@ export default function EmpresaRegister() {
               <h4 className="fw-bold">Cadastre sua empresa</h4>
               <p className="text-muted">
                 Já tem uma conta?{" "}
-                <a href="/empresa/login" className="text-primary">
+                <a href="/auth/login-empresa" className="text-primary">
                   Faça login
                 </a>
               </p>

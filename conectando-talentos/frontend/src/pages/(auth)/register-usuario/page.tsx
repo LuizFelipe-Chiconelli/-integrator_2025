@@ -69,7 +69,7 @@ export default function Register() {
               <h4 className="fw-bold">Crie sua conta</h4>
               <p className="text-muted">
                 Já tem uma conta?{" "}
-                <a href="/login" className="text-primary">
+                <a href="/auth/login-usuario" className="text-primary">
                   Faça login
                 </a>
               </p>
