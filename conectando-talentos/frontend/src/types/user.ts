@@ -48,7 +48,7 @@ export interface UserInfo {
 }
 
 export interface Scholarity {
-    id: number
+    curriculum_escolaridade_id: number
     grau: string
     descricao: string
     instituicao: string
@@ -60,14 +60,16 @@ export interface Scholarity {
 }
 
 export interface Experience {
-    cargo_id: number | string
-    inicio_mes: string
-    inicio_ano: string
-    fim_mes?: string
-    fim_ano?: string
-    estabelecimento: string
-    cargo_descricao: string
-    atividades_exercidas: string
+    curriculum_experiencia_id: number
+    curriculum_id: number
+    inicioMes: number
+    inicioAno: number
+    fimMes: number | null
+    fimAno: number | null
+    estabelecimento: string | null
+    cargo_id: number | null
+    cargoDescricao: string | null
+    atividadesExercidas: string | null
 }
 
 export interface Qualification {

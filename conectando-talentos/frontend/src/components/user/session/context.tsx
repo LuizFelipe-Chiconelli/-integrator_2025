@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useEffect } from "react"
 
-import type { UserInfo, UserInfoPayload } from "@/types/user"
+import type { Experience, Scholarity, UserInfo, UserInfoPayload } from "@/types/user"
 import type { SessionContextType } from "./types"
+import type { AxiosResponse } from "axios"
 
 import api from "@/services/api"
 
@@ -30,8 +31,43 @@ export default function SessionProvider({ children }: Props) {
     }
 
     const updateUserInfo = async (info: UserInfoPayload): Promise<void> => {
-        const res = await api.post("/usuario/perfil", info)
+        await api.post("/usuario/perfil", info)
         fetchUserInfo()
+    }
+
+    const fetchScholarity = async (userId: string | number): Promise<Scholarity[]> => {
+        const res: AxiosResponse<{ data: Scholarity[] }> = await api.get<{ data: Scholarity[] }>(`/escolaridade/lista/${userId}`)
+        return res.data.data
+    }
+
+    const saveScholarity = async (info: Scholarity): Promise<void> => {
+        if (!info.curriculum_escolaridade_id) {
+            await api.post('/escolaridade/criar', info)
+        } else {
+            await api.post(`/escolaridade/atualizar/${userInfo?.usuario.id}`, info)
+        }
+    }
+
+    const deleteScholarity = async (id: number): Promise<void> => {
+        await api.delete(`/escolaridade/remover/${id}`)
+    }
+
+    const fetchExperience = async (userId: string | number): Promise<Experience[]> => {
+        const res: AxiosResponse<{ data: Experience[] }> = await api.get<{ data: Experience[] }>(`/experiencia/lista/${userId}`)
+        return res.data.data
+    }
+
+    const saveExperience = async (info: Experience): Promise<void> => {
+        if (!info.curriculum_experiencia_id) {
+            await api.post('/experiencia/criar', info)
+        } else {
+            await api.post(`/experiencia/atualizar/${userInfo?.usuario.id}`, info)
+        }
+    }
+
+    const deleteExperience = async (id: number): Promise<void> => {
+        const res = await api.delete(`/experiencia/excluir/${id}`)
+        console.log(res)
     }
 
     useEffect(() => {
@@ -39,7 +75,16 @@ export default function SessionProvider({ children }: Props) {
     }, [])
 
     return (
-        <SessionContext.Provider value={{ userInfo, updateUserInfo }}>
+        <SessionContext.Provider value={{
+            userInfo,
+            updateUserInfo,
+            fetchScholarity,
+            saveScholarity,
+            deleteScholarity,
+            fetchExperience,
+            saveExperience,
+            deleteExperience
+        }}>
             {children}
         </SessionContext.Provider>
     )

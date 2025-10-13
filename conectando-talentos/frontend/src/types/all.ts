@@ -3,3 +3,8 @@ export interface City {
     nome: string
     uf: string
 }
+
+export interface Role {
+    cargo_id: number
+    descricao: string
+}
