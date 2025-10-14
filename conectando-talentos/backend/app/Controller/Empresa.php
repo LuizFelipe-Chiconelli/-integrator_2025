@@ -7,11 +7,10 @@ use Core\Library\Response;
 
 class Empresa extends ControllerMain
 {
-    public const PUBLIC_ACTIONS = ['cadastrar', 'login'];
+    /** Métodos acessíveis sem sessão */
+    public const PUBLIC_ACTIONS = ['cadastrar', 'login', 'logout'];
 
-    /* =========================================================
-     * CADASTRO
-     * =======================================================*/
+    /* ================= CADASTRO ================= */
     public function cadastrar(): void
     {
         $dados = json_decode(file_get_contents('php://input'), true) ?? [];
@@ -36,17 +35,17 @@ class Empresa extends ControllerMain
         }
 
         $payload = [
-            'nome'     => trim($dados['nome']),
-            'cnpj'     => preg_replace('/\D/', '', $dados['cnpj']),
-            'endereco' => $dados['endereco'] ?? '',
-            'email'    => strtolower(trim($dados['email'])),
-            'descricao'=> $dados['descricao'] ?? '',
-            'website'  => $dados['website'] ?? null,
-            'setor'    => $dados['setor'] ?? null,
-            'linkedin' => $dados['linkedin'] ?? null,
-            'instagram'=> $dados['instagram'] ?? null,
-            'facebook' => $dados['facebook'] ?? null,
-            'senha'    => password_hash($dados['senha'], PASSWORD_DEFAULT)
+            'nome'      => trim($dados['nome']),
+            'cnpj'      => preg_replace('/\D/', '', $dados['cnpj']),
+            'endereco'  => $dados['endereco']  ?? '',
+            'email'     => strtolower(trim($dados['email'])),
+            'descricao' => $dados['descricao'] ?? '',
+            'website'   => $dados['website']   ?? null,
+            'setor'     => $dados['setor']     ?? null,
+            'linkedin'  => $dados['linkedin']  ?? null,
+            'instagram' => $dados['instagram'] ?? null,
+            'facebook'  => $dados['facebook']  ?? null,
+            'senha'     => password_hash($dados['senha'], PASSWORD_DEFAULT)
         ];
 
         try {
@@ -57,9 +56,7 @@ class Empresa extends ControllerMain
         }
     }
 
-    /* =========================================================
-     * LOGIN
-     * =======================================================*/
+    /* ================= LOGIN ================= */
     public function login(): void
     {
         $dados = json_decode(file_get_contents('php://input'), true) ?? [];
@@ -75,27 +72,28 @@ class Empresa extends ControllerMain
             return;
         }
 
-        Session::set('empresa_id', $empresa['estabelecimento_id']);
-        Session::set('empresa_nome', $empresa['nome']);
+        // 🔐 Sessão padronizada
+        Session::set('empresa_id',          (int)$empresa['estabelecimento_id']);
+        Session::set('estabelecimento_id',  (int)$empresa['estabelecimento_id']); // chave extra para guard de vagas
+        Session::set('empresa_nome',        (string)$empresa['nome']);
+        Session::set('empresa_email',       (string)$empresa['email']);
         session_regenerate_id(true);
 
         Response::json([
             'status'  => 200,
             'mensagem'=> 'Login realizado com sucesso!',
             'empresa' => [
-                'id'    => $empresa['estabelecimento_id'],
-                'nome'  => $empresa['nome'],
-                'email' => $empresa['email']
+                'id'    => (int)$empresa['estabelecimento_id'],
+                'nome'  => (string)$empresa['nome'],
+                'email' => (string)$empresa['email']
             ]
         ]);
     }
 
-    /* =========================================================
-     * PERFIL
-     * =======================================================*/
+    /* ================= PERFIL (GET/POST) ================= */
     public function perfil(): void
     {
-        $empresaId = Session::get('empresa_id');
+        $empresaId = (int) Session::get('empresa_id');
         if (!$empresaId) {
             Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado.']);
             return;
@@ -103,9 +101,9 @@ class Empresa extends ControllerMain
 
         $metodo = $_SERVER['REQUEST_METHOD'];
 
-        /* ---------- GET ---------- */
+        // GET
         if ($metodo === 'GET') {
-            $empresa = $this->model->findById((int)$empresaId);
+            $empresa = $this->model->findById($empresaId);
             if (!$empresa) {
                 Response::json(['status'=>404,'mensagem'=>'Empresa não encontrada.']);
                 return;
@@ -113,56 +111,51 @@ class Empresa extends ControllerMain
 
             unset($empresa['senha']);
 
-            $telefones = $this->loadModel('Telefone')->buscarPorEmpresa((int)$empresaId);
+            $telefones = $this->loadModel('Telefone')->buscarPorEmpresa($empresaId);
 
             Response::json([
-                'status'=>200,
-                'empresa'=>$empresa,
-                'telefones'=>$telefones
+                'status'    => 200,
+                'empresa'   => $empresa,
+                'telefones' => $telefones
             ]);
             return;
         }
 
-        /* ---------- POST ---------- */
+        // POST (atualiza)
         if ($metodo === 'POST') {
             $dados = json_decode(file_get_contents('php://input'), true) ?? [];
 
-            // buscar empresa atual
-            $empresaAtual = $this->model->findById((int)$empresaId);
+            $empresaAtual = $this->model->findById($empresaId);
             if (!$empresaAtual) {
                 Response::json(['status'=>404,'mensagem'=>'Empresa não encontrada.']);
                 return;
             }
 
-            // remove senha antiga do merge
             unset($empresaAtual['senha']);
 
-            // campos permitidos para update
             $payload = [
-                'nome'     => trim($dados['nome'] ?? $empresaAtual['nome']),
-                'cnpj'     => preg_replace('/\D/', '', $dados['cnpj'] ?? $empresaAtual['cnpj']),
-                'endereco' => $dados['endereco'] ?? $empresaAtual['endereco'],
-                'email'    => strtolower(trim($dados['email'] ?? $empresaAtual['email'])),
-                'descricao'=> $dados['descricao'] ?? $empresaAtual['descricao'],
-                'website'  => $dados['website'] ?? $empresaAtual['website'],
-                'setor'    => $dados['setor'] ?? $empresaAtual['setor'],
-                'linkedin' => $dados['linkedin'] ?? $empresaAtual['linkedin'],
-                'instagram'=> $dados['instagram'] ?? $empresaAtual['instagram'],
-                'facebook' => $dados['facebook'] ?? $empresaAtual['facebook'],
+                'nome'      => trim($dados['nome'] ?? $empresaAtual['nome']),
+                'cnpj'      => preg_replace('/\D/', '', $dados['cnpj'] ?? $empresaAtual['cnpj']),
+                'endereco'  => $dados['endereco']  ?? $empresaAtual['endereco'],
+                'email'     => strtolower(trim($dados['email'] ?? $empresaAtual['email'])),
+                'descricao' => $dados['descricao'] ?? $empresaAtual['descricao'],
+                'website'   => $dados['website']   ?? $empresaAtual['website'],
+                'setor'     => $dados['setor']     ?? $empresaAtual['setor'],
+                'linkedin'  => $dados['linkedin']  ?? $empresaAtual['linkedin'],
+                'instagram' => $dados['instagram'] ?? $empresaAtual['instagram'],
+                'facebook'  => $dados['facebook']  ?? $empresaAtual['facebook'],
             ];
 
-            // senha só se enviada
             if (!empty($dados['senha'])) {
                 $payload['senha'] = password_hash($dados['senha'], PASSWORD_DEFAULT);
             }
 
             try {
-                $this->model->atualizarPorId((int)$empresaId, $payload);
+                $this->model->atualizarPorId($empresaId, $payload);
 
-                // telefones (se enviados)
                 if (!empty($dados['telefones']) && is_array($dados['telefones'])) {
-                    $telModel = $this->loadModel('Telefone');
-                    $existentes = $telModel->buscarPorEmpresa((int)$empresaId);
+                    $telModel   = $this->loadModel('Telefone');
+                    $existentes = $telModel->buscarPorEmpresa($empresaId);
 
                     foreach ($existentes as $t) {
                         $telModel->excluir((int)$t['telefone_id']);
@@ -189,68 +182,13 @@ class Empresa extends ControllerMain
         Response::json(['status'=>405,'mensagem'=>'Método não permitido.']);
     }
 
-    /* =========================================================
-     * PUBLICAR VAGA  (POST /empresa/vaga/publicar)
-    * =======================================================*/
-    public function publicarVaga(): void
-    {
-    $empresaId = Session::get('empresa_id');
-    if (!$empresaId) {
-        Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado.']);
-        return;
-    }
-
-    $dados = json_decode(file_get_contents('php://input'), true) ?? [];
-
-    // validação básica
-    if (
-        empty($dados['descricao']) ||
-        empty($dados['sobreaVaga']) ||
-        empty($dados['modalidade']) ||
-        empty($dados['vinculo']) ||
-        empty($dados['dtFim'])
-    ) {
-        Response::json(['status'=>400,'mensagem'=>'Preencha todos os campos obrigatórios.']);
-        return;
-    }
-
-    // payload preparado para salvar no banco
-    $payload = [
-        'cargo_id'          => (int) ($dados['cargo_id'] ?? 0),
-        'descricao'         => trim($dados['descricao']),
-        'sobreaVaga'        => trim($dados['sobreaVaga']),
-        'modalidade'        => (int) $dados['modalidade'],   // 1=Presencial, 2=Remoto
-        'vinculo'           => (int) $dados['vinculo'],      // 1=CLT, 2=PJ
-        'dtInicio'          => date('Y-m-d'),                // data atual
-        'dtFim'             => $dados['dtFim'],              // data final da vaga
-        'estabelecimento_id'=> $empresaId,                   // empresa logada
-        'statusVaga'        => 11                            // padrão = em aberto
-    ];
-
-    try {
-        $vagaId = $this->loadModel('Vaga')->criarVaga($payload);
-        Response::json([
-            'status'=>201,
-            'mensagem'=>'Vaga publicada com sucesso!',
-            'vaga_id'=>$vagaId
-        ]);
-    } catch (\Throwable $e) {
-        Response::json([
-            'status'=>500,
-            'mensagem'=>'Erro ao publicar vaga.',
-            'erro'=>$e->getMessage()
-        ]);
-    }
-    }
-
-
-    /* =========================================================
-     * LOGOUT
-     * =======================================================*/
+    /* ================= LOGOUT ================= */
     public function logout(): void
     {
         Session::destroy('empresa_id');
+        Session::destroy('estabelecimento_id');
         Session::destroy('empresa_nome');
+        Session::destroy('empresa_email');
         session_destroy();
 
         Response::json(['status'=>200,'mensagem'=>'Sessão encerrada com sucesso!']);

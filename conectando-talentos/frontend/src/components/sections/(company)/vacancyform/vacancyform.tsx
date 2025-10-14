@@ -11,7 +11,7 @@ import TextArea from "@/components/form-kit/fields/text-area"
 import SelectField from "@/components/form-kit/fields/select-field"
 import type { Option, FieldMethods } from "@/components/form-kit/types"
 
-interface CargoAPI { cargo_id: number; descricao: string }
+interface CargoAPI  { cargo_id: number; descricao: string }
 interface CidadeAPI { id: number; nome: string; uf: string }
 
 const optionSelecione: Option = { id: "", label: "Selecione" }
@@ -41,7 +41,6 @@ export default function VacancyForm() {
   const [cidades, setCidades] = useState<CidadeAPI[]>([])
   const [isRemote, setIsRemote] = useState(false)
 
-  // refs para limpar cidade se quisermos no futuro
   const cidadeRef = useRef<FieldMethods>(null)
 
   const cargoOptions: Option[] = useMemo(
@@ -49,19 +48,16 @@ export default function VacancyForm() {
     [cargos]
   )
 
-  // UFs únicas
   const ufOptions: Option[] = useMemo(() => {
     const ufs = Array.from(new Set(cidades.map(c => c.uf))).sort()
     return [optionSelecione, ...ufs.map(uf => ({ id: uf, label: uf }))]
   }, [cidades])
 
-  // Todas as cidades (sem filtro por UF, para não depender de onChange no FormKit)
   const cidadeOptions: Option[] = useMemo(
     () => [optionSelecione, ...cidades.map(c => ({ id: String(c.id), label: c.nome }))],
     [cidades]
   )
 
-  // helper: achar cidade e uf pela cidade_id
   const findCidade = (cidadeIdStr?: string) => {
     const cid = Number(cidadeIdStr || 0)
     return cidades.find(c => c.id === cid)
@@ -70,11 +66,9 @@ export default function VacancyForm() {
   useEffect(() => {
     ;(async () => {
       try {
-        // cargos
         const { data: dc } = await api.get<{ status: number; cargos: CargoAPI[] }>("/vaga/cargos")
         setCargos(dc?.cargos ?? [])
 
-        // cidades
         const { data: dz } = await api.get<{ status: number; cidades: CidadeAPI[] }>("/cidade/lista")
         setCidades(dz?.cidades ?? [])
       } catch (e) {
@@ -95,8 +89,11 @@ export default function VacancyForm() {
       alert("O nome da vaga deve ter no máximo 60 caracteres.")
       return
     }
+    if (!f.dtFim) {
+      alert("Informe a data de encerramento da vaga.")
+      return
+    }
 
-    // Monta “Localização: Cidade, UF” a partir dos selects, se houver
     let localizacao = ""
     if (f.cidade_id) {
       const c = findCidade(f.cidade_id)
@@ -120,8 +117,8 @@ export default function VacancyForm() {
       sobreVaga: sobreVagaFinal,     // back mapeia para 'sobreaVaga'
       modalidade: isRemote ? 2 : 1,  // 1=presencial, 2=remoto
       vinculo: Number(f.vagaTipo),
-      // statusVaga default no back (11)
-      // estabelecimento_id vem da Session no backend
+      dtFim: String(f.dtFim).trim(), // ← obrigatório (NOT NULL no banco)
+      // statusVaga default 11 no back; estabelecimento_id vem da sessão
     }
 
     setBusy(true)
@@ -185,7 +182,7 @@ export default function VacancyForm() {
             required
           />
 
-          {/* UF / Cidade vindos do banco */}
+          {/* UF / Cidade (opcionais, só para compor texto da descrição) */}
           <div className="row row-cols-2 g-2">
             <SelectField
               id={`vaga-uf-${formId}`}
@@ -219,7 +216,20 @@ export default function VacancyForm() {
           />
         </div>
 
-        <div className="px-2">
+        {/* NOVO: data de encerramento */}
+        <div className="row mt-2">
+          <div className="col-12 col-lg-4">
+            <TextField
+              id={`vaga-dtfim-${formId}`}
+              name="dtFim"
+              label="Data de encerramento *"
+              placeholder="AAAA-MM-DD"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="px-2 mt-2">
           <FormCheck
             label="Esta é uma vaga remota"
             checked={isRemote}
