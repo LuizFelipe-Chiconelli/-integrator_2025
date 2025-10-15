@@ -195,47 +195,83 @@ class Vaga extends ControllerMain
         return true;
     }
 
-    /** Normalização do payload recebido do front */
     private function sanitize(array $d): array
     {
-        $sobre    = $d['sobreVaga'] ?? $d['sobreaVaga'] ?? '';
-        $dtInicio = $this->parseDate($d['dtInicio'] ?? '') ?: date('Y-m-d');
+    $dtInicio = $this->parseDateFlexible($d['dtInicio'] ?? '') ?: date('Y-m-d');
+    $dtFim    = $this->parseDateFlexible($d['dtFim'] ?? '') ?: null;
 
-        // Se o front não mandar, usamos +30 dias (tabela exige NOT NULL)
-        $dtFimRaw = $this->parseDate($d['dtFim'] ?? '');
-        $dtFim    = $dtFimRaw ?: date('Y-m-d', strtotime('+30 days'));
+    return [
+        // título (nome da vaga)
+        'titulo'             => isset($d['titulo']) ? trim((string)$d['titulo']) : '',
 
-        return [
-            'cargo_id'           => (int)($d['cargo_id'] ?? 0),
-            'descricao'          => isset($d['descricao']) ? trim((string)$d['descricao']) : '',
-            'sobreaVaga'         => trim((string)$sobre),
-            'modalidade'         => (int)($d['modalidade'] ?? 0),
-            'vinculo'            => (int)($d['vinculo'] ?? 0),
-            'dtInicio'           => $dtInicio,
-            'dtFim'              => $dtFim,
-            'estabelecimento_id' => (int)($d['estabelecimento_id'] ?? 0),
-            'statusVaga'         => (int)($d['statusVaga'] ?? 11),
-        ];
+        // texto longo
+        'descricao'          => trim((string)($d['descricao'] ?? '')),
+
+        // catálogo ou texto livre
+        'cargo_id'           => ($d['cargo_id'] ?? null) !== null && $d['cargo_id'] !== '' ? (int)$d['cargo_id'] : null,
+
+        // demais campos
+        'requisitos'         => trim((string)($d['requisitos']   ?? '')),
+        'localizacao'        => trim((string)($d['localizacao']  ?? '')),
+        'salario'            => trim((string)($d['salario']      ?? '')),
+        'nivel'              => (int)($d['nivel'] ?? 0),
+        'modalidade'         => (int)($d['modalidade'] ?? 0),
+        'vinculo'            => (int)($d['vinculo'] ?? 0),
+        'dtInicio'           => $dtInicio,
+        'dtFim'              => $dtFim,
+        'estabelecimento_id' => (int)($d['estabelecimento_id'] ?? 0),
+        'statusVaga'         => (int)($d['statusVaga'] ?? 11),
+    ];
     }
 
-    /** Regras de validação mínimas */
+
+
     private function validate(array $p): ?string
     {
-        if ($p['estabelecimento_id'] <= 0) return 'estabelecimento_id inválido.';
-        if ($p['cargo_id'] <= 0)           return 'cargo_id inválido.';
-        if ($p['descricao'] === '' || mb_strlen($p['descricao']) > 60) return 'descricao inválida (1–60 chars).';
-        if ($p['modalidade'] <= 0)         return 'modalidade inválida.';
-        if ($p['vinculo'] <= 0)            return 'vinculo inválido.';
-        if (empty($p['dtFim']))            return 'dtFim inválido.';
-        return null;
+    if ($p['estabelecimento_id'] <= 0) return 'estabelecimento_id inválido.';
+
+    // título obrigatório (nome da vaga, até 60 chars)
+    if ($p['titulo'] === '' || mb_strlen($p['titulo']) > 60) return 'titulo inválido (1–60 chars).';
+
+    // cargo do catálogo é obrigatório agora
+    if (empty($p['cargo_id']) || (int)$p['cargo_id'] <= 0) return 'cargo_id inválido.';
+
+    // modalidade/vínculo
+    if ((int)$p['modalidade'] <= 0) return 'modalidade inválida.';
+    if ((int)$p['vinculo']    <= 0) return 'vinculo inválido.';
+
+    // requisitos obrigatório
+    if (trim((string)$p['requisitos']) === '') return 'requisitos é obrigatório.';
+
+    // dtFim obrigatório e no formato ISO yyyy-mm-dd
+    if (empty($p['dtFim']) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $p['dtFim'])) {
+        return 'dtFim inválida.';
     }
 
-    /** Parser simples para datas */
-    private function parseDate(?string $s): ?string
-    {
-        $s = trim((string)$s);
-        if ($s === '') return null;
-        $t = strtotime($s);
-        return $t ? date('Y-m-d', $t) : null;
+    return null;
     }
+
+
+
+    /** aceita: yyyy-mm-dd, dd/mm/yyyy, dd-mm-yyyy e ddmmyyyy */
+    private function parseDateFlexible(?string $s): ?string
+    {
+    $s = trim((string)$s);
+    if ($s === '') return null;
+
+    // ddmmyyyy (somente dígitos)
+    if (preg_match('/^(\d{2})(\d{2})(\d{4})$/', $s, $m)) {
+        return "{$m[3]}-{$m[2]}-{$m[1]}";
+    }
+
+    // dd/mm/yyyy ou dd-mm-yyyy
+    if (preg_match('/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})$/', $s, $m)) {
+        return "{$m[3]}-{$m[2]}-{$m[1]}";
+    }
+
+    // tenta parsing nativo (já cobre yyyy-mm-dd)
+    $t = strtotime(str_replace('/', '-', $s));
+    return $t ? date('Y-m-d', $t) : null;
+}
+    
 }

@@ -32,13 +32,26 @@ const nivelOptions: Option[] = [
   { id: "4", label: "Líder" },
 ]
 
+// dd/mm/aaaa -> yyyy-mm-dd | yyyy-mm-dd -> mantém | inválido -> ""
+function toISODate(s?: string): string {
+  const v = String(s || "").trim()
+  if (!v) return ""
+  const m = v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+  if (m) {
+    const [, dd, mm, yyyy] = m
+    return `${yyyy}-${mm}-${dd}`
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v
+  return ""
+}
+
 export default function VacancyForm() {
   const formId: string = useRef<SUUID>(short().generate()).current.toString()
 
-  const [loading, setLoading] = useState(true)
-  const [busy, setBusy] = useState(false)
-  const [cargos, setCargos] = useState<CargoAPI[]>([])
-  const [cidades, setCidades] = useState<CidadeAPI[]>([])
+  const [loading, setLoading]   = useState(true)
+  const [busy, setBusy]         = useState(false)
+  const [cargos, setCargos]     = useState<CargoAPI[]>([])
+  const [cidades, setCidades]   = useState<CidadeAPI[]>([])
   const [isRemote, setIsRemote] = useState(false)
 
   const cidadeRef = useRef<FieldMethods>(null)
@@ -68,7 +81,6 @@ export default function VacancyForm() {
       try {
         const { data: dc } = await api.get<{ status: number; cargos: CargoAPI[] }>("/vaga/cargos")
         setCargos(dc?.cargos ?? [])
-
         const { data: dz } = await api.get<{ status: number; cidades: CidadeAPI[] }>("/cidade/lista")
         setCidades(dz?.cidades ?? [])
       } catch (e) {
@@ -81,18 +93,27 @@ export default function VacancyForm() {
   }, [])
 
   const onSubmit = async (f: Record<string, any>) => {
-    if (!f.descricao || !f.vagaTipo || !f.cargo_id) {
-      alert("Preencha: Nome da vaga, Cargo (catálogo) e Tipo de contratação.")
+    const titulo = String(f.titulo || "").trim()
+    if (!titulo || titulo.length > 60) {
+      alert("Informe o Nome da vaga (até 60 caracteres).")
       return
     }
-    if (String(f.descricao).trim().length > 60) {
-      alert("O nome da vaga deve ter no máximo 60 caracteres.")
+
+    // cargo obrigatório
+    const cargo_id = Number(f.cargo_id || 0)
+    if (!cargo_id) {
+      alert("Selecione um cargo do catálogo.")
       return
     }
-    if (!f.dtFim) {
-      alert("Informe a data de encerramento da vaga.")
-      return
-    }
+
+    const requisitos = String(f.requisitos || "").trim()
+    if (!requisitos) { alert("Informe os requisitos."); return }
+
+    const dtFimISO = toISODate(f.dtFim)
+    if (!dtFimISO) { alert("Informe uma data de fim válida (DD/MM/AAAA)."); return }
+
+    const modalidade = isRemote ? 2 : 1
+    if (!f.vinculo) { alert("Selecione o Tipo de contratação."); return }
 
     let localizacao = ""
     if (f.cidade_id) {
@@ -102,23 +123,18 @@ export default function VacancyForm() {
       else if (c?.nome) localizacao = c.nome
     }
 
-    const nivelTxt = nivelOptions.find(o => o.id === String(f.vagaExp))?.label || ""
-    const extras: string[] = []
-    if (f.vagaRequisitos) extras.push(`Requisitos:\n${String(f.vagaRequisitos).trim()}`)
-    if (localizacao)     extras.push(`Localização: ${localizacao}`)
-    if (f.vagaSalario)   extras.push(`Faixa Salarial: ${String(f.vagaSalario).trim()}`)
-    if (nivelTxt)        extras.push(`Nível: ${nivelTxt}`)
-
-    const sobreVagaFinal = [String(f.vagaDesc || "").trim(), ...extras].filter(Boolean).join("\n\n")
-
     const payload = {
-      cargo_id: Number(f.cargo_id),
-      descricao: String(f.descricao).trim(),
-      sobreVaga: sobreVagaFinal,     // back mapeia para 'sobreaVaga'
-      modalidade: isRemote ? 2 : 1,  // 1=presencial, 2=remoto
-      vinculo: Number(f.vagaTipo),
-      dtFim: String(f.dtFim).trim(), // ← obrigatório (NOT NULL no banco)
-      // statusVaga default 11 no back; estabelecimento_id vem da sessão
+      titulo,
+      descricao: String(f.descricao || "").trim(),
+      cargo_id,
+      requisitos,
+      localizacao,
+      salario: String(f.salario || "").trim(),
+      nivel: f.nivel ? Number(f.nivel) : 0,
+      modalidade,
+      vinculo: Number(f.vinculo),
+      dtFim: dtFimISO,
+      // statusVaga: back define default, estabelecimento_id: sessão
     }
 
     setBusy(true)
@@ -141,14 +157,16 @@ export default function VacancyForm() {
       </div>
 
       <FormProvider id={formId} onSubmit={onSubmit}>
+        {/* Nome da vaga (titulo) */}
         <TextField
-          id={`vaga-nome-${formId}`}
-          name="descricao"
+          id={`vaga-titulo-${formId}`}
+          name="titulo"
           label="Nome da vaga *"
           placeholder="Ex: Desenvolvedor Full Stack"
           required
         />
 
+        {/* Cargo do catálogo (obrigatório) */}
         <SelectField
           id={`vaga-cargo-${formId}`}
           name="cargo_id"
@@ -157,39 +175,34 @@ export default function VacancyForm() {
           required
         />
 
+        {/* Sobre a vaga (texto longo) */}
         <TextArea
-          id={`vaga-desc-${formId}`}
-          name="vagaDesc"
-          label="Descrição da Vaga *"
-          placeholder="Descreva detalhadamente a vaga..."
-          required
+          id={`vaga-descricao-${formId}`}
+          name="descricao"
+          label="Sobre a Vaga"
+          placeholder="Descreva responsabilidades, benefícios, stack etc."
         />
 
+        {/* Requisitos (obrigatório) */}
         <TextArea
-          id={`vaga-req-${formId}`}
-          name="vagaRequisitos"
-          label="Requisitos da vaga *"
+          id={`vaga-requisitos-${formId}`}
+          name="requisitos"
+          label="Requisitos *"
           placeholder="Liste os requisitos necessários para a vaga..."
           required
         />
 
-        <div className="row row-cols-1 row-cols-lg-2">
+        {/* Vínculo + Localização (UF & Cidade) */}
+        <div className="row row-cols-1 row-cols-lg-2 g-3">
           <SelectField
-            id={`vaga-tipo-${formId}`}
-            name="vagaTipo"
+            id={`vaga-vinculo-${formId}`}
+            name="vinculo"
             label="Tipo de Contratação *"
             options={vinculoOptions}
             required
           />
-
-          {/* UF / Cidade (opcionais, só para compor texto da descrição) */}
-          <div className="row row-cols-2 g-2">
-            <SelectField
-              id={`vaga-uf-${formId}`}
-              name="uf"
-              label="UF"
-              options={ufOptions}
-            />
+          <div className="row row-cols-2 g-3">
+            <SelectField id={`vaga-uf-${formId}`} name="uf" label="UF" options={ufOptions} />
             <SelectField
               ref={cidadeRef}
               id={`vaga-cidade-${formId}`}
@@ -200,40 +213,32 @@ export default function VacancyForm() {
           </div>
         </div>
 
-        <div className="row row-cols-1 row-cols-lg-2">
+        {/* Salário + Nível */}
+        <div className="row row-cols-1 row-cols-lg-2 g-3">
           <TextField
             id={`vaga-sal-${formId}`}
-            name="vagaSalario"
+            name="salario"
             label="Faixa Salarial"
             placeholder="Ex: R$ 3.000 - R$ 5.000"
           />
-
-          <SelectField
-            id={`vaga-exp-${formId}`}
-            name="vagaExp"
-            label="Nível de experiência"
-            options={nivelOptions}
-          />
+          <SelectField id={`vaga-nivel-${formId}`} name="nivel" label="Nível" options={nivelOptions} />
         </div>
 
-        {/* NOVO: data de encerramento */}
-        <div className="row mt-2">
-          <div className="col-12 col-lg-4">
-            <TextField
-              id={`vaga-dtfim-${formId}`}
-              name="dtFim"
-              label="Data de encerramento *"
-              placeholder="AAAA-MM-DD"
-              required
+        {/* Modalidade (remoto) + Data fim */}
+        <div className="row row-cols-1 row-cols-lg-2 g-3">
+          <div className="px-2 d-flex align-items-center">
+            <FormCheck
+              label="Esta é uma vaga remota"
+              checked={isRemote}
+              onChange={(e) => setIsRemote(e.target.checked)}
             />
           </div>
-        </div>
-
-        <div className="px-2 mt-2">
-          <FormCheck
-            label="Esta é uma vaga remota"
-            checked={isRemote}
-            onChange={(e) => setIsRemote(e.target.checked)}
+          <TextField
+            id={`vaga-dtfim-${formId}`}
+            name="dtFim"
+            label="Data de encerramento *"
+            placeholder="DD/MM/AAAA"
+            required
           />
         </div>
 
