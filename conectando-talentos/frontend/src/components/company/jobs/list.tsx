@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import api from "@/services/api";
 import JobCard, { type JobCardProps } from "./card";
 
-type VagaAPI = JobCardProps; // ← agora o import de JobCardProps é usado
+type VagaAPI = JobCardProps;
 
 type Props = {
   searchText: string;
-  status: "" | "11" | "12" | "13" | "14";
+  status: "" | "0" | "11" | "12" | "13" | "14"; // "" ou "0" = todos
   page: number;
   pageSize?: number;
   onLoaded?: (meta: { total: number; totalPages: number }) => void;
@@ -28,28 +28,36 @@ export default function List({
     (async () => {
       setLoading(true);
       try {
+        // busca SEM filtro de status; filtramos no cliente
         const { data } = await api.get<{ status: number; data: VagaAPI[] }>(
-          "/vaga/minhas",
-          { params: status ? { status } : {} }
+          "/vaga/minhas"
         );
-
         const all = data?.data ?? [];
 
         const text = searchText.trim().toLowerCase();
-        const filtered = !text
-          ? all
-          : all.filter((v) => {
-              const s = [
-                v.titulo,
-                v.cargo_descricao,
-                v.localizacao,
-                v.requisitos,
-              ]
-                .filter(Boolean)
-                .join(" ")
-                .toLowerCase();
-              return s.includes(text);
-            });
+        const hasText = text.length > 0;
+
+        const statusNum =
+          status && status !== "0" ? Number(status) : null; // null = todos
+
+        const filtered = all.filter((v) => {
+          const okStatus =
+            statusNum === null ? true : Number(v.statusVaga) === statusNum;
+
+          if (!hasText) return okStatus;
+
+          const haystack = [
+            v.titulo,
+            v.cargo_descricao,
+            v.localizacao,
+            v.requisitos,
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+
+          return okStatus && haystack.includes(text);
+        });
 
         const total = filtered.length;
         const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -76,7 +84,7 @@ export default function List({
       {rows.map((v) => (
         <JobCard
           key={v.vaga_id}
-          {...v}                           // ← passa todas as props do tipo JobCardProps
+          {...v}
           onManage={(id) => console.log("gerenciar vaga", id)}
         />
       ))}
