@@ -1,58 +1,110 @@
-import { Button, Card } from "react-bootstrap"
+"use client";
 
-import { IoTimeOutline } from "react-icons/io5"
-import { IoLocationOutline } from "react-icons/io5"
-import { LuBuilding, LuUser, LuDollarSign } from "react-icons/lu"
+import { Button, Card } from "react-bootstrap";
+import { IoTimeOutline, IoLocationOutline } from "react-icons/io5";
+import { LuBuilding, LuUser, LuDollarSign } from "react-icons/lu";
 
-export default function JobCard() {
-    return (
-        <Card className="w-full">
-            <Card.Body className="d-flex justify-content-between">
-                {/* Esquerda */}
-                <div className="d-flex flex-column">
-                    {/* Título */}
-                    <div className="d-flex flex-column">
-                        <h3 className="fw-semibold mb-1" style={{ fontSize: "20px" }}>Desenvolvedor Frontend React</h3>
-                        <div className="d-flex align-items-center gap-1">
-                            <LuBuilding style={{ fontSize: "16px" }} />
-                            <span style={{ fontSize: "14px" }}>Tech Corp</span>
-                        </div>
-                    </div>
+export type JobCardProps = {
+  vaga_id: number;
+  titulo?: string | null;
+  cargo_descricao?: string | null;
+  requisitos?: string | null;
+  localizacao?: string | null;
+  salario?: string | number | null;
+  dtFim?: string | null;       // yyyy-mm-dd
+  statusVaga: number;
+  onManage?: (id: number) => void;
+};
 
-                    {/* Descrição */}
-                    <div className="text-6 mt-3" style={{ fontSize: "16px" }}>
-                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nemo optio perferendis, sed ullam aspernatur excepturi necessitatibus, earum, unde cupiditate ex id. Nam sapiente vel dolore non minus architecto eligendi ab.</p>
-                    </div>
+const statusLabel: Record<number, string> = {
+  11: "Em aberto",
+  12: "Pausada",
+  13: "Encerrada",
+  14: "Cancelada",
+};
 
-                    {/* Informações rápidas */}
-                    <div className="d-flex gap-3">
-                        {/* Localização */}
-                        <div className="d-flex align-items-center gap-2">
-                            <IoLocationOutline /> Rio de Janeiro, RJ
-                        </div>
+const fmtDate = (d?: string | null) => {
+  if (!d) return "";
+  const [y, m, day] = d.split("-");
+  return `${day}/${m}/${y}`;
+};
 
-                        {/* Salário */}
-                        <div className="d-flex align-items-center gap-2">
-                            <LuDollarSign /> R$ 6.000 - R$ 10.000
-                        </div>
+export default function JobCard({
+  vaga_id,
+  titulo,
+  cargo_descricao,
+  requisitos,
+  localizacao,
+  salario,
+  dtFim,
+  statusVaga,
+  onManage,
+}: JobCardProps) {
+  return (
+    <Card className="w-full">
+      <Card.Body className="d-flex justify-content-between">
+        {/* Esquerda */}
+        <div className="d-flex flex-column">
+          {/* Título */}
+          <div className="d-flex flex-column">
+            <h3 className="fw-semibold mb-1" style={{ fontSize: 20 }}>
+              {titulo || cargo_descricao || "Vaga"}
+            </h3>
 
-                        {/* Tempo desde a postagem */}
-                        <div className="d-flex align-items-center gap-2">
-                            <IoTimeOutline /> 1 dia atrás
-                        </div>
+            <div className="d-flex align-items-center gap-2 flex-wrap">
+              {cargo_descricao && (
+                <span className="d-flex align-items-center gap-1">
+                  <LuBuilding style={{ fontSize: 16 }} />
+                  <span style={{ fontSize: 14 }}>{cargo_descricao}</span>
+                </span>
+              )}
 
-                        {/* Número de candidatos */}
-                        <div className="d-flex align-items-center gap-2">
-                            <LuUser /> 50 candidatos
-                        </div>
-                    </div>
-                </div>
+              <span className="badge bg-light text-dark ms-2" style={{ fontSize: 12 }}>
+                {statusLabel[statusVaga] || "—"}
+              </span>
+            </div>
+          </div>
 
-                {/* Direita */}
-                <div className="w-25 d-flex justify-content-end align-items-start">
-                    <Button style={{ fontSize: "15px" }}>Gerenciar</Button>
-                </div>
-            </Card.Body>
-        </Card>
-    )
+          {/* Descrição (requisitos) */}
+          {requisitos && (
+            <div className="text-6 mt-3" style={{ fontSize: 16 }}>
+              <p className="mb-0">{requisitos}</p>
+            </div>
+          )}
+
+          {/* Informações rápidas */}
+          <div className="d-flex gap-3 mt-3 flex-wrap text-muted">
+            {localizacao && (
+              <div className="d-flex align-items-center gap-2">
+                <IoLocationOutline /> {localizacao}
+              </div>
+            )}
+
+            {salario && (
+              <div className="d-flex align-items-center gap-2">
+                <LuDollarSign /> {String(salario)}
+              </div>
+            )}
+
+            {dtFim && (
+              <div className="d-flex align-items-center gap-2">
+                <IoTimeOutline /> até {fmtDate(dtFim)}
+              </div>
+            )}
+
+            <div className="d-flex align-items-center gap-2">
+              <LuUser /> —
+            </div>
+          </div>
+        </div>
+
+        {/* Direita */}
+        <div className="d-flex justify-content-end align-items-start">
+          <Button style={{ fontSize: 15 }} onClick={() => onManage?.(vaga_id)}>
+            Gerenciar
+          </Button>
+        </div>
+      </Card.Body>
+    </Card>
+  );
 }

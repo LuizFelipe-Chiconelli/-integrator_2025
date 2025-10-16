@@ -227,7 +227,7 @@ class Vaga extends ControllerMain
 
 
     private function validate(array $p): ?string
-    {
+{
     if ($p['estabelecimento_id'] <= 0) return 'estabelecimento_id inválido.';
 
     // título obrigatório (nome da vaga, até 60 chars)
@@ -249,7 +249,8 @@ class Vaga extends ControllerMain
     }
 
     return null;
-    }
+}
+
 
 
 
