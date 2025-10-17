@@ -12,6 +12,8 @@ type Props = {
   page: number;
   pageSize?: number;
   onLoaded?: (meta: { total: number; totalPages: number }) => void;
+  onManage?: (id: number) => void; // ← repassa para o card
+  refreshToken?: number;           // ← para recarregar lista após salvar/excluir
 };
 
 export default function List({
@@ -20,6 +22,8 @@ export default function List({
   page,
   pageSize = 6,
   onLoaded,
+  onManage,
+  refreshToken,
 }: Props) {
   const [rows, setRows] = useState<VagaAPI[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,30 +32,20 @@ export default function List({
     (async () => {
       setLoading(true);
       try {
-        // busca SEM filtro de status; filtramos no cliente
-        const { data } = await api.get<{ status: number; data: VagaAPI[] }>(
-          "/vaga/minhas"
-        );
+        // pega todas as vagas da empresa
+        const { data } = await api.get<{ status: number; data: VagaAPI[] }>("/vaga/minhas");
         const all = data?.data ?? [];
 
+        // filtros no cliente
         const text = searchText.trim().toLowerCase();
         const hasText = text.length > 0;
-
-        const statusNum =
-          status && status !== "0" ? Number(status) : null; // null = todos
+        const statusNum = status && status !== "0" ? Number(status) : null;
 
         const filtered = all.filter((v) => {
-          const okStatus =
-            statusNum === null ? true : Number(v.statusVaga) === statusNum;
-
+          const okStatus = statusNum === null ? true : Number(v.statusVaga) === statusNum;
           if (!hasText) return okStatus;
 
-          const haystack = [
-            v.titulo,
-            v.cargo_descricao,
-            v.localizacao,
-            v.requisitos,
-          ]
+          const haystack = [v.titulo, v.cargo_descricao, v.localizacao, v.requisitos]
             .filter(Boolean)
             .join(" ")
             .toLowerCase();
@@ -74,7 +68,8 @@ export default function List({
         setLoading(false);
       }
     })();
-  }, [searchText, status, page, pageSize, onLoaded]);
+    // inclui refreshToken para forçar reload pós-salvar/excluir
+  }, [searchText, status, page, pageSize, onLoaded, refreshToken]);
 
   if (loading) return <div className="text-muted">Carregando...</div>;
   if (!rows.length) return <div className="text-muted">Nenhuma vaga encontrada.</div>;
@@ -82,11 +77,7 @@ export default function List({
   return (
     <div className="w-100 d-flex flex-column gap-3">
       {rows.map((v) => (
-        <JobCard
-          key={v.vaga_id}
-          {...v}
-          onManage={(id) => console.log("gerenciar vaga", id)}
-        />
+        <JobCard key={v.vaga_id} {...v} onManage={onManage} />
       ))}
     </div>
   );

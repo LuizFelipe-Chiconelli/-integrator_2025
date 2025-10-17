@@ -11,9 +11,9 @@ export type JobCardProps = {
   requisitos?: string | null;
   localizacao?: string | null;
   salario?: string | number | null;
-  dtFim?: string | null;       // yyyy-mm-dd
+  dtFim?: string | null; // yyyy-mm-dd
   statusVaga: number;
-  onManage?: (id: number) => void;
+  onManage?: (id: number) => void; // ← callback para abrir modal
 };
 
 const statusLabel: Record<number, string> = {
@@ -43,9 +43,8 @@ export default function JobCard({
   return (
     <Card className="w-full">
       <Card.Body className="d-flex justify-content-between">
-        {/* Esquerda */}
+        {/* esquerda */}
         <div className="d-flex flex-column">
-          {/* Título */}
           <div className="d-flex flex-column">
             <h3 className="fw-semibold mb-1" style={{ fontSize: 20 }}>
               {titulo || cargo_descricao || "Vaga"}
@@ -58,47 +57,41 @@ export default function JobCard({
                   <span style={{ fontSize: 14 }}>{cargo_descricao}</span>
                 </span>
               )}
-
               <span className="badge bg-light text-dark ms-2" style={{ fontSize: 12 }}>
                 {statusLabel[statusVaga] || "—"}
               </span>
             </div>
           </div>
 
-          {/* Descrição (requisitos) */}
           {requisitos && (
             <div className="text-6 mt-3" style={{ fontSize: 16 }}>
               <p className="mb-0">{requisitos}</p>
             </div>
           )}
 
-          {/* Informações rápidas */}
           <div className="d-flex gap-3 mt-3 flex-wrap text-muted">
             {localizacao && (
               <div className="d-flex align-items-center gap-2">
                 <IoLocationOutline /> {localizacao}
               </div>
             )}
-
             {salario && (
               <div className="d-flex align-items-center gap-2">
                 <LuDollarSign /> {String(salario)}
               </div>
             )}
-
             {dtFim && (
               <div className="d-flex align-items-center gap-2">
                 <IoTimeOutline /> até {fmtDate(dtFim)}
               </div>
             )}
-
             <div className="d-flex align-items-center gap-2">
               <LuUser /> —
             </div>
           </div>
         </div>
 
-        {/* Direita */}
+        {/* direita */}
         <div className="d-flex justify-content-end align-items-start">
           <Button style={{ fontSize: 15 }} onClick={() => onManage?.(vaga_id)}>
             Gerenciar
