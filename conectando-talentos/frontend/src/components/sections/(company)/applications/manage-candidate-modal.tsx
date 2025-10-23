@@ -1,387 +1,221 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Modal, Button, Spinner, Row, Col, Badge } from "react-bootstrap";
+import { useEffect, useMemo, useState } from "react";
+import { Container, Form, Button, Badge } from "react-bootstrap";
 import api from "@/services/api";
-import {
-  IoDocumentOutline,
-  IoMailOutline,
-  IoCallOutline,
-  IoLocationOutline,
-  IoLinkOutline,
-} from "react-icons/io5";
+import ApplicationTable from "@/components/user/applications/table";
+import PaginationButtons from "@/components/all/pagination";
 
-type Props = {
-  open: boolean;
-  vagaId: number | null;
-  curriculumId: number | null;
-  onClose: () => void;
-  onSaved?: () => void; // recarregar lista após mudar status
-};
+// ⚠️ AJUSTE o caminho abaixo para onde está seu modal:
+import ManageCandidateModal from "@/components/sections/(company)/applications/manage-candidate-modal";
+// Ex.: "@/components/sections/(company)/applications/manage-candidate-modal"
 
-/* ===========================
-   Formatos aceitos do backend
-   =========================== */
-
-// flat (se o /candidatura/detalhe já devolve pronto)
-type FlatDetalhe = {
+type VagaEmpresa = { vaga_id: number; titulo?: string | null; statusVaga?: number; };
+type CandidaturaItem = {
   vaga_id: number;
   curriculum_id: number;
   titulo?: string | null;
-
-  statusCandidatura: number; // 11..14
+  empresa?: string | null;
   dataCandidatura?: string | null;
-
+  statusCandidatura: number;
   candidato_nome?: string | null;
   candidato_email?: string | null;
-  candidato_telefone?: string | null;
   candidato_cidade?: string | null;
-
-  linkedin?: string | null;
-  github?: string | null;
-  portfolio?: string | null;
-  cv_url?: string | null;
-  resumo?: string | null;
 };
 
-// aninhado (parecido com Usuario::perfil)
-type PerfilLike = {
-  vaga_id: number;
-  curriculum_id: number;
-  titulo?: string | null;
-
-  statusCandidatura: number;
-  dataCandidatura?: string | null;
-
-  usuario?: {
-    id: number;
-    login: string;
-    tipo: string;
-  } | null;
-
-  pessoa_fisica?: {
-    nome?: string | null;
-    cpf?: string | null;
-  } | null;
-
-  curriculum?: {
-    email?: string | null;
-    celular?: string | null;
-    cidade?: string | null; // já calculado no controller
-    uf?: string | null;     // já calculado no controller
-    apresentacaoPessoal?: string | null;
-
-    linkedin?: string | null;
-    github?: string | null;
-    portfolio?: string | null;
-    cv_url?: string | null;
-  } | null;
-};
-
-// estrutura interna normalizada
-type DetalheNorm = {
-  vaga_id: number;
-  curriculum_id: number;
-  titulo?: string | null;
-
-  statusCandidatura: number;
-  dataCandidatura?: string | null;
-
-  nome?: string | null;
-  email?: string | null;
-  telefone?: string | null;
-  cidade?: string | null;
-
-  linkedin?: string | null;
-  github?: string | null;
-  portfolio?: string | null;
-  cv_url?: string | null;
-  resumo?: string | null;
-};
-
-const statusOpts = [
-  { id: 11, label: "Pendente" },
-  { id: 12, label: "Em análise" },
-  { id: 13, label: "Aprovado" },
-  { id: 14, label: "Reprovado" },
-];
-
-const statusVariant: Record<number, string> = {
+const statusBadges: Record<number, string> = {
   11: "secondary",
   12: "info",
   13: "success",
   14: "danger",
 };
 
-// util: sempre devolver uma URL com http(s)
-const safeHttp = (url?: string | null) => {
-  const s = (url || "").trim();
-  if (!s) return "";
-  if (/^https?:\/\//i.test(s)) return s;
-  return `https://${s}`;
-};
-
-// util: exibe data/hora pt-BR com fallback
-const formatDateTime = (iso?: string | null) => {
-  if (!iso) return "";
-  const d = new Date(iso);
-  return isNaN(+d)
-    ? ""
-    : d.toLocaleString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-};
-
-// Normaliza a resposta (flat OU aninhada) para DetalheNorm
-function normalizeDetalhe(d: any): DetalheNorm | null {
-  if (!d || typeof d !== "object") return null;
-
-  // Se já vier no formato “flat”
-  if ("candidato_nome" in d || "candidato_email" in d) {
-    const flat = d as FlatDetalhe;
-    return {
-      vaga_id: flat.vaga_id,
-      curriculum_id: flat.curriculum_id,
-      titulo: flat.titulo ?? null,
-      statusCandidatura: flat.statusCandidatura,
-      dataCandidatura: flat.dataCandidatura ?? null,
-      nome: flat.candidato_nome ?? null,
-      email: flat.candidato_email ?? null,
-      telefone: flat.candidato_telefone ?? null,
-      cidade: flat.candidato_cidade ?? null,
-      linkedin: flat.linkedin ?? null,
-      github: flat.github ?? null,
-      portfolio: flat.portfolio ?? null,
-      cv_url: flat.cv_url ?? null,
-      resumo: flat.resumo ?? null,
-    };
+async function fetchCandidaturas(vagaId: number) {
+  // tenta as 3 variações de rota que seu backend pode mapear
+  try {
+    const r = await api.get<{ status: number; data: CandidaturaItem[] }>(`/candidatura/porvaga/${vagaId}`);
+    return r.data?.data ?? [];
+  } catch {
+    try {
+      const r = await api.get<{ status: number; data: CandidaturaItem[] }>(`/candidatura/por-vaga/${vagaId}`);
+      return r.data?.data ?? [];
+    } catch {
+      const r = await api.get<{ status: number; data: CandidaturaItem[] }>(`/candidatura/porVaga/${vagaId}`);
+      return r.data?.data ?? [];
+    }
   }
-
-  // Caso venha aninhado (perfil-like)
-  const P = (d as PerfilLike) || ({} as PerfilLike);
-  const pf = P.pessoa_fisica || {};
-  const cv = P.curriculum || {};
-  const usr = P.usuario || {};
-
-  const cidadeUF =
-    (cv.cidade ? cv.cidade : "") +
-    (cv.uf ? (cv.cidade ? `, ${cv.uf}` : cv.uf) : "");
-
-  return {
-    vaga_id: P.vaga_id,
-    curriculum_id: P.curriculum_id,
-    titulo: P.titulo ?? null,
-    statusCandidatura: P.statusCandidatura,
-    dataCandidatura: P.dataCandidatura ?? null,
-
-    nome: pf?.nome ?? null,
-    email: cv?.email ?? usr?.login ?? null,
-    telefone: cv?.celular ?? null,
-    cidade: cidadeUF || null,
-
-    linkedin: cv?.linkedin ?? null,
-    github: cv?.github ?? null,
-    portfolio: cv?.portfolio ?? null,
-    cv_url: cv?.cv_url ?? null,
-    resumo: cv?.apresentacaoPessoal ?? null,
-  };
 }
 
-export default function ManageCandidateModal({
-  open,
-  vagaId,
-  curriculumId,
-  onClose,
-  onSaved,
-}: Props) {
+export default function ApplicationsGrid() {
+  // filtros
+  const [vagaId, setVagaId] = useState<number | null>(null);
+  const [texto, setTexto] = useState("");
+  const [status, setStatus] = useState<number | "all">("all");
+
+  // dados
+  const [vagas, setVagas] = useState<VagaEmpresa[]>([]);
+  const [items, setItems] = useState<CandidaturaItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [det, setDet] = useState<DetalheNorm | null>(null);
-  const aliveRef = useRef(true);
 
-  // limpa quando fecha
+  // paginação
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+
+  // ====== ESTADO DO MODAL ======
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selVagaId, setSelVagaId] = useState<number | null>(null);
+  const [selCurriculumId, setSelCurriculumId] = useState<number | null>(null);
+
+  // carrega vagas da empresa
   useEffect(() => {
-    if (!open) setDet(null);
-  }, [open]);
-
-  // flag de vida do componente (evita setState após unmount)
-  useEffect(() => {
-    aliveRef.current = true;
-    return () => {
-      aliveRef.current = false;
-    };
-  }, []);
-
-  // carrega detalhe
-  useEffect(() => {
-    if (!open || !vagaId || !curriculumId) return;
-
     (async () => {
-      setLoading(true);
       try {
-        const { data } = await api.get<{ status: number; data: any }>(
-          `/candidatura/detalhe?vaga_id=${vagaId}&curriculum_id=${curriculumId}`
-        );
-        const norm = normalizeDetalhe(data?.data);
-        if (aliveRef.current) setDet(norm);
+        const { data } = await api.get<{ status: number; data: VagaEmpresa[] }>("/vaga/minhas");
+        const rows = data?.data ?? [];
+        setVagas(rows);
+        if (!vagaId && rows[0]?.vaga_id) setVagaId(rows[0].vaga_id);
       } catch (e) {
-        console.error(e);
-        alert("Falha ao carregar a candidatura.");
-        onClose();
-      } finally {
-        if (aliveRef.current) setLoading(false);
+        console.error("Falha ao carregar vagas da empresa:", e);
       }
     })();
-  }, [open, vagaId, curriculumId, onClose]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // atualizar status
-  const handleStatus = async (novo: number) => {
-    if (!vagaId || !curriculumId) return;
-    setBusy(true);
+  // carrega candidaturas da vaga selecionada
+  const reload = async () => {
+    if (!vagaId) { setItems([]); return; }
+    setLoading(true);
     try {
-      await api.post("/candidatura/status", {
-        vaga_id: vagaId,
-        curriculum_id: curriculumId,
-        statusCandidatura: novo,
-      });
-      if (aliveRef.current) {
-        setDet((old) => (old ? { ...old, statusCandidatura: novo } : old));
-      }
-      onSaved?.();
-    } catch (e) {
-      console.error(e);
-      alert("Falha ao atualizar o status.");
+      const rows = await fetchCandidaturas(vagaId);
+      setItems(rows);
+      setPage(1);
+    } catch (e: any) {
+      console.error("Falha ao carregar candidaturas:", e?.response?.status, e?.response?.request?.responseURL);
+      setItems([]);
     } finally {
-      if (aliveRef.current) setBusy(false);
+      setLoading(false);
     }
   };
 
+  useEffect(() => { reload(); }, [vagaId]); // eslint-disable-line
+
+  // filtro + paginação client-side
+  const filtered = useMemo(() => {
+    const t = texto.trim().toLowerCase();
+    return items.filter((it) => {
+      if (status !== "all" && it.statusCandidatura !== status) return false;
+      if (!t) return true;
+      const hay = [
+        it.titulo,
+        it.empresa,             // irrelevante na visão empresa, mas não atrapalha
+        it.candidato_nome,
+        it.candidato_email,
+        it.candidato_cidade,
+      ].filter(Boolean).join(" ").toLowerCase();
+      return hay.includes(t);
+    });
+  }, [items, texto, status]);
+
+  // contadores por status
+  const counters = useMemo(() => {
+    const c = { total: filtered.length, 11: 0, 12: 0, 13: 0, 14: 0 } as any;
+    filtered.forEach((i) => { c[i.statusCandidatura]++; });
+    return c;
+  }, [filtered]);
+
+  // paginação
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const slice = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+  // ====== HANDLER DO BOTÃO "VISUALIZAR" NA TABELA ======
+  const handleView = (vId: number, cId: number) => {
+    if (!vId || !cId) {
+      alert("IDs inválidos para abrir o modal.");
+      return;
+    }
+    setSelVagaId(vId);
+    setSelCurriculumId(cId);
+    setModalOpen(true);
+  };
+
   return (
-    <Modal show={open} onHide={onClose} centered size="lg" backdrop="static">
-      <Modal.Header closeButton>
-        <Modal.Title>Gerenciar candidatura</Modal.Title>
-      </Modal.Header>
+    <Container fluid className="p-0 mt-4">
+      {/* Vaga */}
+      <Form.Group className="mb-3">
+        <Form.Label>Vaga</Form.Label>
+        <Form.Select
+          value={vagaId ?? ""}
+          onChange={(e) => setVagaId(e.target.value ? Number(e.target.value) : null)}
+        >
+          {vagas.map((v) => (
+            <option key={v.vaga_id} value={v.vaga_id}>
+              {v.titulo || `Vaga #${v.vaga_id}`}
+            </option>
+          ))}
+        </Form.Select>
+      </Form.Group>
 
-      <Modal.Body>
-        {loading || !det ? (
-          <div className="d-flex align-items-center gap-2">
-            <Spinner size="sm" animation="border" /> Carregando…
-          </div>
-        ) : (
-          <>
-            <div className="mb-3">
-              <h5 className="mb-1 d-flex align-items-center gap-2">
-                <span>{det.nome || "Candidato"}</span>
-                <Badge bg={statusVariant[det.statusCandidatura] || "secondary"}>
-                  {statusOpts.find((s) => s.id === det.statusCandidatura)?.label ||
-                    "—"}
-                </Badge>
-              </h5>
+      {/* Filtros */}
+      <div className="row g-2">
+        <div className="col">
+          <Form.Label>Filtrar por texto</Form.Label>
+          <Form.Control
+            placeholder="Nome, e-mail, cidade, vaga..."
+            value={texto}
+            onChange={(e) => { setTexto(e.target.value); setPage(1); }}
+          />
+        </div>
+        <div className="col-12 col-md-4">
+          <Form.Label>Filtrar por Status</Form.Label>
+          <Form.Select
+            value={status}
+            onChange={(e) => { const v = e.target.value; setStatus(v === "all" ? "all" : Number(v)); setPage(1); }}
+          >
+            <option value="all">Todos</option>
+            <option value={11}>Pendente</option>
+            <option value={12}>Em análise</option>
+            <option value={13}>Aprovado</option>
+            <option value={14}>Reprovado</option>
+          </Form.Select>
+        </div>
+      </div>
 
-              {det.titulo && (
-                <div className="text-muted">Vaga: {det.titulo}</div>
-              )}
+      <div className="d-flex gap-2 align-items-center my-3">
+        <Button variant="secondary" onClick={reload}>Atualizar</Button>
+        <span className="ms-auto d-flex gap-2">
+          <Badge bg="secondary">Total {counters.total}</Badge>
+          <Badge bg={statusBadges[11]}>Pendente {counters[11]}</Badge>
+          <Badge bg={statusBadges[12]}>Em análise {counters[12]}</Badge>
+          <Badge bg={statusBadges[13]}>Aprovado {counters[13]}</Badge>
+          <Badge bg={statusBadges[14]}>Reprovado {counters[14]}</Badge>
+        </span>
+      </div>
 
-              {!!det.dataCandidatura && (
-                <div className="text-muted">
-                  Candidatou-se em {formatDateTime(det.dataCandidatura)}
-                </div>
-              )}
-            </div>
+      {/* Tabela */}
+      <div className="border rounded-2 m-0 p-1">
+        <ApplicationTable
+          view="company"       // <- mostra Nome do candidato
+          items={slice}
+          loading={loading}
+          onView={handleView}  // <- ABRE O MODAL
+        />
+      </div>
 
-            <Row className="g-3">
-              <Col md={6}>
-                <div className="d-flex flex-column gap-1">
-                  {det.email && (
-                    <div className="d-flex align-items-center gap-2">
-                      <IoMailOutline />{" "}
-                      <a href={`mailto:${det.email}`}>{det.email}</a>
-                    </div>
-                  )}
-                  {det.telefone && (
-                    <div className="d-flex align-items-center gap-2">
-                      <IoCallOutline /> <span>{det.telefone}</span>
-                    </div>
-                  )}
-                  {det.cidade && (
-                    <div className="d-flex align-items-center gap-2">
-                      <IoLocationOutline /> <span>{det.cidade}</span>
-                    </div>
-                  )}
-                </div>
-              </Col>
+      <PaginationButtons
+        className="mt-3"
+        active={page}
+        total={totalPages}
+        onChange={setPage}
+      />
 
-              <Col md={6}>
-                <div className="d-flex flex-column gap-1">
-                  {[
-                    { label: "LinkedIn", url: det.linkedin },
-                    { label: "GitHub", url: det.github },
-                    { label: "Portfólio", url: det.portfolio },
-                    { label: "Currículo (PDF)", url: det.cv_url },
-                  ]
-                    .map(({ label, url }) => ({
-                      label,
-                      href: safeHttp(url),
-                    }))
-                    .filter((l) => l.href)
-                    .map((l) => (
-                      <div key={l.href} className="d-flex align-items-center gap-2">
-                        <IoLinkOutline />
-                        <a href={l.href} target="_blank" rel="noreferrer">
-                          {l.label}
-                        </a>
-                      </div>
-                    ))}
-                </div>
-              </Col>
-
-              {det.resumo && (
-                <Col md={12}>
-                  <div className="p-2 border rounded">
-                    <div className="fw-semibold mb-1">Resumo</div>
-                    <div style={{ whiteSpace: "pre-wrap" }}>{det.resumo}</div>
-                  </div>
-                </Col>
-              )}
-            </Row>
-
-            <div className="d-flex justify-content-between align-items-center mt-4">
-              <div className="d-flex gap-2 flex-wrap">
-                {statusOpts.map((s) => (
-                  <Button
-                    key={s.id}
-                    size="sm"
-                    variant={
-                      det.statusCandidatura === s.id
-                        ? "primary"
-                        : "outline-primary"
-                    }
-                    disabled={busy}
-                    onClick={() => handleStatus(s.id)}
-                  >
-                    {s.label}
-                  </Button>
-                ))}
-              </div>
-
-              {det.cv_url && (
-                <a
-                  className="btn btn-outline-secondary d-flex align-items-center gap-2"
-                  href={safeHttp(det.cv_url)}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <IoDocumentOutline /> Abrir currículo
-                </a>
-              )}
-            </div>
-          </>
-        )}
-      </Modal.Body>
-    </Modal>
+      {/* ====== MODAL (RECEBE OS IDs E ABRE) ====== */}
+      <ManageCandidateModal
+        open={modalOpen}
+        vagaId={selVagaId}
+        curriculumId={selCurriculumId}
+        onClose={() => setModalOpen(false)}
+        onSaved={reload}
+      />
+    </Container>
   );
 }

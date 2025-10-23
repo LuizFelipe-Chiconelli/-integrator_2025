@@ -12,7 +12,6 @@ import api from "@/services/api";
 type Props = {
   open: boolean;
   vagaId: number | null;
-  /** dados já exibidos na tabela (opcional, só para mostrar algo enquanto carrega) */
   prefill?: {
     titulo?: string | null;
     empresa?: string | null;
@@ -20,7 +19,6 @@ type Props = {
     statusCandidatura?: number;
   } | null;
   onClose: () => void;
-  /** chamado após cancelar a candidatura para recarregar a grid */
   onSaved?: () => void;
 };
 
@@ -31,9 +29,8 @@ type VagaDetalhe = {
   requisitos?: string | null;
   localizacao?: string | null;
   salario?: string | number | null;
-  dtFim?: string | null; // yyyy-mm-dd
+  dtFim?: string | null;
   cargo_descricao?: string | null;
-  // se seu detalhe trouxer:
   empresa?: string | null;
 };
 
@@ -74,7 +71,6 @@ export default function ManageUserApplicationModal({
   const [busy, setBusy] = useState(false);
   const [det, setDet] = useState<VagaDetalhe | null>(null);
 
-  // carrega detalhe da vaga
   useEffect(() => {
     if (!open || !vagaId) return;
     (async () => {
@@ -106,7 +102,6 @@ export default function ManageUserApplicationModal({
     if (!confirm("Tem certeza que deseja cancelar sua candidatura?")) return;
     setBusy(true);
     try {
-      // axios delete: body deve ir em { data: { ... } }
       const { data } = await api.delete("/candidatura/remover", {
         data: { vaga_id: vagaId },
       });
@@ -146,9 +141,7 @@ export default function ManageUserApplicationModal({
                 </Badge>
               </h5>
               {empresa && <div className="text-muted">Empresa: {empresa}</div>}
-              <div className="text-muted">
-                Candidatou-se em {dataCand}
-              </div>
+              <div className="text-muted">Candidatou-se em {dataCand}</div>
             </div>
 
             <Row className="g-3">

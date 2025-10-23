@@ -18,7 +18,9 @@ type ApiResp = { status: number; data: CandidaturaItem[] };
 export default function ApplicationsGrid() {
   const [texto, setTexto] = useState("");
   const [status, setStatus] = useState<string>("all");
+
   const [page, setPage] = useState(1);
+  const pageSize = 8;
   const [totalPages, setTotalPages] = useState(1);
 
   const [items, setItems] = useState<CandidaturaItem[]>([]);
@@ -45,22 +47,22 @@ export default function ApplicationsGrid() {
     reload();
   }, []);
 
-  // filtro + paginação client-side
+  // filtro client-side
   const filtered = useMemo(() => {
     const t = texto.trim().toLowerCase();
-    const list = items.filter((it) => {
+    return items.filter((it) => {
       const okText =
         !t ||
         [it.titulo || "", it.empresa || ""].join(" ").toLowerCase().includes(t);
       const okStatus = status === "all" || String(it.statusCandidatura) === status;
       return okText && okStatus;
     });
-    return list;
   }, [items, texto, status]);
 
+  // quando mudar filtros, volta página p/ 1
   useEffect(() => setPage(1), [texto, status]);
 
-  const pageSize = 8;
+  // paginação client-side
   const total = filtered.length;
   const tp = Math.max(1, Math.ceil(total / pageSize));
   const start = (page - 1) * pageSize;
@@ -68,8 +70,10 @@ export default function ApplicationsGrid() {
 
   useEffect(() => setTotalPages(tp), [tp]);
 
+  // abrir modal
   const handleView = (vaga_id: number, curriculum_id: number) => {
-    const found = items.find((x) => x.vaga_id === vaga_id && x.curriculum_id === curriculum_id) || null;
+    const found =
+      items.find((x) => x.vaga_id === vaga_id && x.curriculum_id === curriculum_id) || null;
     setCurrent(found);
     setOpen(true);
   };
@@ -100,7 +104,12 @@ export default function ApplicationsGrid() {
       </div>
 
       <Container fluid className="border rounded-2 m-0 p-1">
-        <ApplicationTable items={slice} loading={loading} onView={handleView} />
+        <ApplicationTable
+          view="user"              // <<<<< aqui estava "Company"
+          items={slice}
+          loading={loading}
+          onView={handleView}
+        />
       </Container>
 
       <PaginationButtons
@@ -110,7 +119,6 @@ export default function ApplicationsGrid() {
         onChange={setPage}
       />
 
-      {/* Modal */}
       <ManageUserApplicationModal
         open={open}
         vagaId={current?.vaga_id ?? null}

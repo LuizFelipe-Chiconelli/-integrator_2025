@@ -82,22 +82,26 @@ class CandidaturaModel extends ModelMain
 
     /**
      * Lista candidaturas do candidato (visão do CANDIDATO).
-     * Retorna título da vaga e status.
+     * Retorna título da vaga, status e NOME DA EMPRESA.
      */
-    public function listarPorCurriculum(int $curriculumId): array {
-        return $this->db->table($this->table.' vc')
+    public function listarPorCurriculum(int $curriculumId): array
+    {
+        return $this->db->table($this->table . ' vc')
             ->select("
                 vc.vaga_id,
                 vc.curriculum_id,
                 vc.statusCandidatura,
                 vc.dataCandidatura,
-                v.titulo
+                v.titulo,
+                e.nome AS empresa
             ")
             ->join('vaga v', 'v.vaga_id = vc.vaga_id', 'INNER')
+            ->join('estabelecimento e', 'e.estabelecimento_id = v.estabelecimento_id', 'LEFT')
             ->where('vc.curriculum_id', $curriculumId)
             ->orderBy('vc.dataCandidatura', 'DESC')
             ->findAll();
     }
+
 
     /**
      * Detalhe rico de UMA candidatura (empresa clicou em “Visualizar”).

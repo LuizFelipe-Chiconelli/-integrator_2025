@@ -172,13 +172,14 @@ export default function ApplicationsGrid() {
       </div>
 
       <div className="border rounded-2 m-0 p-1">
-        <ApplicationTable
-          items={slice}
-          loading={loading}
-          onView={(vaga_id, curriculum_id) => {
-            console.log("abrir modal de detalhe", { vaga_id, curriculum_id });
-          }}
-        />
+      <ApplicationTable
+      view="company"
+      items={slice}
+      loading={loading}
+      onView={(vaga_id, curriculum_id) => {
+        console.log("abrir modal de detalhe", { vaga_id, curriculum_id });
+      }}
+      />
       </div>
 
       <PaginationButtons
