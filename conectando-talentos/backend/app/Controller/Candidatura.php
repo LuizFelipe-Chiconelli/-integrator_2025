@@ -7,85 +7,211 @@ use Core\Library\Session;
 
 class Candidatura extends ControllerMain
 {
-    public const PUBLIC_ACTIONS = []; // mantenha fechado, a não ser que queira abrir algo
+    // deixe "porVaga" público (só se você realmente quiser expor),
+    // e "whoami" apenas para debug.
+    public const PUBLIC_ACTIONS = ['porVaga', 'whoami'];
 
-    private function model()     { return $this->loadModel('CandidaturaModel'); }
-    private function vagaModel() { return $this->loadModel('VagaModel'); }
+    /* ================= Helpers de Models ================= */
 
-    /** POST /candidatura/aplicar { vaga_id } – candidato se inscreve */
+    /** Candidatura model (tenta com e sem sufixo Model) */
+    private function candModel() {
+        $m = $this->loadModel('CandidaturaModel');
+        if (!$m) $m = $this->loadModel('Candidatura');
+        return $m;
+    }
+
+    /** Vaga model (tenta com e sem sufixo Model) */
+    private function vagaModel() {
+        $m = $this->loadModel('VagaModel');
+        if (!$m) $m = $this->loadModel('Vaga');
+        return $m;
+    }
+
+    private function usuarioModel() { return $this->loadModel('Usuario'); }
+    private function cvModel()      { return $this->loadModel('Curriculum'); }
+
+    /* ================ Auxiliares de sessão ================ */
+
+    /** Resolve curriculum_id do usuário logado e faz cache em sessão */
+    private function resolveCurriculumId(): int
+    {
+        $currId = (int)(Session::get('curriculum_id') ?: 0);
+        if ($currId > 0) return $currId;
+
+        $usuarioId = (int)(Session::get('usuario_id') ?: 0);
+        if ($usuarioId <= 0) return 0;
+
+        $usuario = $this->usuarioModel() ? $this->usuarioModel()->findById($usuarioId) : null;
+        if (!$usuario) return 0;
+
+        $pfId = (int)($usuario['pessoa_fisica_id'] ?? 0);
+        if ($pfId <= 0) return 0;
+
+        $cv = $this->cvModel() ? ($this->cvModel()->getByPessoaFisica($pfId) ?? []) : [];
+        $currId = (int)($cv['curriculum_id'] ?? 0);
+        if ($currId > 0) Session::set('curriculum_id', $currId);
+
+        return $currId;
+    }
+
+    /** Garante currículo e responde 401 se faltar */
+    private function requireCurriculumOr401(): int
+    {
+        $currId = $this->resolveCurriculumId();
+        if ($currId <= 0) {
+            Response::json(['status'=>401,'mensagem'=>'Não autenticado ou currículo não encontrado.']);
+            exit;
+        }
+        return $currId;
+    }
+
+    /* ==================== CANDIDATO ==================== */
+
+    /** POST /candidatura/aplicar  { vaga_id } */
     public function aplicar(): void
     {
-        // ajuste se sua sessão de candidato usar outro nome:
-        $curriculumId = (int)(Session::get('curriculum_id') ?: 0);
-        $body = json_decode(file_get_contents('php://input'), true) ?? [];
-        $vagaId = (int)($body['vaga_id'] ?? 0);
+        $currId = $this->requireCurriculumOr401();
 
-        if ($curriculumId <= 0) { Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado (candidato).']); return; }
-        if ($vagaId <= 0)       { Response::json(['status'=>422,'mensagem'=>'vaga_id inválido.']); return; }
+        $d = json_decode(file_get_contents('php://input'), true) ?? [];
+        $vagaId = (int)($d['vaga_id'] ?? 0);
+        if ($vagaId <= 0) { Response::json(['status'=>422,'mensagem'=>'vaga_id inválido.']); return; }
 
-        if ($this->model()->jaCandidatou($vagaId, $curriculumId)) {
+        $M = $this->candModel();
+        if (!$M) { Response::json(['status'=>500,'mensagem'=>'Model de candidatura não encontrado.']); return; }
+
+        if ($M->jaCandidatado($vagaId, $currId)) {
             Response::json(['status'=>409,'mensagem'=>'Você já se candidatou a esta vaga.']); return;
         }
 
         try {
-            $ok = $this->model()->aplicar($vagaId, $curriculumId);
-            $ok ? Response::json(['status'=>201,'mensagem'=>'Candidatura enviada.'])
-                : Response::json(['status'=>500,'mensagem'=>'Falha ao gravar candidatura.']);
+            $ok = $M->aplicar($vagaId, $currId);
+            Response::json(['status'=>201,'mensagem'=>'Candidatura registrada.','ok'=>$ok]);
         } catch (\Throwable $e) {
             Response::json(['status'=>500,'mensagem'=>'Erro ao candidatar.','erro'=>$e->getMessage()]);
         }
     }
 
-    /** GET /candidatura/por-vaga/{vagaId} – empresa lista candidaturas da sua vaga */
-    public function porVaga(int $vagaId = 0): void
-    {
-        $empresaId = (int)(Session::get('empresa_id') ?: Session::get('estabelecimento_id') ?: 0);
-        if ($empresaId <= 0)         { Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado.']); return; }
-        if ($vagaId    <= 0)         { Response::json(['status'=>400,'mensagem'=>'vagaId inválido.']); return; }
-
-        $vaga = $this->vagaModel()->findById($vagaId);
-        if (!$vaga)                  { Response::json(['status'=>404,'mensagem'=>'Vaga não encontrada.']); return; }
-        if ((int)$vaga['estabelecimento_id'] !== $empresaId) {
-            Response::json(['status'=>403,'mensagem'=>'Sem permissão para esta vaga.']); return;
-        }
-
-        try {
-            $rows = $this->model()->listarPorVaga($vagaId);
-            Response::json(['status'=>200,'data'=>$rows]);
-        } catch (\Throwable $e) {
-            Response::json(['status'=>500,'mensagem'=>'Erro ao listar candidaturas.','erro'=>$e->getMessage()]);
-        }
-    }
-
-    /** GET /candidatura/minhas – candidato vê as suas candidaturas */
-    public function minhas(): void
-    {
-        $curriculumId = (int)(Session::get('curriculum_id') ?: 0);
-        if ($curriculumId <= 0) { Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado (candidato).']); return; }
-
-        try {
-            $rows = $this->model()->listarDoCandidato($curriculumId);
-            Response::json(['status'=>200,'data'=>$rows]);
-        } catch (\Throwable $e) {
-            Response::json(['status'=>500,'mensagem'=>'Erro ao listar suas candidaturas.','erro'=>$e->getMessage()]);
-        }
-    }
-
-    /** DELETE /candidatura/remover { vaga_id } – candidato retira candidatura */
+    /** DELETE /candidatura/remover  { vaga_id } */
     public function remover(): void
     {
-        $curriculumId = (int)(Session::get('curriculum_id') ?: 0);
-        $body = json_decode(file_get_contents('php://input'), true) ?? [];
-        $vagaId = (int)($body['vaga_id'] ?? 0);
+        $currId = $this->requireCurriculumOr401();
 
-        if ($curriculumId <= 0) { Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado (candidato).']); return; }
-        if ($vagaId <= 0)       { Response::json(['status'=>422,'mensagem'=>'vaga_id inválido.']); return; }
+        $d = json_decode(file_get_contents('php://input'), true) ?? [];
+        $vagaId = (int)($d['vaga_id'] ?? 0);
+        if ($vagaId <= 0) { Response::json(['status'=>422,'mensagem'=>'vaga_id inválido.']); return; }
+
+        $M = $this->candModel();
+        if (!$M) { Response::json(['status'=>500,'mensagem'=>'Model de candidatura não encontrado.']); return; }
 
         try {
-            $rows = $this->model()->remover($vagaId, $curriculumId);
-            Response::json(['status'=>200,'mensagem'=>'Candidatura retirada.','data'=>['rows'=>$rows]]);
+            $rows = $M->remover($vagaId, $currId);
+            Response::json(['status'=>200,'mensagem'=>'Candidatura removida.','rows'=>$rows]);
         } catch (\Throwable $e) {
             Response::json(['status'=>500,'mensagem'=>'Erro ao remover candidatura.','erro'=>$e->getMessage()]);
         }
+    }
+
+    /** GET /candidatura/minhas */
+    public function minhas(): void
+    {
+        $currId = $this->requireCurriculumOr401();
+
+        $M = $this->candModel();
+        if (!$M) { Response::json(['status'=>500,'mensagem'=>'Model de candidatura não encontrado.']); return; }
+
+        $rows = $M->listarPorCurriculum($currId);
+        Response::json(['status'=>200,'data'=>$rows]);
+    }
+
+    /* ==================== EMPRESA ==================== */
+
+    /** GET /candidatura/porVaga/{vagaId} */
+    public function porVaga(int $vagaId = 0): void
+    {
+        $eid = (int)(Session::get('empresa_id') ?: Session::get('estabelecimento_id') ?: 0);
+        if ($eid <= 0) { Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado.']); return; }
+        if ($vagaId <= 0) { Response::json(['status'=>422,'mensagem'=>'vagaId inválido.']); return; }
+
+        $VM = $this->vagaModel();
+        if (!$VM) { Response::json(['status'=>500,'mensagem'=>'Model de Vaga não encontrado.']); return; }
+
+        $vaga = $VM->findById($vagaId);
+        if (!$vaga || (int)$vaga['estabelecimento_id'] !== $eid) {
+            Response::json(['status'=>403,'mensagem'=>'Vaga não pertence à empresa.']); return;
+        }
+
+        $M = $this->candModel();
+        if (!$M) { Response::json(['status'=>500,'mensagem'=>'Model de candidatura não encontrado.']); return; }
+
+        $rows = $M->listarPorVaga($vagaId);
+        Response::json(['status'=>200,'data'=>$rows]);
+    }
+
+    /** GET /candidatura/detalhe?vaga_id=..&curriculum_id=.. */
+    public function detalhe(): void
+    {
+        $eid = (int)(Session::get('empresa_id') ?: Session::get('estabelecimento_id') ?: 0);
+        if ($eid <= 0) { Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado.']); return; }
+
+        $vagaId = (int)($_GET['vaga_id'] ?? 0);
+        $currId = (int)($_GET['curriculum_id'] ?? 0);
+        if ($vagaId<=0 || $currId<=0) { Response::json(['status'=>422,'mensagem'=>'Parâmetros inválidos.']); return; }
+
+        $M = $this->candModel();
+        if (!$M) { Response::json(['status'=>500,'mensagem'=>'Model de candidatura não encontrado.']); return; }
+
+        $det = $M->detalheComJoins($vagaId, $currId);
+        if (!$det || (int)$det['estabelecimento_id'] !== $eid) {
+            Response::json(['status'=>403,'mensagem'=>'Sem permissão ou não encontrado.']); return;
+        }
+        Response::json(['status'=>200,'data'=>$det]);
+    }
+
+    /** POST /candidatura/status  { vaga_id, curriculum_id, statusCandidatura } */
+    public function status(): void
+    {
+        $eid = (int)(Session::get('empresa_id') ?: Session::get('estabelecimento_id') ?: 0);
+        if ($eid <= 0) { Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado.']); return; }
+
+        $d = json_decode(file_get_contents('php://input'), true) ?? [];
+        $vagaId = (int)($d['vaga_id'] ?? 0);
+        $currId = (int)($d['curriculum_id'] ?? 0);
+        $novo   = (int)($d['statusCandidatura'] ?? 0);
+
+        if ($vagaId<=0 || $currId<=0 || $novo<=0) {
+            Response::json(['status'=>422,'mensagem'=>'Parâmetros inválidos.']); return;
+        }
+
+        $VM = $this->vagaModel();
+        if (!$VM) { Response::json(['status'=>500,'mensagem'=>'Model de Vaga não encontrado.']); return; }
+
+        $vaga = $VM->findById($vagaId);
+        if (!$vaga || (int)$vaga['estabelecimento_id'] !== $eid) {
+            Response::json(['status'=>403,'mensagem'=>'Vaga não pertence à empresa.']); return;
+        }
+
+        $M = $this->candModel();
+        if (!$M) { Response::json(['status'=>500,'mensagem'=>'Model de candidatura não encontrado.']); return; }
+
+        try {
+            $rows = $M->atualizarStatus($vagaId, $currId, $novo);
+            Response::json(['status'=>200,'mensagem'=>'Status atualizado.','rows'=>$rows]);
+        } catch (\Throwable $e) {
+            Response::json(['status'=>500,'mensagem'=>'Erro ao atualizar status.','erro'=>$e->getMessage()]);
+        }
+    }
+
+    /* ======================== DEBUG ======================== */
+
+    /** GET /candidatura/whoami  (apenas para diagnóstico rápido) */
+    public function whoami(): void
+    {
+        Response::json([
+            'status'              => 200,
+            'empresa_id'          => (int)(Session::get('empresa_id') ?: 0),
+            'estabelecimento_id'  => (int)(Session::get('estabelecimento_id') ?: 0),
+            'usuario_id'          => (int)(Session::get('usuario_id') ?: 0),
+            'curriculum_id'       => (int)(Session::get('curriculum_id') ?: 0),
+        ]);
     }
 }

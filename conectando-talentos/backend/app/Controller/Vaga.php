@@ -5,25 +5,10 @@ use Core\Library\ControllerMain;
 use Core\Library\Response;
 use Core\Library\Session;
 
-/**
- * CRUD de Vagas
- *
- * Rotas públicas:
- *   GET  /vaga/cargos
- *   GET  /vaga/lista-publica
- *   GET  /vaga/detalhe/{id}
- *
- * Rotas privadas (empresa logada):
- *   GET    /vaga/minhas
- *   POST   /vaga/publicar
- *   PUT    /vaga/atualizar/{id}
- *   POST   /vaga/status/{id}    (usando POST por causa do CORS; PATCH opcional)
- *   DELETE /vaga/remover/{id}
- */
 class Vaga extends ControllerMain
 {
-    /** Rotas públicas */
-    public const PUBLIC_ACTIONS = ['cargos', 'listaPublica', 'detalhe'];
+    /** Rotas públicas (mantenho os 3 nomes) */
+    public const PUBLIC_ACTIONS = ['cargos', 'listaPublica', 'lista_publica', 'detalhe'];
 
     /* ========== Helpers de model ========== */
     private function vagaModel()  { return $this->model; }
@@ -31,7 +16,6 @@ class Vaga extends ControllerMain
 
     /* ========== Rotas públicas ========== */
 
-    /** GET /vaga/cargos */
     public function cargos(): void
     {
         $rows = $this->cargoModel()->lista('descricao', 'ASC');
@@ -45,11 +29,14 @@ class Vaga extends ControllerMain
         ]);
     }
 
-    /** GET /vaga/lista-publica?status=11 */
-    public function listaPublica(): void
+    /** GET /vaga/listaPublica  ou  /vaga/listaPublica/11  (sem query string) */
+    public function listaPublica(string $action = null, int $id = 0): void
     {
-        $status = isset($_GET['status']) ? (int) $_GET['status'] : 11;
+        // Alguns roteadores do seu framework mandam 'action' e 'id' (vide Routes::rota()).
+        // Se vier um número no ID, tratamos como o status desejado; senão, padrão = 11.
+        $status = ($id > 0) ? (int)$id : 11;
 
+        // IMPORTANTE: ignorar $_GET aqui, pois ?status=11 bagunça seu router.
         $rows = $this->vagaModel()->listarPorEstabelecimentoComCargo(0, $status);
 
         Response::json(['status' => 200, 'data' => $rows]);
@@ -63,15 +50,12 @@ class Vaga extends ControllerMain
         $row = $this->vagaModel()->findById($id);
         if (!$row) { Response::json(['status'=>404,'mensagem'=>'Vaga não encontrada.']); return; }
 
-        // Compat: alguns frontends esperam "sobreVaga"
         $row['sobreVaga'] = $row['descricao'] ?? ($row['sobreaVaga'] ?? '');
-
         Response::json(['status'=>200,'data'=>$row]);
     }
 
     /* ========== Rotas privadas (empresa logada) ========== */
 
-    /** GET /vaga/minhas */
     public function minhas(): void
     {
         $eid = $this->getLoggedEmpresaId();
@@ -83,7 +67,6 @@ class Vaga extends ControllerMain
         Response::json(['status'=>200,'data'=>$rows]);
     }
 
-    /** POST /vaga/publicar */
     public function publicar(): void
     {
         $eid = $this->getLoggedEmpresaId();
@@ -99,20 +82,17 @@ class Vaga extends ControllerMain
 
         try {
             $id = (int) $this->vagaModel()->criarVaga($payload);
-
             if ($id <= 0) {
                 $motivo = Session::getDestroy('msgError') ?: 'Falha ao inserir no banco.';
                 Response::json(['status'=>500,'mensagem'=>'Erro ao publicar vaga.','erro'=>$motivo]);
                 return;
             }
-
             Response::json(['status'=>201,'data'=>['vaga_id'=>$id]]);
         } catch (\Throwable $e) {
             Response::json(['status'=>500,'mensagem'=>'Erro ao publicar vaga.','erro'=>$e->getMessage()]);
         }
     }
 
-    /** PUT /vaga/atualizar/{id} */
     public function atualizar(int $id = 0): void
     {
         $eid = $this->getLoggedEmpresaId();
@@ -137,7 +117,6 @@ class Vaga extends ControllerMain
         }
     }
 
-    /** POST /vaga/status/{id}  (POST usado por causa do CORS) */
     public function status(int $id = 0): void
     {
         $eid = $this->getLoggedEmpresaId();
@@ -158,7 +137,6 @@ class Vaga extends ControllerMain
         }
     }
 
-    /** DELETE /vaga/remover/{id} */
     public function remover(int $id = 0): void
     {
         $eid = $this->getLoggedEmpresaId();
@@ -185,10 +163,7 @@ class Vaga extends ControllerMain
     private function empresaPodeAlterar(int $empresaId, int $vagaId): bool
     {
         $vaga = $this->vagaModel()->findById($vagaId);
-        if (!$vaga) {
-            Response::json(['status'=>404,'mensagem'=>'Vaga não encontrada.']);
-            return false;
-        }
+        if (!$vaga) { Response::json(['status'=>404,'mensagem'=>'Vaga não encontrada.']); return false; }
         if ((int)$vaga['estabelecimento_id'] !== $empresaId) {
             Response::json(['status'=>403,'mensagem'=>'Você não tem permissão para alterar esta vaga.']);
             return false;
@@ -203,11 +178,8 @@ class Vaga extends ControllerMain
 
         return [
             'titulo'             => isset($d['titulo']) ? trim((string)$d['titulo']) : '',
-            // **texto longo** — backend usa "descricao"
             'descricao'          => trim((string)($d['descricao'] ?? '')),
-            // catálogo (ou null)
             'cargo_id'           => ($d['cargo_id'] ?? null) !== null && $d['cargo_id'] !== '' ? (int)$d['cargo_id'] : null,
-            // demais
             'requisitos'         => trim((string)($d['requisitos']   ?? '')),
             'localizacao'        => trim((string)($d['localizacao']  ?? '')),
             'salario'            => trim((string)($d['salario']      ?? '')),
@@ -224,19 +196,12 @@ class Vaga extends ControllerMain
     private function validate(array $p): ?string
     {
         if ($p['estabelecimento_id'] <= 0) return 'estabelecimento_id inválido.';
-
         if ($p['titulo'] === '' || mb_strlen($p['titulo']) > 60) return 'titulo inválido (1–60 chars).';
-
         if (empty($p['cargo_id']) || (int)$p['cargo_id'] <= 0) return 'cargo_id inválido.';
-
         if ((int)$p['modalidade'] <= 0) return 'modalidade inválida.';
         if ((int)$p['vinculo']    <= 0) return 'vinculo inválido.';
-
         if (trim((string)$p['requisitos']) === '') return 'requisitos é obrigatório.';
-
-        if (empty($p['dtFim']) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $p['dtFim'])) {
-            return 'dtFim inválida.';
-        }
+        if (empty($p['dtFim']) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $p['dtFim'])) return 'dtFim inválida.';
         return null;
     }
 
@@ -246,17 +211,9 @@ class Vaga extends ControllerMain
         $s = trim((string)$s);
         if ($s === '') return null;
 
-        // ddmmyyyy (somente dígitos)
-        if (preg_match('/^(\d{2})(\d{2})(\d{4})$/', $s, $m)) {
-            return "{$m[3]}-{$m[2]}-{$m[1]}";
-        }
+        if (preg_match('/^(\d{2})(\d{2})(\d{4})$/', $s, $m)) return "{$m[3]}-{$m[2]}-{$m[1]}";
+        if (preg_match('/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})$/', $s, $m)) return "{$m[3]}-{$m[2]}-{$m[1]}";
 
-        // dd/mm/yyyy ou dd-mm-yyyy
-        if (preg_match('/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})$/', $s, $m)) {
-            return "{$m[3]}-{$m[2]}-{$m[1]}";
-        }
-
-        // tenta parsing nativo (já cobre yyyy-mm-dd)
         $t = strtotime(str_replace('/', '-', $s));
         return $t ? date('Y-m-d', $t) : null;
     }

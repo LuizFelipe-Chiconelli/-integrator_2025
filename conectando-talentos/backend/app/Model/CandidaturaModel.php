@@ -6,59 +6,136 @@ use Core\Library\ModelMain;
 class CandidaturaModel extends ModelMain
 {
     protected $table = 'vaga_curriculum';
-    // chave composta; não usamos $primaryKey aqui
+    protected $primaryKey = null; // PK composta
 
-    /** Verifica se já existe candidatura (evita duplicar) */
-    public function jaCandidatou(int $vagaId, int $curriculumId): bool
-    {
-        $r = $this->db->table($this->table)
-            ->select('vaga_id')
-            ->where('vaga_id', $vagaId)
-            ->where('curriculum_id', $curriculumId)
-            ->first();
-        return !empty($r);
-    }
+    /* ========= Ações ========= */
 
-    /** Aplica (insere) candidatura */
-    public function aplicar(int $vagaId, int $curriculumId): bool
-    {
+    public function aplicar(int $vagaId, int $curriculumId): bool {
         return (bool) $this->db->table($this->table)->insert([
-            'vaga_id'         => $vagaId,
-            'curriculum_id'   => $curriculumId,
-            // dataCandidatura usa DEFAULT CURRENT_TIMESTAMP
+            'vaga_id'           => $vagaId,
+            'curriculum_id'     => $curriculumId,
+            'statusCandidatura' => 11, // Pendente
+            'dataCandidatura'   => date('Y-m-d H:i:s'),
         ]);
     }
 
-    /** Remove candidatura (desinscrever) */
-    public function remover(int $vagaId, int $curriculumId): int
-    {
+    public function remover(int $vagaId, int $curriculumId): int {
         return (int) $this->db->table($this->table)
             ->where('vaga_id', $vagaId)
             ->where('curriculum_id', $curriculumId)
             ->delete();
     }
 
-    /** Lista candidaturas de uma vaga (para a empresa) */
-    public function listarPorVaga(int $vagaId): array
-    {
-        $db = $this->db->table($this->table)
+    public function jaCandidatado(int $vagaId, int $curriculumId): bool {
+        $r = $this->db->table($this->table)
             ->where('vaga_id', $vagaId)
-            ->orderBy('dataCandidatura', 'DESC');
-
-        // Se quiser enriquecer com dados do currículo:
-        // ->select('vc.*, c.nome, c.email')
-        // ->from($this->table.' AS vc')
-        // ->join('curriculum AS c', 'c.curriculum_id = vc.curriculum_id', 'LEFT')
-
-        return $db->findAll();
+            ->where('curriculum_id', $curriculumId)
+            ->first();
+        return (bool) $r;
     }
 
-    /** Lista candidaturas do candidato (para o usuário/currículo logado) */
-    public function listarDoCandidato(int $curriculumId): array
-    {
-        return $this->db->table($this->table)
+    public function atualizarStatus(int $vagaId, int $curriculumId, int $novo): int {
+        return (int) $this->db->table($this->table)
+            ->where('vaga_id', $vagaId)
             ->where('curriculum_id', $curriculumId)
-            ->orderBy('dataCandidatura', 'DESC')
+            ->update(['statusCandidatura' => $novo]);
+    }
+
+    /* ========= Listagens ========= */
+
+    /**
+     * Lista candidaturas de UMA vaga (visão da EMPRESA).
+     * Retorna nome do candidato, título da vaga, e metadados úteis.
+     */
+    public function listarPorVaga(int $vagaId): array {
+        // Ajuste nomes de tabelas/colunas se diferirem no seu schema
+        return $this->db->table($this->table.' vc')
+            ->select("
+                vc.vaga_id,
+                vc.curriculum_id,
+                vc.statusCandidatura,
+                vc.dataCandidatura,
+
+                v.titulo,
+                v.estabelecimento_id,
+
+                pf.nome              AS candidato_nome,
+                cur.email            AS candidato_email,
+                cur.celular          AS candidato_telefone,
+
+                CONCAT(
+                    COALESCE(cid.cidade, ''), 
+                    CASE WHEN cid.uf IS NOT NULL AND cid.uf <> '' 
+                        THEN CONCAT(', ', cid.uf) 
+                        ELSE '' 
+                    END
+                )                    AS candidato_cidade
+            ")
+            ->join('vaga v',          'v.vaga_id = vc.vaga_id',                 'INNER')
+            ->join('curriculum cur',  'cur.curriculum_id = vc.curriculum_id',   'INNER')
+            ->join('pessoa_fisica pf','pf.pessoa_fisica_id = cur.pessoa_fisica_id','INNER')
+            ->join('cidade cid',      'cid.cidade_id = cur.cidade_id',          'LEFT')
+            ->where('vc.vaga_id', $vagaId)
+            ->orderBy('vc.dataCandidatura', 'DESC')
             ->findAll();
+    }
+
+    /**
+     * Lista candidaturas do candidato (visão do CANDIDATO).
+     * Retorna título da vaga e status.
+     */
+    public function listarPorCurriculum(int $curriculumId): array {
+        return $this->db->table($this->table.' vc')
+            ->select("
+                vc.vaga_id,
+                vc.curriculum_id,
+                vc.statusCandidatura,
+                vc.dataCandidatura,
+                v.titulo
+            ")
+            ->join('vaga v', 'v.vaga_id = vc.vaga_id', 'INNER')
+            ->where('vc.curriculum_id', $curriculumId)
+            ->orderBy('vc.dataCandidatura', 'DESC')
+            ->findAll();
+    }
+
+    /**
+     * Detalhe rico de UMA candidatura (empresa clicou em “Visualizar”).
+     * Junta vaga + candidato + currículo + cidade.
+     */
+    public function detalheComJoins(int $vagaId, int $curriculumId): ?array {
+        $r = $this->db->table($this->table.' vc')
+            ->select("
+                vc.*,
+
+                v.titulo,
+                v.estabelecimento_id,
+
+                pf.nome                AS candidato_nome,
+                cur.email              AS candidato_email,
+                cur.celular            AS candidato_telefone,
+                cur.apresentacaoPessoal AS resumo,
+                cur.linkedin,
+                cur.github,
+                cur.portfolio,
+                cur.cv_url,
+
+                CONCAT(
+                    COALESCE(cid.cidade, ''), 
+                    CASE WHEN cid.uf IS NOT NULL AND cid.uf <> '' 
+                        THEN CONCAT(', ', cid.uf) 
+                        ELSE '' 
+                    END
+                ) AS candidato_cidade
+            ")
+            ->join('vaga v',          'v.vaga_id = vc.vaga_id',                 'INNER')
+            ->join('curriculum cur',  'cur.curriculum_id = vc.curriculum_id',   'INNER')
+            ->join('pessoa_fisica pf','pf.pessoa_fisica_id = cur.pessoa_fisica_id','INNER')
+            ->join('cidade cid',      'cid.cidade_id = cur.cidade_id',          'LEFT')
+            ->where('vc.vaga_id', $vagaId)
+            ->where('vc.curriculum_id', $curriculumId)
+            ->first();
+
+        return $r ?: null;
     }
 }
