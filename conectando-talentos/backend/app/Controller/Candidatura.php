@@ -9,7 +9,7 @@ class Candidatura extends ControllerMain
 {
     // deixe "porVaga" público (só se você realmente quiser expor),
     // e "whoami" apenas para debug.
-    public const PUBLIC_ACTIONS = ['porVaga', 'whoami'];
+    public const PUBLIC_ACTIONS = ['porVaga', 'whoami', 'detalhe'];
 
     /* ================= Helpers de Models ================= */
 
@@ -123,49 +123,114 @@ class Candidatura extends ControllerMain
         Response::json(['status'=>200,'data'=>$rows]);
     }
 
-    /* ==================== EMPRESA ==================== */
-
-    /** GET /candidatura/porVaga/{vagaId} */
-    public function porVaga(int $vagaId = 0): void
+    /** GET /candidatura/porVaga/listar/{vagaId} */
+    public function porVaga($action = "", $vagaId = 0): void
     {
-        $eid = (int)(Session::get('empresa_id') ?: Session::get('estabelecimento_id') ?: 0);
-        if ($eid <= 0) { Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado.']); return; }
-        if ($vagaId <= 0) { Response::json(['status'=>422,'mensagem'=>'vagaId inválido.']); return; }
-
-        $VM = $this->vagaModel();
-        if (!$VM) { Response::json(['status'=>500,'mensagem'=>'Model de Vaga não encontrado.']); return; }
-
-        $vaga = $VM->findById($vagaId);
-        if (!$vaga || (int)$vaga['estabelecimento_id'] !== $eid) {
-            Response::json(['status'=>403,'mensagem'=>'Vaga não pertence à empresa.']); return;
-        }
-
-        $M = $this->candModel();
-        if (!$M) { Response::json(['status'=>500,'mensagem'=>'Model de candidatura não encontrado.']); return; }
-
-        $rows = $M->listarPorVaga($vagaId);
-        Response::json(['status'=>200,'data'=>$rows]);
+    // Debug para ver o que está chegando
+    error_log("DEBUG porVaga - action: '$action', vagaId: '$vagaId'");
+    
+    // Se o primeiro parâmetro for numérico, é o vagaId
+    if (is_numeric($action) && $vagaId === 0) {
+        $vagaId = (int)$action;
+        $action = "";
+    }
+    
+    // Se veio pelo formato /porVaga/listar/10
+    if ($action === "listar" && is_numeric($vagaId)) {
+        $vagaId = (int)$vagaId;
+    }
+    
+    // Se ainda não tem vagaId, tenta por query param
+    if ($vagaId <= 0) {
+        $vagaId = (int)($_GET['vaga_id'] ?? $_GET['vagaId'] ?? 0);
+    }
+    
+    $eid = (int)(Session::get('empresa_id') ?: Session::get('estabelecimento_id') ?: 0);
+    if ($eid <= 0) { 
+        Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado.']); 
+        return; 
+    }
+    
+    if ($vagaId <= 0) { 
+        Response::json(['status'=>422,'mensagem'=>'vagaId inválido.']); 
+        return; 
     }
 
-    /** GET /candidatura/detalhe?vaga_id=..&curriculum_id=.. */
-    public function detalhe(): void
-    {
-        $eid = (int)(Session::get('empresa_id') ?: Session::get('estabelecimento_id') ?: 0);
-        if ($eid <= 0) { Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado.']); return; }
+    $VM = $this->vagaModel();
+    if (!$VM) { 
+        Response::json(['status'=>500,'mensagem'=>'Model de Vaga não encontrado.']); 
+        return; 
+    }
 
+    $vaga = $VM->findById($vagaId);
+    if (!$vaga || (int)$vaga['estabelecimento_id'] !== $eid) {
+        Response::json(['status'=>403,'mensagem'=>'Vaga não pertence à empresa.']); 
+        return;
+    }
+
+    $M = $this->candModel();
+    if (!$M) { 
+        Response::json(['status'=>500,'mensagem'=>'Model de candidatura não encontrado.']); 
+        return; 
+    }
+
+    $rows = $M->listarPorVaga($vagaId);
+    Response::json(['status'=>200,'data'=>$rows]);
+    }
+
+    /** GET /candidatura/detalhe/listar/{vagaId}/{curriculumId} */
+    public function detalhe($action = "", $vagaId = 0, $curriculumId = 0): void
+    {
+    // Debug
+    error_log("DEBUG detalhe - action: '$action', vagaId: '$vagaId', curriculumId: '$curriculumId'");
+    
+    // Se o primeiro parâmetro for "listar", então os próximos são os IDs
+    if ($action === "listar" && is_numeric($vagaId) && $curriculumId === 0) {
+        // Formato: /detalhe/listar/10/20
+        $curriculumId = (int)$vagaId;
+        $vagaId = (int)$action;
+        // Vamos reordenar - isso precisa de ajuste
+    } elseif ($action === "listar" && is_numeric($vagaId) && is_numeric($curriculumId)) {
+        // Já está no formato correto
+        $vagaId = (int)$vagaId;
+        $curriculumId = (int)$curriculumId;
+    }
+    
+    // Fallback para query params se ainda faltar
+    if ($vagaId <= 0) {
         $vagaId = (int)($_GET['vaga_id'] ?? 0);
-        $currId = (int)($_GET['curriculum_id'] ?? 0);
-        if ($vagaId<=0 || $currId<=0) { Response::json(['status'=>422,'mensagem'=>'Parâmetros inválidos.']); return; }
-
-        $M = $this->candModel();
-        if (!$M) { Response::json(['status'=>500,'mensagem'=>'Model de candidatura não encontrado.']); return; }
-
-        $det = $M->detalheComJoins($vagaId, $currId);
-        if (!$det || (int)$det['estabelecimento_id'] !== $eid) {
-            Response::json(['status'=>403,'mensagem'=>'Sem permissão ou não encontrado.']); return;
-        }
-        Response::json(['status'=>200,'data'=>$det]);
     }
+    if ($curriculumId <= 0) {
+        $curriculumId = (int)($_GET['curriculum_id'] ?? 0);
+    }
+
+    $eid = (int)(Session::get('empresa_id') ?: Session::get('estabelecimento_id') ?: 0);
+    if ($eid <= 0) { 
+        Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado.']); 
+        return; 
+    }
+
+    if ($vagaId <= 0 || $curriculumId <= 0) {
+        Response::json(['status'=>422,'mensagem'=>'Parâmetros inválidos.']); 
+        return;
+    }
+
+    $M = $this->candModel();
+    if (!$M) { 
+        Response::json(['status'=>500,'mensagem'=>'Model de candidatura não encontrado.']); 
+        return; 
+    }
+
+    $det = $M->detalheComJoins($vagaId, $curriculumId);
+    if (!$det || (int)$det['estabelecimento_id'] !== $eid) {
+        Response::json(['status'=>403,'mensagem'=>'Sem permissão ou não encontrado.']); 
+        return;
+    }
+
+    Response::json(['status'=>200,'data'=>$det]);
+    }
+
+
 
     /** POST /candidatura/status  { vaga_id, curriculum_id, statusCandidatura } */
     public function status(): void

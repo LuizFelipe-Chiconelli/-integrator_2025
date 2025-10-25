@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Container, Form, Button, Badge } from "react-bootstrap";
+import { Container, Form, Button, Badge, Alert } from "react-bootstrap";
 import api from "@/services/api";
 import ApplicationTable from "@/components/user/applications/table";
 import PaginationButtons from "@/components/all/pagination";
+import ManageCandidateModal from "@/components/sections/(company)/applications/manage-candidate-modal";
 
 type VagaEmpresa = { vaga_id: number; titulo?: string | null; statusVaga?: number; };
 type CandidaturaItem = {
@@ -26,33 +27,6 @@ const statusBadges: Record<number, string> = {
   14: "danger",
 };
 
-async function fetchCandidaturas(vagaId: number) {
-  try {
-    // preferimos a forma que seu servidor realmente mapeia:
-    const r = await api.get<{ status: number; data: CandidaturaItem[] }>(`/candidatura/porvaga/${vagaId}`);
-    return r.data?.data ?? [];
-  } catch (e1: any) {
-    // fallback #1: por-vaga
-    try {
-      const r = await api.get<{ status: number; data: CandidaturaItem[] }>(`/candidatura/por-vaga/${vagaId}`);
-      return r.data?.data ?? [];
-    } catch (e2: any) {
-      // fallback #2: porVaga
-      try {
-        const r = await api.get<{ status: number; data: CandidaturaItem[] }>(`/candidatura/porVaga/${vagaId}`);
-        return r.data?.data ?? [];
-      } catch (e3: any) {
-        const res = e3?.response;
-        console.error("Falha ao buscar candidaturas:", {
-          status: res?.status,
-          finalURL: res?.request?.responseURL,
-        });
-        throw e3;
-      }
-    }
-  }
-}
-
 export default function ApplicationsGrid() {
   const [vagaId, setVagaId] = useState<number | null>(null);
   const [texto, setTexto] = useState("");
@@ -61,10 +35,27 @@ export default function ApplicationsGrid() {
   const [vagas, setVagas] = useState<VagaEmpresa[]>([]);
   const [items, setItems] = useState<CandidaturaItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>("");
 
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
+  // modal
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selVagaId, setSelVagaId] = useState<number | null>(null);
+  const [selCurriculumId, setSelCurriculumId] = useState<number | null>(null);
+
+  // Teste básico de sessão
+  const testSession = async () => {
+    try {
+      const { data } = await api.get("/candidatura/whoami");
+      console.log("🚀 Dados da sessão:", data);
+    } catch (e: any) {
+      console.error("❌ Erro na sessão:", e?.response?.data);
+    }
+  };
+
+  // carrega vagas
   useEffect(() => {
     (async () => {
       try {
@@ -72,29 +63,70 @@ export default function ApplicationsGrid() {
         const rows = data?.data ?? [];
         setVagas(rows);
         if (!vagaId && rows[0]?.vaga_id) setVagaId(rows[0].vaga_id);
-      } catch (e) {
-        console.error("Falha ao carregar vagas da empresa:", e);
+        setError("");
+      } catch (e: any) {
+        console.error("❌ Falha ao carregar vagas:", e);
+        setError("Erro ao carregar vagas da empresa");
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
+    // Testa sessão ao carregar
+    testSession();
   }, []);
 
+  // carrega candidaturas via /candidatura/porVaga/listar/{id} - ROTA CORRIGIDA
   const reload = async () => {
-    if (!vagaId) { setItems([]); return; }
+    if (!vagaId) { 
+      setItems([]); 
+      return; 
+    }
+    
     setLoading(true);
+    setError("");
+    
     try {
-      const rows = await fetchCandidaturas(vagaId);
-      setItems(rows);
-      setPage(1);
-    } catch {
+      console.log(`🔄 Carregando candidaturas para vaga: ${vagaId}`);
+      
+      const { data } = await api.get<{ status: number; data: CandidaturaItem[] }>(
+        `/candidatura/porVaga/listar/${vagaId}` // ROTA CORRIGIDA
+      );
+      
+      console.log("✅ Resposta da API:", data);
+      
+      if (data.status === 200) {
+        setItems(data?.data ?? []);
+        setPage(1);
+      } else {
+        setError(data.mensagem || "Erro ao carregar candidaturas");
+        setItems([]);
+      }
+    } catch (e: any) {
+      console.error("❌ Erro na requisição:", {
+        status: e?.response?.status,
+        url: e?.response?.request?.responseURL,
+        data: e?.response?.data
+      });
+      
+      if (e?.response?.status === 401) {
+        setError("Não autenticado. Faça login novamente.");
+      } else if (e?.response?.status === 403) {
+        setError("Você não tem permissão para ver esta vaga.");
+      } else if (e?.response?.status === 404) {
+        setError("Rota não encontrada. Verifique a URL.");
+      } else {
+        setError("Erro ao carregar candidaturas. Tente novamente.");
+      }
       setItems([]);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { reload(); }, [vagaId]); // eslint-disable-line
+  useEffect(() => { 
+    if (vagaId) reload(); 
+  }, [vagaId]);
 
+  // filtro/paginação
   const filtered = useMemo(() => {
     const t = texto.trim().toLowerCase();
     return items.filter((it) => {
@@ -111,29 +143,64 @@ export default function ApplicationsGrid() {
     });
   }, [items, texto, status]);
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const slice = filtered.slice((page - 1) * pageSize, page * pageSize);
+
   const counters = useMemo(() => {
     const c = { total: filtered.length, 11: 0, 12: 0, 13: 0, 14: 0 } as any;
     filtered.forEach((i) => { c[i.statusCandidatura]++; });
     return c;
   }, [filtered]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const slice = filtered.slice((page - 1) * pageSize, page * pageSize);
+  const handleView = (vaga_id: number, curriculum_id: number) => {
+    setSelVagaId(vaga_id);
+    setSelCurriculumId(curriculum_id);
+    setModalOpen(true);
+  };
 
   return (
     <Container fluid className="p-0 mt-4">
+      {/* Debug Info */}
+      <div className="mb-3 p-2 border rounded bg-light">
+        <small className="text-muted">
+          <strong>Debug:</strong> Vaga selecionada: {vagaId || "Nenhuma"} | 
+          Total de vagas: {vagas.length} | 
+          Candidaturas carregadas: {items.length}
+        </small>
+      </div>
+
+      {error && (
+        <Alert variant="danger" className="mb-3">
+          {error}
+          <div className="mt-2">
+            <Button variant="outline-danger" size="sm" onClick={testSession}>
+              Testar Sessão
+            </Button>
+            <Button variant="outline-primary" size="sm" className="ms-2" onClick={reload}>
+              Tentar Novamente
+            </Button>
+          </div>
+        </Alert>
+      )}
+
       <Form.Group className="mb-3">
         <Form.Label>Vaga</Form.Label>
         <Form.Select
           value={vagaId ?? ""}
           onChange={(e) => setVagaId(e.target.value ? Number(e.target.value) : null)}
         >
+          <option value="">Selecione uma vaga</option>
           {vagas.map((v) => (
             <option key={v.vaga_id} value={v.vaga_id}>
-              {v.titulo || `Vaga #${v.vaga_id}`}
+              {v.titulo || `Vaga #${v.vaga_id}`} {v.statusVaga ? `(Status: ${v.statusVaga})` : ''}
             </option>
           ))}
         </Form.Select>
+        {vagas.length === 0 && (
+          <Form.Text className="text-warning">
+            Nenhuma vaga encontrada para sua empresa.
+          </Form.Text>
+        )}
       </Form.Group>
 
       <div className="row g-2">
@@ -161,7 +228,9 @@ export default function ApplicationsGrid() {
       </div>
 
       <div className="d-flex gap-2 align-items-center my-3">
-        <Button variant="secondary" onClick={reload}>Atualizar</Button>
+        <Button variant="primary" onClick={reload} disabled={loading}>
+          {loading ? "Carregando..." : "Atualizar"}
+        </Button>
         <span className="ms-auto d-flex gap-2">
           <Badge bg="secondary">Total {counters.total}</Badge>
           <Badge bg={statusBadges[11]}>Pendente {counters[11]}</Badge>
@@ -172,21 +241,38 @@ export default function ApplicationsGrid() {
       </div>
 
       <div className="border rounded-2 m-0 p-1">
-      <ApplicationTable
-      view="company"
-      items={slice}
-      loading={loading}
-      onView={(vaga_id, curriculum_id) => {
-        console.log("abrir modal de detalhe", { vaga_id, curriculum_id });
-      }}
-      />
+        {loading ? (
+          <div className="text-center p-4">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Carregando...</span>
+            </div>
+            <div className="mt-2">Carregando candidaturas...</div>
+          </div>
+        ) : (
+          <ApplicationTable
+            view="company"
+            items={slice}
+            loading={false}
+            onView={handleView}
+          />
+        )}
       </div>
 
-      <PaginationButtons
-        className="mt-3"
-        active={page}
-        total={totalPages}
-        onChange={setPage}
+      {filtered.length > 0 && (
+        <PaginationButtons
+          className="mt-3"
+          active={page}
+          total={totalPages}
+          onChange={setPage}
+        />
+      )}
+
+      <ManageCandidateModal
+        open={modalOpen}
+        vagaId={selVagaId}
+        curriculumId={selCurriculumId}
+        onClose={() => setModalOpen(false)}
+        onSaved={reload}
       />
     </Container>
   );

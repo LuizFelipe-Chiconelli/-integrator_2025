@@ -43,42 +43,40 @@ class CandidaturaModel extends ModelMain
 
     /* ========= Listagens ========= */
 
-    /**
-     * Lista candidaturas de UMA vaga (visão da EMPRESA).
-     * Retorna nome do candidato, título da vaga, e metadados úteis.
-     */
-    public function listarPorVaga(int $vagaId): array {
-        // Ajuste nomes de tabelas/colunas se diferirem no seu schema
-        return $this->db->table($this->table.' vc')
-            ->select("
-                vc.vaga_id,
-                vc.curriculum_id,
-                vc.statusCandidatura,
-                vc.dataCandidatura,
+   /**
+ * Lista candidaturas de UMA vaga (visão da EMPRESA).
+ */
+public function listarPorVaga(int $vagaId): array {
+    return $this->db->table($this->table.' vc')
+        ->select("
+            vc.vaga_id,
+            vc.curriculum_id,
+            vc.statusCandidatura,
+            vc.dataCandidatura,
 
-                v.titulo,
-                v.estabelecimento_id,
+            v.titulo,
+            v.estabelecimento_id,
 
-                pf.nome              AS candidato_nome,
-                cur.email            AS candidato_email,
-                cur.celular          AS candidato_telefone,
+            pf.nome              AS candidato_nome,
+            cur.email            AS candidato_email,
+            cur.celular          AS candidato_telefone,
 
-                CONCAT(
-                    COALESCE(cid.cidade, ''), 
-                    CASE WHEN cid.uf IS NOT NULL AND cid.uf <> '' 
-                        THEN CONCAT(', ', cid.uf) 
-                        ELSE '' 
-                    END
-                )                    AS candidato_cidade
-            ")
-            ->join('vaga v',          'v.vaga_id = vc.vaga_id',                 'INNER')
-            ->join('curriculum cur',  'cur.curriculum_id = vc.curriculum_id',   'INNER')
-            ->join('pessoa_fisica pf','pf.pessoa_fisica_id = cur.pessoa_fisica_id','INNER')
-            ->join('cidade cid',      'cid.cidade_id = cur.cidade_id',          'LEFT')
-            ->where('vc.vaga_id', $vagaId)
-            ->orderBy('vc.dataCandidatura', 'DESC')
-            ->findAll();
-    }
+            CONCAT(
+                COALESCE(cid.cidade, ''), 
+                CASE WHEN cid.uf IS NOT NULL AND cid.uf <> '' 
+                    THEN CONCAT(', ', cid.uf) 
+                    ELSE '' 
+                END
+            ) AS candidato_cidade
+        ")
+        ->join('vaga v',          'v.vaga_id = vc.vaga_id',                 'INNER')
+        ->join('curriculum cur',  'cur.curriculum_id = vc.curriculum_id',   'INNER')
+        ->join('pessoa_fisica pf','pf.pessoa_fisica_id = cur.pessoa_fisica_id','INNER')
+        ->join('cidade cid',      'cid.cidade_id = cur.cidade_id',          'LEFT')
+        ->where('vc.vaga_id', $vagaId)
+        ->orderBy('vc.dataCandidatura', 'DESC')
+        ->findAll();
+}
 
     /**
      * Lista candidaturas do candidato (visão do CANDIDATO).
@@ -103,43 +101,43 @@ class CandidaturaModel extends ModelMain
     }
 
 
-    /**
-     * Detalhe rico de UMA candidatura (empresa clicou em “Visualizar”).
-     * Junta vaga + candidato + currículo + cidade.
-     */
-    public function detalheComJoins(int $vagaId, int $curriculumId): ?array {
-        $r = $this->db->table($this->table.' vc')
-            ->select("
-                vc.*,
+  /**
+ * Detalhe rico de UMA candidatura - VERSÃO CORRIGIDA
+ * Usa apenas colunas que existem no banco
+ */
+public function detalheComJoins(int $vagaId, int $curriculumId): ?array 
+{
+    $r = $this->db->table($this->table.' vc')
+        ->select("
+            vc.*,
 
-                v.titulo,
-                v.estabelecimento_id,
+            v.titulo,
+            v.estabelecimento_id,
 
-                pf.nome                AS candidato_nome,
-                cur.email              AS candidato_email,
-                cur.celular            AS candidato_telefone,
-                cur.apresentacaoPessoal AS resumo,
-                cur.linkedin,
-                cur.github,
-                cur.portfolio,
-                cur.cv_url,
+            pf.nome                 AS candidato_nome,
+            cur.email               AS candidato_email,
+            cur.celular             AS candidato_telefone,
+            cur.apresentacaoPessoal AS resumo,
 
-                CONCAT(
-                    COALESCE(cid.cidade, ''), 
-                    CASE WHEN cid.uf IS NOT NULL AND cid.uf <> '' 
-                        THEN CONCAT(', ', cid.uf) 
-                        ELSE '' 
-                    END
-                ) AS candidato_cidade
-            ")
-            ->join('vaga v',          'v.vaga_id = vc.vaga_id',                 'INNER')
-            ->join('curriculum cur',  'cur.curriculum_id = vc.curriculum_id',   'INNER')
-            ->join('pessoa_fisica pf','pf.pessoa_fisica_id = cur.pessoa_fisica_id','INNER')
-            ->join('cidade cid',      'cid.cidade_id = cur.cidade_id',          'LEFT')
-            ->where('vc.vaga_id', $vagaId)
-            ->where('vc.curriculum_id', $curriculumId)
-            ->first();
+            -- REMOVIDAS colunas que não existem:
+            -- cur.linkedin, cur.github, cur.portfolio, cur.cv_url
 
-        return $r ?: null;
-    }
+            CONCAT(
+                COALESCE(cid.cidade, ''), 
+                CASE WHEN cid.uf IS NOT NULL AND cid.uf <> '' 
+                    THEN CONCAT(', ', cid.uf) 
+                    ELSE '' 
+                END
+            ) AS candidato_cidade
+        ")
+        ->join('vaga v',          'v.vaga_id = vc.vaga_id',                 'INNER')
+        ->join('curriculum cur',  'cur.curriculum_id = vc.curriculum_id',   'INNER')
+        ->join('pessoa_fisica pf','pf.pessoa_fisica_id = cur.pessoa_fisica_id','INNER')
+        ->join('cidade cid',      'cid.cidade_id = cur.cidade_id',          'LEFT')
+        ->where('vc.vaga_id', $vagaId)
+        ->where('vc.curriculum_id', $curriculumId)
+        ->first();
+
+    return $r ?: null;
+}
 }

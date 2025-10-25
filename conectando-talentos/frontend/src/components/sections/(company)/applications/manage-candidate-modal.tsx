@@ -1,221 +1,343 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Container, Form, Button, Badge } from "react-bootstrap";
+import { Modal, Button, Spinner, Row, Col, Badge, Alert } from "react-bootstrap";
+import {
+  IoDocumentOutline,
+  IoMailOutline,
+  IoCallOutline,
+  IoLocationOutline,
+  IoLinkOutline,
+} from "react-icons/io5";
 import api from "@/services/api";
-import ApplicationTable from "@/components/user/applications/table";
-import PaginationButtons from "@/components/all/pagination";
 
-// ⚠️ AJUSTE o caminho abaixo para onde está seu modal:
-import ManageCandidateModal from "@/components/sections/(company)/applications/manage-candidate-modal";
-// Ex.: "@/components/sections/(company)/applications/manage-candidate-modal"
+type Props = {
+  open: boolean;
+  vagaId: number | null;
+  curriculumId: number | null;
+  onClose: () => void;
+  onSaved?: () => void;
+};
 
-type VagaEmpresa = { vaga_id: number; titulo?: string | null; statusVaga?: number; };
-type CandidaturaItem = {
+type DetalheNorm = {
   vaga_id: number;
   curriculum_id: number;
   titulo?: string | null;
-  empresa?: string | null;
-  dataCandidatura?: string | null;
   statusCandidatura: number;
-  candidato_nome?: string | null;
-  candidato_email?: string | null;
-  candidato_cidade?: string | null;
+  dataCandidatura?: string | null;
+
+  nome?: string | null;
+  email?: string | null;
+  telefone?: string | null;
+  cidade?: string | null;
+
+  linkedin?: string | null;
+  github?: string | null;
+  portfolio?: string | null;
+  cv_url?: string | null;
+  resumo?: string | null;
 };
 
-const statusBadges: Record<number, string> = {
+const statusOpts = [
+  { id: 11, label: "Pendente" },
+  { id: 12, label: "Em análise" },
+  { id: 13, label: "Aprovado" },
+  { id: 14, label: "Reprovado" },
+];
+
+const statusVariant: Record<number, string> = {
   11: "secondary",
   12: "info",
   13: "success",
   14: "danger",
 };
 
-async function fetchCandidaturas(vagaId: number) {
-  // tenta as 3 variações de rota que seu backend pode mapear
-  try {
-    const r = await api.get<{ status: number; data: CandidaturaItem[] }>(`/candidatura/porvaga/${vagaId}`);
-    return r.data?.data ?? [];
-  } catch {
-    try {
-      const r = await api.get<{ status: number; data: CandidaturaItem[] }>(`/candidatura/por-vaga/${vagaId}`);
-      return r.data?.data ?? [];
-    } catch {
-      const r = await api.get<{ status: number; data: CandidaturaItem[] }>(`/candidatura/porVaga/${vagaId}`);
-      return r.data?.data ?? [];
-    }
+function normalizeDetalhe(d: any): DetalheNorm | null {
+  if (!d || typeof d !== "object") return null;
+
+  if ("candidato_nome" in d || "candidato_email" in d) {
+    return {
+      vaga_id: d.vaga_id,
+      curriculum_id: d.curriculum_id,
+      titulo: d.titulo ?? null,
+      statusCandidatura: d.statusCandidatura,
+      dataCandidatura: d.dataCandidatura ?? null,
+      nome: d.candidato_nome ?? null,
+      email: d.candidato_email ?? null,
+      telefone: d.candidato_telefone ?? null,
+      cidade: d.candidato_cidade ?? null,
+      linkedin: d.linkedin ?? null,
+      github: d.github ?? null,
+      portfolio: d.portfolio ?? null,
+      cv_url: d.cv_url ?? null,
+      resumo: d.resumo ?? null,
+    };
   }
+
+  const pf = d.pessoa_fisica || {};
+  const cv = d.curriculum || {};
+  const usr = d.usuario || {};
+
+  const cidadeUF =
+    (cv?.cidade ? cv.cidade : "") +
+    (cv?.uf ? (cv?.cidade ? `, ${cv.uf}` : cv.uf) : "");
+
+  return {
+    vaga_id: d.vaga_id,
+    curriculum_id: d.curriculum_id,
+    titulo: d.titulo ?? null,
+    statusCandidatura: d.statusCandidatura,
+    dataCandidatura: d.dataCandidatura ?? null,
+    nome: pf?.nome ?? null,
+    email: cv?.email ?? usr?.login ?? null,
+    telefone: cv?.celular ?? null,
+    cidade: cidadeUF || null,
+    linkedin: cv?.linkedin ?? null,
+    github: cv?.github ?? null,
+    portfolio: cv?.portfolio ?? null,
+    cv_url: cv?.cv_url ?? null,
+    resumo: cv?.apresentacaoPessoal ?? null,
+  };
 }
 
-export default function ApplicationsGrid() {
-  // filtros
-  const [vagaId, setVagaId] = useState<number | null>(null);
-  const [texto, setTexto] = useState("");
-  const [status, setStatus] = useState<number | "all">("all");
-
-  // dados
-  const [vagas, setVagas] = useState<VagaEmpresa[]>([]);
-  const [items, setItems] = useState<CandidaturaItem[]>([]);
+export default function ManageCandidateModal({
+  open,
+  vagaId,
+  curriculumId,
+  onClose,
+  onSaved,
+}: Props) {
   const [loading, setLoading] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [det, setDet] = useState<DetalheNorm | null>(null);
+  const [error, setError] = useState<string>("");
 
-  // paginação
-  const [page, setPage] = useState(1);
-  const pageSize = 10;
-
-  // ====== ESTADO DO MODAL ======
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selVagaId, setSelVagaId] = useState<number | null>(null);
-  const [selCurriculumId, setSelCurriculumId] = useState<number | null>(null);
-
-  // carrega vagas da empresa
   useEffect(() => {
-    (async () => {
-      try {
-        const { data } = await api.get<{ status: number; data: VagaEmpresa[] }>("/vaga/minhas");
-        const rows = data?.data ?? [];
-        setVagas(rows);
-        if (!vagaId && rows[0]?.vaga_id) setVagaId(rows[0].vaga_id);
-      } catch (e) {
-        console.error("Falha ao carregar vagas da empresa:", e);
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // carrega candidaturas da vaga selecionada
-  const reload = async () => {
-    if (!vagaId) { setItems([]); return; }
-    setLoading(true);
-    try {
-      const rows = await fetchCandidaturas(vagaId);
-      setItems(rows);
-      setPage(1);
-    } catch (e: any) {
-      console.error("Falha ao carregar candidaturas:", e?.response?.status, e?.response?.request?.responseURL);
-      setItems([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { reload(); }, [vagaId]); // eslint-disable-line
-
-  // filtro + paginação client-side
-  const filtered = useMemo(() => {
-    const t = texto.trim().toLowerCase();
-    return items.filter((it) => {
-      if (status !== "all" && it.statusCandidatura !== status) return false;
-      if (!t) return true;
-      const hay = [
-        it.titulo,
-        it.empresa,             // irrelevante na visão empresa, mas não atrapalha
-        it.candidato_nome,
-        it.candidato_email,
-        it.candidato_cidade,
-      ].filter(Boolean).join(" ").toLowerCase();
-      return hay.includes(t);
-    });
-  }, [items, texto, status]);
-
-  // contadores por status
-  const counters = useMemo(() => {
-    const c = { total: filtered.length, 11: 0, 12: 0, 13: 0, 14: 0 } as any;
-    filtered.forEach((i) => { c[i.statusCandidatura]++; });
-    return c;
-  }, [filtered]);
-
-  // paginação
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const slice = filtered.slice((page - 1) * pageSize, page * pageSize);
-
-  // ====== HANDLER DO BOTÃO "VISUALIZAR" NA TABELA ======
-  const handleView = (vId: number, cId: number) => {
-    if (!vId || !cId) {
-      alert("IDs inválidos para abrir o modal.");
+    if (!open || !vagaId || !curriculumId) {
+      setDet(null);
+      setError("");
       return;
     }
-    setSelVagaId(vId);
-    setSelCurriculumId(cId);
-    setModalOpen(true);
+
+    (async () => {
+      setLoading(true);
+      setError("");
+      
+      try {
+        console.log(`🔄 Carregando detalhes: vaga=${vagaId}, curriculum=${curriculumId}`);
+        
+        // ROTA CORRIGIDA - usando parâmetros na URL
+        const { data } = await api.get<{ status: number; data: any }>(
+          `/candidatura/detalhe/listar/${vagaId}/${curriculumId}`
+        );
+        
+        console.log("✅ Detalhes carregados:", data);
+        
+        if (data.status === 200) {
+          setDet(normalizeDetalhe(data.data));
+        } else {
+          setError(data.mensagem || "Erro ao carregar detalhes");
+        }
+      } catch (e: any) {
+        console.error("❌ Erro ao carregar detalhes:", {
+          status: e?.response?.status,
+          url: e?.response?.request?.responseURL,
+          data: e?.response?.data
+        });
+        
+        if (e?.response?.status === 401) {
+          setError("Sessão expirada. Faça login novamente.");
+        } else if (e?.response?.status === 403) {
+          setError("Você não tem permissão para ver estes detalhes.");
+        } else if (e?.response?.status === 404) {
+          setError("Candidatura não encontrada.");
+        } else {
+          setError("Erro ao carregar detalhes da candidatura.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [open, vagaId, curriculumId]);
+
+  const links = useMemo(() => {
+    if (!det) return [];
+    const arr: Array<{ label: string; href: string }> = [];
+    const push = (label: string, url?: string | null) => {
+      const href = (url || "").trim();
+      if (!href) return;
+      arr.push({ label, href: href.startsWith("http") ? href : `https://${href}` });
+    };
+    push("LinkedIn", det.linkedin);
+    push("GitHub", det.github);
+    push("Portfólio", det.portfolio);
+    push("Currículo (PDF)", det.cv_url);
+    return arr;
+  }, [det]);
+
+  const handleStatus = async (novo: number) => {
+    if (!vagaId || !curriculumId) return;
+    
+    setBusy(true);
+    try {
+      console.log(`🔄 Atualizando status para: ${novo}`);
+      
+      await api.post("/candidatura/status", {
+        vaga_id: vagaId,
+        curriculum_id: curriculumId,
+        statusCandidatura: novo,
+      });
+      
+      setDet((old) => (old ? { ...old, statusCandidatura: novo } : old));
+      onSaved?.();
+      
+      console.log("✅ Status atualizado com sucesso");
+    } catch (e: any) {
+      console.error("❌ Erro ao atualizar status:", e);
+      alert("Falha ao atualizar o status. Tente novamente.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
-    <Container fluid className="p-0 mt-4">
-      {/* Vaga */}
-      <Form.Group className="mb-3">
-        <Form.Label>Vaga</Form.Label>
-        <Form.Select
-          value={vagaId ?? ""}
-          onChange={(e) => setVagaId(e.target.value ? Number(e.target.value) : null)}
-        >
-          {vagas.map((v) => (
-            <option key={v.vaga_id} value={v.vaga_id}>
-              {v.titulo || `Vaga #${v.vaga_id}`}
-            </option>
-          ))}
-        </Form.Select>
-      </Form.Group>
+    <Modal show={open} onHide={onClose} centered size="lg" backdrop="static">
+      <Modal.Header closeButton>
+        <Modal.Title>
+          Gerenciar candidatura
+          {vagaId && curriculumId && (
+            <small className="text-muted d-block fs-6">
+              Vaga: {vagaId} | Candidato: {curriculumId}
+            </small>
+          )}
+        </Modal.Title>
+      </Modal.Header>
 
-      {/* Filtros */}
-      <div className="row g-2">
-        <div className="col">
-          <Form.Label>Filtrar por texto</Form.Label>
-          <Form.Control
-            placeholder="Nome, e-mail, cidade, vaga..."
-            value={texto}
-            onChange={(e) => { setTexto(e.target.value); setPage(1); }}
-          />
-        </div>
-        <div className="col-12 col-md-4">
-          <Form.Label>Filtrar por Status</Form.Label>
-          <Form.Select
-            value={status}
-            onChange={(e) => { const v = e.target.value; setStatus(v === "all" ? "all" : Number(v)); setPage(1); }}
-          >
-            <option value="all">Todos</option>
-            <option value={11}>Pendente</option>
-            <option value={12}>Em análise</option>
-            <option value={13}>Aprovado</option>
-            <option value={14}>Reprovado</option>
-          </Form.Select>
-        </div>
-      </div>
+      <Modal.Body>
+        {error && (
+          <Alert variant="danger">
+            {error}
+            <div className="mt-2">
+              <Button variant="outline-danger" size="sm" onClick={onClose}>
+                Fechar
+              </Button>
+            </div>
+          </Alert>
+        )}
 
-      <div className="d-flex gap-2 align-items-center my-3">
-        <Button variant="secondary" onClick={reload}>Atualizar</Button>
-        <span className="ms-auto d-flex gap-2">
-          <Badge bg="secondary">Total {counters.total}</Badge>
-          <Badge bg={statusBadges[11]}>Pendente {counters[11]}</Badge>
-          <Badge bg={statusBadges[12]}>Em análise {counters[12]}</Badge>
-          <Badge bg={statusBadges[13]}>Aprovado {counters[13]}</Badge>
-          <Badge bg={statusBadges[14]}>Reprovado {counters[14]}</Badge>
-        </span>
-      </div>
+        {loading && (
+          <div className="d-flex align-items-center gap-2 p-3">
+            <Spinner size="sm" animation="border" /> Carregando detalhes da candidatura...
+          </div>
+        )}
 
-      {/* Tabela */}
-      <div className="border rounded-2 m-0 p-1">
-        <ApplicationTable
-          view="company"       // <- mostra Nome do candidato
-          items={slice}
-          loading={loading}
-          onView={handleView}  // <- ABRE O MODAL
-        />
-      </div>
+        {!loading && det && (
+          <>
+            <div className="mb-3">
+              <h5 className="mb-1">
+                {det.nome || "Candidato sem nome"}{" "}
+                <Badge bg={statusVariant[det.statusCandidatura] || "secondary"}>
+                  {statusOpts.find((s) => s.id === det.statusCandidatura)?.label || "—"}
+                </Badge>
+              </h5>
+              {det.titulo && <div className="text-muted">Vaga: {det.titulo}</div>}
+              {det.dataCandidatura && (
+                <div className="text-muted">
+                  Candidatou-se em {new Date(det.dataCandidatura).toLocaleString("pt-BR")}
+                </div>
+              )}
+            </div>
 
-      <PaginationButtons
-        className="mt-3"
-        active={page}
-        total={totalPages}
-        onChange={setPage}
-      />
+            <Row className="g-3">
+              <Col md={6}>
+                <div className="d-flex flex-column gap-2">
+                  <h6>Contato</h6>
+                  {det.email && (
+                    <div className="d-flex align-items-center gap-2">
+                      <IoMailOutline /> <a href={`mailto:${det.email}`}>{det.email}</a>
+                    </div>
+                  )}
+                  {det.telefone && (
+                    <div className="d-flex align-items-center gap-2">
+                      <IoCallOutline /> <span>{det.telefone}</span>
+                    </div>
+                  )}
+                  {det.cidade && (
+                    <div className="d-flex align-items-center gap-2">
+                      <IoLocationOutline /> <span>{det.cidade}</span>
+                    </div>
+                  )}
+                </div>
+              </Col>
 
-      {/* ====== MODAL (RECEBE OS IDs E ABRE) ====== */}
-      <ManageCandidateModal
-        open={modalOpen}
-        vagaId={selVagaId}
-        curriculumId={selCurriculumId}
-        onClose={() => setModalOpen(false)}
-        onSaved={reload}
-      />
-    </Container>
+              <Col md={6}>
+                <div className="d-flex flex-column gap-2">
+                  <h6>Links</h6>
+                  {links.length > 0 ? (
+                    links.map((l) => (
+                      <div key={l.href} className="d-flex align-items-center gap-2">
+                        <IoLinkOutline /> 
+                        <a href={l.href} target="_blank" rel="noreferrer">
+                          {l.label}
+                        </a>
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-muted">Nenhum link disponível</span>
+                  )}
+                </div>
+              </Col>
+
+              {det.resumo && (
+                <Col md={12}>
+                  <div className="p-3 border rounded">
+                    <h6>Resumo Pessoal</h6>
+                    <div style={{ whiteSpace: "pre-wrap" }} className="text-muted">
+                      {det.resumo}
+                    </div>
+                  </div>
+                </Col>
+              )}
+            </Row>
+
+            <div className="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+              <div>
+                <h6>Alterar Status:</h6>
+                <div className="d-flex gap-2 flex-wrap">
+                  {statusOpts.map((s) => (
+                    <Button
+                      key={s.id}
+                      size="sm"
+                      variant={det.statusCandidatura === s.id ? "primary" : "outline-primary"}
+                      disabled={busy}
+                      onClick={() => handleStatus(s.id)}
+                    >
+                      {s.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {det.cv_url && (
+                <a
+                  className="btn btn-outline-secondary d-flex align-items-center gap-2"
+                  href={det.cv_url.startsWith("http") ? det.cv_url : `https://${det.cv_url}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <IoDocumentOutline /> Abrir currículo
+                </a>
+              )}
+            </div>
+          </>
+        )}
+
+        {!loading && !det && !error && (
+          <div className="text-center p-4 text-muted">
+            Nenhum dado disponível para esta candidatura.
+          </div>
+        )}
+      </Modal.Body>
+    </Modal>
   );
 }
