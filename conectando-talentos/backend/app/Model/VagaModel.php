@@ -52,11 +52,24 @@ class VagaModel extends ModelMain
         return $db->findAll();
     }
 
-    // Reutilizável: se $eid > 0 filtra por empresa; se $eid = 0 lista público
+    // ✅ ATUALIZADO: Agora inclui dados da empresa
     public function listarPorEstabelecimentoComCargo(int $eid = 0, ?int $status = null): array {
         $db = $this->db->table($this->table)
-            ->select('vaga.*, cargo.descricao AS cargo_descricao')
+            ->select("
+                vaga.*, 
+                cargo.descricao AS cargo_descricao,
+                estabelecimento.estabelecimento_id AS empresa_id,
+                estabelecimento.nome AS empresa_nome,
+                estabelecimento.email AS empresa_email,
+                estabelecimento.descricao AS empresa_descricao,
+                estabelecimento.website AS empresa_website,
+                estabelecimento.setor AS empresa_setor,
+                estabelecimento.linkedin AS empresa_linkedin,
+                estabelecimento.instagram AS empresa_instagram,
+                estabelecimento.facebook AS empresa_facebook
+            ")
             ->join('cargo', 'cargo.cargo_id = vaga.cargo_id', 'LEFT')
+            ->join('estabelecimento', 'estabelecimento.estabelecimento_id = vaga.estabelecimento_id', 'LEFT')
             ->orderBy('vaga.'.$this->primaryKey, 'DESC');
 
         if ($eid > 0) {
@@ -69,7 +82,32 @@ class VagaModel extends ModelMain
         return $db->findAll();
     }
 
-    // (Opcional) Detalhe com cargo
+    // ✅ NOVO MÉTODO: Detalhe completo com empresa
+    public function findByIdCompleta(int $id): ?array {
+        $r = $this->db->table($this->table)
+            ->select("
+                vaga.*, 
+                cargo.descricao AS cargo_descricao,
+                estabelecimento.estabelecimento_id AS empresa_id,
+                estabelecimento.nome AS empresa_nome,
+                estabelecimento.cnpj AS empresa_cnpj,
+                estabelecimento.email AS empresa_email,
+                estabelecimento.endereco AS empresa_endereco,
+                estabelecimento.descricao AS empresa_descricao,
+                estabelecimento.website AS empresa_website,
+                estabelecimento.setor AS empresa_setor,
+                estabelecimento.linkedin AS empresa_linkedin,
+                estabelecimento.instagram AS empresa_instagram,
+                estabelecimento.facebook AS empresa_facebook
+            ")
+            ->join('cargo', 'cargo.cargo_id = vaga.cargo_id', 'LEFT')
+            ->join('estabelecimento', 'estabelecimento.estabelecimento_id = vaga.estabelecimento_id', 'LEFT')
+            ->where('vaga.'.$this->primaryKey, $id)
+            ->first();
+        return $r ?: null;
+    }
+
+    // (Opcional) Mantido para compatibilidade
     public function findByIdComCargo(int $id): ?array {
         $r = $this->db->table($this->table)
             ->select('vaga.*, cargo.descricao AS cargo_descricao')
@@ -81,7 +119,6 @@ class VagaModel extends ModelMain
 
     /* ===== Helpers ===== */
 
-    // (Opcional) Ownership centralizado – útil no controller
     public function pertenceAEmpresa(int $vagaId, int $empresaId): bool {
         $r = $this->db->table($this->table)
             ->select('estabelecimento_id')

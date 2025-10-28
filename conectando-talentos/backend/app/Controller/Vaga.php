@@ -32,23 +32,30 @@ class Vaga extends ControllerMain
     /** GET /vaga/listaPublica  ou  /vaga/listaPublica/11  (sem query string) */
     public function listaPublica(string $action = null, int $id = 0): void
     {
-        // Alguns roteadores do seu framework mandam 'action' e 'id' (vide Routes::rota()).
-        // Se vier um número no ID, tratamos como o status desejado; senão, padrão = 11.
         $status = ($id > 0) ? (int)$id : 11;
-
-        // IMPORTANTE: ignorar $_GET aqui, pois ?status=11 bagunça seu router.
+        
+        // ✅ CORRIGIDO: O método atualizado já se chama listarPorEstabelecimentoComCargo() 
+        // (não listarPorEstabelecimentoComCargoCompleto())
+        // Ele já inclui dados da empresa automaticamente
         $rows = $this->vagaModel()->listarPorEstabelecimentoComCargo(0, $status);
-
+        
         Response::json(['status' => 200, 'data' => $rows]);
     }
 
     /** GET /vaga/detalhe/{id} */
     public function detalhe(int $id = 0): void
     {
-        if ($id <= 0) { Response::json(['status'=>400,'mensagem'=>'ID inválido.']); return; }
+        if ($id <= 0) { 
+            Response::json(['status'=>400,'mensagem'=>'ID inválido.']); 
+            return; 
+        }
 
-        $row = $this->vagaModel()->findById($id);
-        if (!$row) { Response::json(['status'=>404,'mensagem'=>'Vaga não encontrada.']); return; }
+        // ✅ CORRETO: Usar o novo método completo
+        $row = $this->vagaModel()->findByIdCompleta($id);
+        if (!$row) { 
+            Response::json(['status'=>404,'mensagem'=>'Vaga não encontrada.']); 
+            return; 
+        }
 
         $row['sobreVaga'] = $row['descricao'] ?? ($row['sobreaVaga'] ?? '');
         Response::json(['status'=>200,'data'=>$row]);
@@ -62,6 +69,8 @@ class Vaga extends ControllerMain
         if ($eid <= 0) { Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado.']); return; }
 
         $status = isset($_GET['status']) ? (int) $_GET['status'] : null;
+        
+        // ✅ Para "minhas vagas" também usamos o método atualizado que inclui dados da empresa
         $rows = $this->vagaModel()->listarPorEstabelecimentoComCargo($eid, $status);
 
         Response::json(['status'=>200,'data'=>$rows]);
@@ -182,7 +191,8 @@ class Vaga extends ControllerMain
             'cargo_id'           => ($d['cargo_id'] ?? null) !== null && $d['cargo_id'] !== '' ? (int)$d['cargo_id'] : null,
             'requisitos'         => trim((string)($d['requisitos']   ?? '')),
             'localizacao'        => trim((string)($d['localizacao']  ?? '')),
-            'salario'            => trim((string)($d['salario']      ?? '')),
+            'salario_minimo'     => isset($d['salario_minimo']) ? trim((string)$d['salario_minimo']) : '',
+            'salario_maximo'     => isset($d['salario_maximo']) ? trim((string)$d['salario_maximo']) : '',
             'nivel'              => (int)($d['nivel'] ?? 0),
             'modalidade'         => (int)($d['modalidade'] ?? 0),
             'vinculo'            => (int)($d['vinculo'] ?? 0),
@@ -202,7 +212,29 @@ class Vaga extends ControllerMain
         if ((int)$p['vinculo']    <= 0) return 'vinculo inválido.';
         if (trim((string)$p['requisitos']) === '') return 'requisitos é obrigatório.';
         if (empty($p['dtFim']) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $p['dtFim'])) return 'dtFim inválida.';
+        
+        // Validação dos salários (opcional - podem ser vazios)
+        if (!empty($p['salario_minimo']) && !empty($p['salario_maximo'])) {
+            // Converter para número para comparação
+            $min = $this->converterSalarioParaNumero($p['salario_minimo']);
+            $max = $this->converterSalarioParaNumero($p['salario_maximo']);
+            
+            if ($min !== null && $max !== null && $min > $max) {
+                return 'salario_minimo não pode ser maior que salario_maximo.';
+            }
+        }
+        
         return null;
+    }
+
+    /** Converte string de salário (R$ 4.000,00) para número */
+    private function converterSalarioParaNumero(string $salarioString): ?float
+    {
+        // Remove "R$", pontos e converte vírgula para ponto
+        $limpo = preg_replace('/[^\d,]/', '', $salarioString);
+        $limpo = str_replace(',', '.', str_replace('.', '', $limpo));
+        
+        return is_numeric($limpo) ? (float)$limpo : null;
     }
 
     /** aceita: yyyy-mm-dd, dd/mm/yyyy, dd-mm-yyyy e ddmmyyyy */
