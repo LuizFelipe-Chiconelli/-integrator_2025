@@ -8,21 +8,31 @@ class CidadeModel extends ModelMain
     protected $table      = 'cidade';
     protected $primaryKey = 'cidade_id';
 
-    /** busca simples pelo PK */
-    public function findById(int $id): ?array          // ← NOVO
+    /** 
+     * Busca uma cidade pelo ID 
+     * Retorna os dados da cidade ou null se não encontrar
+     */
+    public function findById(int $id): ?array
     {
         return $this->db
             ->where($this->primaryKey, $id)
-            ->first();               // devolve array | null
+            ->first(); // Retorna array ou null
     }
 
-    /** lista (já existia) */
+    /** 
+     * Lista cidades com opção de filtro por UF
+     * @param string $uf Filtro opcional por estado (ex: 'SP', 'MG')
+     * @return array Lista de cidades ordenadas
+     */
     public function lista($orderby = 'cidade', $direction = 'ASC', $uf = null)
     {
         $query = $this->db->orderBy($orderby, $direction);
+        
+        // Aplica filtro por UF se fornecido
         if ($uf) {
             $query->where('uf', $uf);
         }
+        
         return $query->findAll();
     }
 }

@@ -7,7 +7,6 @@ use Core\Library\ModelMain;
  * Model para a tabela "estabelecimento"
  * 
  * Responsável por operações de CRUD relacionadas às empresas.
- * Segue o mesmo padrão do UsuarioModel.
  */
 class EmpresaModel extends ModelMain
 {

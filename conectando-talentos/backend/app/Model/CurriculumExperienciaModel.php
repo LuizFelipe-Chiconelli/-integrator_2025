@@ -8,7 +8,7 @@ class CurriculumExperienciaModel extends ModelMain
     protected $table      = 'curriculum_experiencia';
     protected $primaryKey = 'curriculum_experiencia_id';
 
-    /** lista por currículo */
+    /** Busca todas as experiências de um currículo, ordenadas por data (mais recente primeiro) */
     public function findByCurriculum(int $curriculumId): array
     {
         return $this->db
@@ -19,7 +19,7 @@ class CurriculumExperienciaModel extends ModelMain
             ->findAll();
     }
 
-    /** busca por id */
+    /** Busca uma experiência específica pelo ID */
     public function findById(int $id): ?array
     {
         $row = $this->db
@@ -29,13 +29,13 @@ class CurriculumExperienciaModel extends ModelMain
         return $row ?: null;
     }
 
-    /** cria e retorna o id inserido */
+    /** Cria uma nova experiência e retorna o ID gerado */
     public function create(array $data): int
     {
         return (int) $this->db->table($this->table)->insert($data);
     }
 
-    /** atualiza por id (linhas afetadas) */
+    /** Atualiza uma experiência existente, retorna número de linhas afetadas */
     public function updateById(int $id, array $data): int
     {
         return (int) $this->db
@@ -44,7 +44,7 @@ class CurriculumExperienciaModel extends ModelMain
             ->update($data);
     }
 
-    /** exclui por id (linhas afetadas) */
+    /** Exclui uma experiência, retorna número de linhas afetadas */
     public function deleteById(int $id): int
     {
         return (int) $this->db

@@ -8,7 +8,7 @@ class CurriculumQualificacaoModel extends ModelMain
     protected $table      = 'curriculum_qualificacao';
     protected $primaryKey = 'curriculum_qualificacao_id';
 
-    /** lista por curriculum_id */
+    /** Busca todas as qualificações de um currículo, ordenadas por data (mais recente primeiro) */
     public function findByCurriculum(int $curriculumId): array
     {
         return $this->db
@@ -19,13 +19,13 @@ class CurriculumQualificacaoModel extends ModelMain
             ->findAll();
     }
 
-    /** cria e devolve o id inserido */
+    /** Cria uma nova qualificação e retorna o ID gerado */
     public function create(array $data): int
     {
         return (int) $this->db->table($this->table)->insert($data);
     }
 
-    /** atualiza pelo id; retorna linhas afetadas */
+    /** Atualiza uma qualificação existente, retorna número de linhas afetadas */
     public function updateById(int $id, array $data): int
     {
         return (int) $this->db
@@ -34,7 +34,7 @@ class CurriculumQualificacaoModel extends ModelMain
             ->update($data);
     }
 
-    /** exclui pelo id; retorna linhas afetadas */
+    /** Exclui uma qualificação, retorna número de linhas afetadas */
     public function deleteById(int $id): int
     {
         return (int) $this->db

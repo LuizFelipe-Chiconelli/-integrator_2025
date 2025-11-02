@@ -8,30 +8,35 @@ class VagaModel extends ModelMain
     protected $table      = 'vaga';
     protected $primaryKey = 'vaga_id';
 
-    /* ===== CRUD ===== */
+    /* ===== CRUD BÁSICO ===== */
 
+    /** Cria uma nova vaga e retorna o ID gerado */
     public function criarVaga(array $dados): int {
         return (int) $this->db->table($this->table)->insert($dados);
     }
 
+    /** Atualiza uma vaga existente pelo ID */
     public function atualizarPorId(int $id, array $dados): int {
         return (int) $this->db->table($this->table)
             ->where($this->primaryKey, $id)
             ->update($dados);
     }
 
+    /** Atualiza apenas o status de uma vaga */
     public function atualizarStatus(int $id, int $statusVaga): int {
         return (int) $this->db->table($this->table)
             ->where($this->primaryKey, $id)
             ->update(['statusVaga' => $statusVaga]);
     }
 
+    /** Exclui uma vaga pelo ID */
     public function excluirPorId(int $id): int {
         return (int) $this->db->table($this->table)
             ->where($this->primaryKey, $id)
             ->delete();
     }
 
+    /** Busca uma vaga pelo ID */
     public function findById(int $id): ?array {
         $r = $this->db->table($this->table)
             ->where($this->primaryKey, $id)
@@ -39,9 +44,9 @@ class VagaModel extends ModelMain
         return $r ?: null;
     }
 
-    /* ===== Listagens ===== */
+    /* ===== LISTAGENS ===== */
 
-    // Minhas vagas (empresa) – mantém filtro por estabelecimento
+    /** Lista vagas de uma empresa, com filtro opcional por status */
     public function listarPorEstabelecimento(int $eid, ?int $status = null): array {
         $db = $this->db->table($this->table)
             ->where('estabelecimento_id', $eid)
@@ -52,7 +57,7 @@ class VagaModel extends ModelMain
         return $db->findAll();
     }
 
-    // ✅ ATUALIZADO: Agora inclui dados da empresa
+    /** ✅ ATUALIZADO: Lista vagas com dados da empresa e cargo */
     public function listarPorEstabelecimentoComCargo(int $eid = 0, ?int $status = null): array {
         $db = $this->db->table($this->table)
             ->select("
@@ -82,7 +87,7 @@ class VagaModel extends ModelMain
         return $db->findAll();
     }
 
-    // ✅ NOVO MÉTODO: Detalhe completo com empresa
+    /** ✅ NOVO: Busca vaga completa com todos os dados da empresa */
     public function findByIdCompleta(int $id): ?array {
         $r = $this->db->table($this->table)
             ->select("
@@ -107,7 +112,7 @@ class VagaModel extends ModelMain
         return $r ?: null;
     }
 
-    // (Opcional) Mantido para compatibilidade
+    /** Busca vaga com dados do cargo (mantido para compatibilidade) */
     public function findByIdComCargo(int $id): ?array {
         $r = $this->db->table($this->table)
             ->select('vaga.*, cargo.descricao AS cargo_descricao')
@@ -117,8 +122,9 @@ class VagaModel extends ModelMain
         return $r ?: null;
     }
 
-    /* ===== Helpers ===== */
+    /* ===== HELPERS ===== */
 
+    /** Verifica se uma vaga pertence a uma empresa específica */
     public function pertenceAEmpresa(int $vagaId, int $empresaId): bool {
         $r = $this->db->table($this->table)
             ->select('estabelecimento_id')
