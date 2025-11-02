@@ -1,19 +1,26 @@
 'use client'
 
-import type { FieldMethods, FieldRef } from "../types"
+import type { Color } from "react-bootstrap/esm/types"
+import type { FieldMethods, FieldRef } from "@/components/form-kit/types"
 
 import { useFormContext } from "../context"
 import { useState, useRef, useImperativeHandle, useEffect } from "react"
+import { Form } from "react-bootstrap"
 
 interface Props {
-    ref?: React.Ref<FieldMethods>
-    name: string
-    label?: string
-    placeholder?: string
-    required?: boolean
+	ref?: React.Ref<FieldMethods>
+	id: string
+	bg?: Color
+	name: string
+	label?: string
+	placeholder?: string
+	className?: string
+	disabled?: boolean
+	required?: boolean
+	initialValue?: string
 }
 
-export default function PhoneField({ ref, name, label, placeholder = "", required }: Props) {
+export default function PhoneField({ ref, id, bg = "light", name, label, placeholder = "", className, disabled = false, required, initialValue }: Props) {
 
     // Hooks
     const inputRef = useRef<HTMLInputElement>(null)
@@ -39,10 +46,16 @@ export default function PhoneField({ ref, name, label, placeholder = "", require
     }
 
     const getValue = (): string => {
-        return inputRef.current?.value ?? ""
+        return inputRef.current?.value || ""
     }
 
-    const phoneFormat = (e: React.ChangeEvent) => {
+    const setValue = (val: string): void => {
+        if (inputRef?.current) {
+            inputRef.current.value = val.replace(/\D/g, '').replace(/(\d{2})(\d{4,5})(\d{4})/, "($1) $2-$3")
+        }
+    }
+
+    const format = (e: React.ChangeEvent) => {
         e.preventDefault()
         if (inputRef.current?.value) {
             inputRef.current.value = inputRef.current.value.replace(/\D/g, '').replace(/(\d{2})(\d{4,5})(\d{4})/, "($1) $2-$3")
@@ -62,6 +75,7 @@ export default function PhoneField({ ref, name, label, placeholder = "", require
         const fieldRef: FieldRef = {
             current: {
                 getValue,
+                setValue,
                 validate
             }
         }
@@ -73,25 +87,36 @@ export default function PhoneField({ ref, name, label, placeholder = "", require
         }
     }, [name, registerField, unregisterField])
 
+    useEffect(() => {
+        if (initialValue) {
+            setValue(initialValue)
+        }
+    }, [])
+
     return (
-        <div className="flex flex-col">
-            {label && (
-                <label htmlFor={`input-${name}`} className="ml-2">{label}</label>
-            )}
-            <input
-                id={`input-${name}`}
-                ref={inputRef}
-                type="text"
-                name={name}
-                placeholder={placeholder}
-                className={`border rounded-sm transition-all focus:outline-1 px-4 py-1
-                ${error ? "border-red-500 outline-red-500 outline-1" : ""}`}
-                onChange={phoneFormat}
+        <Form.Group className="mb-3">
+			{label && (
+				<Form.Label htmlFor={id} className="fw-semibold mb-1 ms-1" style={{ fontSize: 14 }}>
+					{label}
+				</Form.Label>
+			)}
+
+			<Form.Control
+				id={id}
+				ref={inputRef}
+				type="text"
                 maxLength={15}
-            />
-            {error && (
-                <span className="text-red-500 text-sm mt-1 ml-2">{error}</span>
-            )}
-        </div>
+				placeholder={placeholder}
+				className={`bg-${bg} ${className ?? ""}`.trim()}
+                onChange={format}
+				disabled={disabled}
+			/>
+
+			{error && (
+				<Form.Control.Feedback type="invalid" style={{ display: "block" }}>
+					{error}
+				</Form.Control.Feedback>
+			)}
+		</Form.Group>
     )
 }

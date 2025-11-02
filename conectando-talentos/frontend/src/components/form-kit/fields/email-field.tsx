@@ -54,10 +54,10 @@ export default function EmailField({ ref, id, bg = "light", name, label, placeho
     }
 
     const setValue = (val: string): void => {
-		if (inputRef?.current) {
-			inputRef.current.value = val
-		}
-	}
+        if (inputRef?.current) {
+            inputRef.current.value = val
+        }
+    }
 
     // Controle
 
@@ -86,31 +86,31 @@ export default function EmailField({ ref, id, bg = "light", name, label, placeho
     }, [name, registerField, unregisterField])
 
     useEffect(() => {
-		if (initialValue) setValue(initialValue)
-	}, [])
+        if (initialValue) setValue(initialValue)
+    }, [])
 
     return (
         <Form.Group className="mb-3">
-			{label && (
-				<Form.Label htmlFor={id} className="fw-semibold mb-1 ms-1" style={{ fontSize: 14 }}>
-					{label}
-				</Form.Label>
-			)}
+            {label && (
+                <Form.Label htmlFor={id} className="fw-semibold mb-1 ms-1" style={{ fontSize: 14 }}>
+                    {label}
+                </Form.Label>
+            )}
 
-			<Form.Control
-				id={id}
-				ref={inputRef}
-				type="text"
-				placeholder={placeholder}
-				className={`bg-${bg} ${className ?? ""}`.trim()}
-				disabled={disabled}
-			/>
+            <Form.Control
+                id={id}
+                ref={inputRef}
+                type="text"
+                placeholder={placeholder}
+                className={`bg-${bg} ${className ?? ""}`.trim()}
+                disabled={disabled}
+            />
 
-			{error && (
-				<Form.Control.Feedback type="invalid" style={{ display: "block" }}>
-					{error}
-				</Form.Control.Feedback>
-			)}
-		</Form.Group>
+            {error && (
+                <Form.Control.Feedback type="invalid" style={{ display: "block" }}>
+                    {error}
+                </Form.Control.Feedback>
+            )}
+        </Form.Group>
     )
 }

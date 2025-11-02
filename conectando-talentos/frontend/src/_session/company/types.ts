@@ -1,0 +1,23 @@
+import type { Job } from "@/types/jobs"
+
+export interface SessionContextType {
+    companyInfo: Company | null | undefined
+    updateCompanyInfo: (info: Company) => Promise<{ ok: boolean, message?: string }>
+    createJobVacancy: (info: Job) => Promise<{ ok: boolean, message?: string }>
+}
+
+export interface Company {
+    estabelecimento_id?: number
+    nome: string,
+    cnpj: string,
+    email: string,
+    setor?: string,
+    endereco: string,
+    latitude?: string,
+    longitude?: string,
+    descricao?: string,
+    website?: string,
+    linkedin?: string,
+    instagram?: string,
+    facebook?: string
+}

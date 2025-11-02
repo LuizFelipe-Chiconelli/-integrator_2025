@@ -1,19 +1,26 @@
 'use client'
 
-import type { FieldMethods, FieldRef } from "../types"
+import type { Color } from "react-bootstrap/esm/types"
+import type { FieldMethods, FieldRef } from "@/components/form-kit/types"
 
+import { Form } from "react-bootstrap"
 import { useFormContext } from "../context"
 import { useRef, useImperativeHandle, useState, useEffect } from "react"
 
 interface Props {
-    ref?: React.Ref<FieldMethods>
-    name: string
-    label?: string
-    placeholder?: string
-    required?: boolean
+	ref?: React.Ref<FieldMethods>
+	id: string
+	bg?: Color
+	name: string
+	label?: string
+	placeholder?: string
+	className?: string
+	disabled?: boolean
+	required?: boolean
+	initialValue?: string
 }
 
-export default function DateField({ ref, name, label, placeholder = "", required }: Props) {
+export default function DateField({ ref, id, bg = "light", name, label, placeholder = "", className, disabled = false, required, initialValue }: Props) {
 
     // Hooks
     const inputRef = useRef<HTMLInputElement>(null)
@@ -33,8 +40,14 @@ export default function DateField({ ref, name, label, placeholder = "", required
         return true
     }
 
-    const getValue = (): string => {
-        return inputRef.current?.value ?? ""
+    const getValue = (): string | null => {
+        return inputRef.current?.value ?? null
+    }
+
+    const setValue = (val: string | null): void => {
+        if (inputRef?.current) {
+            inputRef.current.value = String(val)
+        }
     }
 
     // Controle
@@ -42,6 +55,7 @@ export default function DateField({ ref, name, label, placeholder = "", required
     useImperativeHandle(ref, () => {
         return {
             getValue,
+            setValue,
             validate
         }
     }, [])
@@ -50,6 +64,7 @@ export default function DateField({ ref, name, label, placeholder = "", required
         const fieldRef: FieldRef = {
             current: {
                 getValue,
+                setValue,
                 validate
             }
         }
@@ -61,23 +76,34 @@ export default function DateField({ ref, name, label, placeholder = "", required
         }
     }, [name, registerField, unregisterField])
 
+    useEffect(() => {
+        if (initialValue) {
+            setValue(initialValue)
+        }
+    }, [])
+
     return (
-        <div className="flex flex-col">
-            {label && (
-                <label htmlFor={`input-${name}`} className="ml-2">{label}</label>
-            )}
-            <input
-                id={`input-${name}`}
-                ref={inputRef}
-                type="date"
-                name={name}
-                placeholder={placeholder}
-                className={`border rounded-sm transition-all focus:outline-1 appearance-none px-4 py-1
-                ${error ? "border-red-500 outline-red-500 outline-1" : ""}`}
-            />
-            {error && (
-                <span className="text-red-500 text-sm mt-1 ml-2">{error}</span>
-            )}
-        </div>
+        <Form.Group className="mb-3">
+			{label && (
+				<Form.Label htmlFor={id} className="fw-semibold mb-1 ms-1" style={{ fontSize: 14 }}>
+					{label}
+				</Form.Label>
+			)}
+
+			<Form.Control
+				id={id}
+				ref={inputRef}
+				type="date"
+				placeholder={placeholder}
+				className={`bg-${bg} ${className ?? ""}`.trim()}
+				disabled={disabled}
+			/>
+
+			{error && (
+				<Form.Control.Feedback type="invalid" style={{ display: "block" }}>
+					{error}
+				</Form.Control.Feedback>
+			)}
+		</Form.Group>
     )
 }

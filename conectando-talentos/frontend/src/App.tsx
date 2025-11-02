@@ -1,89 +1,88 @@
 import './App.css'
 
-import { BrowserRouter, Routes, Route, } from 'react-router-dom'
-
-// Páginas padrão
-import Home from './pages/(default)/home/page'
-import Jobs from './pages/(default)/jobs/page'
-import About from './pages/(default)/abouts/page'
-import Business from './pages/(default)/business/page'
-import SingleVacancy from './pages/(default)/single-vacancy/page'
-
-// Páginas de Empresa
-import Profile from './pages/(company)/profile/page'
-import Application from './pages/(company)/applications/page'
-import PublishVacancy from './pages/(company)/publish-vacancy/page'
-import CompanyJobs from './pages/(company)/Jobs/page'
-
-// Páginas de Usuário
-import UserJobs from './pages/(user)/jobs/page'
-import UserProfile from './pages/(user)/profile/page'
-import Curriculum from './pages/(user)/curriculum/page'
-import UserApplication from './pages/(user)/applications/page'
-
-// Páginas Login e Registro
-import Login from './pages/(auth)/login-usuario/page'
-import Register from './pages/(auth)/register-usuario/page'
-import EmpresaLogin from './pages/(auth)/login-empresa/page'
-import EmpresaRegister from './pages/(auth)/register-empresa/page'
-
-// Páginas de Erro
-import PageNotFound from './pages/errors/404/page'
-import Unauthorized from './pages/errors/403/page'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 // Layouts
-import UserLayout from './components/layouts/user'
-import AuthLayout from './components/layouts/auth'
-import DefaultLayout from './components/layouts/default'
-import CompanyLayout from './components/layouts/company'
+import UserLayout from './components/layouts/user-layout'
+import DefaultLayout from './components/layouts/default-layout'
+import CompanyLayout from './components/layouts/company-layout'
+
+// Pages - Default Layout
+import HomePage from './_pages/(Default)/home/page'
+import AboutUsPage from './_pages/(Default)/about-us/page'
+import VacanciesPage from './_pages/(Default)/vacancies/page'
+import CompaniesPage from './_pages/(Default)/companies/page'
+
+// Pages - Auth Layout
+import CandidateSignInPage from './_pages/(Auth)/candidate-signin/page'
+import CandidateSignUpPage from './_pages/(Auth)/candidate-signup/page'
+import CompanySignInPage from './_pages/(Auth)/company-signin/page'
+import CompanySignUpPage from './_pages/(Auth)/company-signup/page'
+
+// Pages - User Layout
+import UserHomePage from './_pages/(User)/home/page'
+import CurriculumPage from './_pages/(User)/curriculum/page'
+
+// Pages - Company Layout
+import CompanyHomePage from './_pages/(Company)/home/page'
+import PublishVacancyPage from './_pages/(Company)/publish-vacancy/page'
+
+// Pages - Error
+import Unauthorized from './_pages/errors/403/page'
+import PageNotFound from './_pages/errors/404/page'
+
+// Providers
+import NotificationProvider from './components/notifications/context'
 
 function App() {
-  return (
-    <>
-      <BrowserRouter>
-        <Routes>
-          {/* Rotas do layout Padrão */}
-          <Route path='/' element={<DefaultLayout />}>
-            <Route index element={<Home />} />
-            <Route path='/vagas' element={<Jobs />} />
-            <Route path='/sobre' element={<About />} />
-            <Route path='/empresa' element={<Business />} />
+	return (
+		<>
+			<NotificationProvider>
+				<BrowserRouter>
+					<Routes>
+						{/* Rotas do layout Padrão */}
+						<Route path='/' element={<DefaultLayout />}>
+							<Route index element={<HomePage />} />
+							<Route path='/vagas' element={<VacanciesPage />} />
+							<Route path='/empresa' element={<CompaniesPage />} />
+							<Route path='/sobre' element={<AboutUsPage />} />
 
-            <Route path='/vagas/:id' element={<SingleVacancy />} />
+							{/* <Route path='/vagas/:id' element={<SingleVacancy />} /> */}
 
-            <Route path='/unauthorized' element={<Unauthorized />} />
-            <Route path='*' element={<PageNotFound />} />
-          </Route>
+							<Route path='/unauthorized' element={<Unauthorized />} />
+							<Route path='*' element={<PageNotFound />} />
+						</Route>
 
-          {/* Rotas para layout Company */}
-          <Route path='/minha-empresa' element={<CompanyLayout />}>
-            <Route index element={<Profile />} />
-            <Route path='publicar-vaga' element={<PublishVacancy />} />
-            <Route path='candidaturas' element={<Application />} />
-            <Route path='vagas' element={<CompanyJobs />} />
-            <Route path='*' element={<PageNotFound />} />
-          </Route>
+						{/* Rotas para layout Company */}
+						<Route path='/minha-empresa' element={<CompanyLayout />}>
+							<Route index element={<CompanyHomePage />} />
+							<Route path='publicar-vaga' element={<PublishVacancyPage />} />
+							{/* <Route path='candidaturas' element={<Application />} /> */}
+							{/* <Route path='vagas' element={<CompanyJobs />} /> */}
+							{/* <Route path='*' element={<PageNotFound />} /> */}
+						</Route>
 
-          {/* Rotas para layout User */}
-          <Route path='/usuario' element={<UserLayout />}>
-            <Route index element={<UserProfile />} />
-            <Route path='curriculo' element={<Curriculum />} />
-            <Route path='candidaturas' element={<UserApplication />} />
-            <Route path='vagas-recomendadas' element={<UserJobs />} />
-            <Route path='*' element={<PageNotFound />} />
-          </Route>
+						{/* Rotas para layout User */}
+						<Route path='/usuario' element={<UserLayout />}>
+							<Route index element={<UserHomePage />} />
+							<Route path='curriculo' element={<CurriculumPage />} />
+							{/* <Route path='candidaturas' element={<UserApplication />} /> */}
+							{/* <Route path='vagas-recomendadas' element={<UserJobs />} /> */}
+							{/* <Route path='*' element={<PageNotFound />} /> */}
+						</Route>
 
-          {/* Rotas para layout Login/Register */}
-          <Route path='/auth' element={<AuthLayout />}>
-            <Route path='login-usuario' element={<Login />} />
-            <Route path='register-usuario' element={<Register />} />
-            <Route path='login-empresa' element={<EmpresaLogin />} />
-            <Route path='register-empresa' element={<EmpresaRegister />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </>
-  )
+						{/* Rotas para layout Login/Register */}
+						<Route path='/auth' element={<DefaultLayout />}>
+							<Route path='login-usuario' element={<CandidateSignInPage />} />
+							<Route path='register-usuario' element={<CandidateSignUpPage />} />
+							<Route path='login-empresa' element={<CompanySignInPage />} />
+							<Route path='register-empresa' element={<CompanySignUpPage />} />
+						</Route>
+					</Routes>
+				</BrowserRouter>
+			</NotificationProvider>
+		</>
+	)
 }
 
 export default App
