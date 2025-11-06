@@ -6,6 +6,19 @@ use Core\Library\Response;
 use Exception;
 use \Firebase\JWT\JWT;
 use \Firebase\JWT\Key;
+/**
+ * FLUXO COMPLETO
+ * Esta classe é essencial para proteger endpoints da API e garantir que apenas clientes autorizados possam acessar recursos protegidos.
+ * Gera tokens de acesso para usuários autorizados
+ * Valida tokens em cada requisição à API
+ * Protege endpoints da sua aplicação
+ * 
+ * 
+ * EXPLICAÇÃO
+ * Cliente manda credenciais → Recebe um token JWT
+ * Cliente usa o token → Para acessar partes protegidas da API
+ * API verifica o token → Antes de permitir o acesso
+ */
 
 class Api extends ControllerMain
 {

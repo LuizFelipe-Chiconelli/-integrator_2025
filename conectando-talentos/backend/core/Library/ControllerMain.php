@@ -4,6 +4,23 @@ namespace Core\Library;
 
 use Core\Library\Request;
 
+/** 
+ * Papéis:
+ * Segurança: Controla acesso a páginas
+ * Organização: Centraliza código repetitivo
+ * Loader: Carrega models, helpers e views
+ * Gerenciador: Controla fluxo entre usuário e sistema
+ * 
+ * Herança:
+ * Todos os controllers herdam de ControllerMain e ganham:
+ * Verificação de login automática
+ * Métodos para carregar components
+ * Controle de permissões
+ * Sistema de templates
+ * Em resumo: É a base que garante que toda a aplicação funcione de forma consistente e segura! 
+ * 
+ */ 
+
 class ControllerMain
 {
     protected $controller;
