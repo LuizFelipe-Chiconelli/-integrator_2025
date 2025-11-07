@@ -4,6 +4,9 @@ export interface SessionContextType {
     companyInfo: Company | null | undefined
     updateCompanyInfo: (info: Company) => Promise<{ ok: boolean, message?: string }>
     createJobVacancy: (info: Job) => Promise<{ ok: boolean, message?: string }>
+    getJobVacancies: () => Promise<{ ok: boolean, vacancies?: Job[] }>
+    updateVacancy: (info: Job) => Promise<{ ok: boolean, message?: string }>
+    updateVacancyStatus: (id: string, status: number) => Promise<{ ok: boolean, message?: string }>
 }
 
 export interface Company {

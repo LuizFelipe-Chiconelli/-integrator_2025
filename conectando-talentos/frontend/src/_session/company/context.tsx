@@ -12,12 +12,12 @@ export const SessionContext = createContext<SessionContextType | undefined>(unde
 
 export const useCompanySessionContext = (): SessionContextType => {
     const context = useContext(SessionContext)
-    
-        if (!context) {
-            throw new Error('Este hook deve ser utilizado dentro de um CompanySessionProvider!')
-        }
-    
-        return context
+
+    if (!context) {
+        throw new Error('Este hook deve ser utilizado dentro de um CompanySessionProvider!')
+    }
+
+    return context
 }
 
 interface Props {
@@ -41,7 +41,7 @@ export default function CompanySessionProvider({ children }: Props) {
             const payload: Company = { ...companyInfo, ...info } as Company
             await api.post("/empresa/perfil", payload)
             fetchCompanyInfo()
-            
+
             return { ok: true, message: "Alterações salvas com  sucesso!" }
         } catch (error) {
             return { ok: false, message: error as string }
@@ -57,6 +57,33 @@ export default function CompanySessionProvider({ children }: Props) {
         }
     }
 
+    const getJobVacancies = async (): Promise<{ ok: boolean, vacancies?: Job[] }> => {
+        try {
+            const { data: { data } }: { data: { data: Job[] } } = await api.get("/vaga/minhas")
+            return { ok: true, vacancies: data }
+        } catch (error) {
+            return { ok: false }
+        }
+    }
+
+    const updateVacancy = async (info: Job): Promise<{ ok: boolean, message?: string }> => {
+        try {
+            await api.put(`/vaga/atualizar/${info.vaga_id}`, info)
+            return { ok: true }
+        } catch (error) {
+            return { ok: false, message: String(error) }
+        }
+    }
+
+    const updateVacancyStatus = async (id: string, status: number): Promise<{ ok: boolean, message?: string }> => {
+        try {
+            await api.post(`/vaga/status/${id}`, { statusVaga: status })
+            return { ok: true }
+        } catch (error) {
+            return { ok: false, message: String(error) }
+        }
+    }
+
     useEffect(() => {
         fetchCompanyInfo()
     }, [])
@@ -65,7 +92,10 @@ export default function CompanySessionProvider({ children }: Props) {
         <SessionContext.Provider value={{
             companyInfo,
             updateCompanyInfo,
-            createJobVacancy
+            createJobVacancy,
+            getJobVacancies,
+            updateVacancy,
+            updateVacancyStatus
         }}>
             {companyInfo !== undefined ? (children) : (<><Navigate to='/' /></>)}
         </SessionContext.Provider>

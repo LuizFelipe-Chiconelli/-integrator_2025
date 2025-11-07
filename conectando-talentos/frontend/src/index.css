@@ -7,3 +7,7 @@
 body {
 	overflow-x: hidden;
 }
+
+.modal-backdrop {
+	z-index: 45 !important;
+}

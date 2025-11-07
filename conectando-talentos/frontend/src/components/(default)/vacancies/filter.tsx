@@ -35,10 +35,6 @@ export default function VacanciesFilter() {
         const typeValue: string = formData.formTipo as string
         const expValue: string = formData.formExp as string
 
-        console.log(formData)
-        console.log(typeValue)
-        console.log(expValue)
-
         setSearchParams((prev: URLSearchParams) => {
             const updatedParams = new URLSearchParams(prev)
 

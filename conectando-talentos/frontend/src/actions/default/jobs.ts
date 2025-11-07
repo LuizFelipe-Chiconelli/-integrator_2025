@@ -7,6 +7,5 @@ import type { AxiosResponse } from "axios"
 
 export async function getJobs(filter?: string): Promise<Job[]> {
     const res: AxiosResponse<{ data: Job[] }> = await api.get<{ data: Job[] }>("/vaga/listaPublica")
-    console.log(res)
     return res.data.data || []
 }

@@ -5,8 +5,8 @@ export interface Job {
     descricao: string
     requisitos: string
     localizacao: string
-    salario_minimo: string,
-    salario_maximo: string,
+    salario_minimo: string
+    salario_maximo: string
     nivel: number
     modalidade: number
     vinculo: number
@@ -15,4 +15,13 @@ export interface Job {
     estabelecimento_id: number
     statusVaga: number
     cargo_descricao: string
+    empresa_id: number
+    empresa_nome: string
+    empresa_descricao?: string | null
+    empresa_email?: string | null
+    empresa_facebook?: string | null
+    empresa_instagram?: string | null
+    empresa_linkedin?: string | null
+    empresa_setor?: string | null
+    empresa_website?: string | null
 }

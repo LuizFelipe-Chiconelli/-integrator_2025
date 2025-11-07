@@ -32,6 +32,7 @@ import Unauthorized from './_pages/errors/403/page'
 import PageNotFound from './_pages/errors/404/page'
 
 // Providers
+import MyVacanciesPage from './_pages/(Company)/my-vacancies/page'
 import NotificationProvider from './components/notifications/context'
 
 function App() {
@@ -58,7 +59,7 @@ function App() {
 							<Route index element={<CompanyHomePage />} />
 							<Route path='publicar-vaga' element={<PublishVacancyPage />} />
 							{/* <Route path='candidaturas' element={<Application />} /> */}
-							{/* <Route path='vagas' element={<CompanyJobs />} /> */}
+							<Route path='vagas' element={<MyVacanciesPage />} />
 							{/* <Route path='*' element={<PageNotFound />} /> */}
 						</Route>
 

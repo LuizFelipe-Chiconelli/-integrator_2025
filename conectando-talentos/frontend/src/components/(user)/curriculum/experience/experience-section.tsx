@@ -19,7 +19,6 @@ export default function ExperienceSection() {
 
 	const refreshExperience = async (userId: string | number): Promise<void> => {
 		const res: Experience[] = await fetchExperience(userId)
-		console.log(res)
 		setExperience(res)
 	}
 
@@ -27,13 +26,9 @@ export default function ExperienceSection() {
 		try {
 			await saveExperience(info)
 			if (userInfo) {
-				console.log('R1')
 				await refreshExperience(userInfo.curriculum.curriculum_id)
-				console.log('R2')
 			}
-			console.log('R3')
 		} catch (error) {
-			console.log('R4')
 			console.log(error)
 		}
 	}
@@ -64,10 +59,6 @@ export default function ExperienceSection() {
 	useEffect(() => {
 		fetchRoles()
 	}, [])
-
-	useEffect(() => {
-		console.log('R5')
-	}, [experience])
 
 	return (
 		<Container className="bg-white border rounded-3 p-4 shadow-sm">

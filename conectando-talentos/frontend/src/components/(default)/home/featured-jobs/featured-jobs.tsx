@@ -16,8 +16,6 @@ export default function FeaturedJobs() {
 
     async function fetchJobs() {
         const res = await getJobs('1')
-
-        console.log(res)
         setJobs(res.slice(0, 6))
     }
 

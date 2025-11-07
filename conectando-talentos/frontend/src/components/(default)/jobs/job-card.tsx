@@ -9,8 +9,10 @@ interface Props {
 
 export default function JobCard({ job }: Props) {
     // const skills: Array<string> = JSON.parse(job.requisitos).slice(0, 4)
-    const salaryFrom: string = job.salario
-    const salaryTo: string = job.salario
+    const minSalario: string = Number(job.salario_minimo).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+	const maxSalario: string = Number(job.salario_minimo).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+
+	const dateString: string = new Date(`${job.dtFim}T00:00:00`).toLocaleDateString("pt-BR", { timeZone: "UTC" })
 
     return (
         <Card className="h-100">
@@ -46,14 +48,14 @@ export default function JobCard({ job }: Props) {
                         className="border text-success"
                         style={{ fontSize: "11px" }}
                     >
-                        R$ {salaryFrom} - R$ {salaryTo}
+                        {minSalario} - {maxSalario}
                     </Badge>
                     <Badge
                         bg="light"
                         className="border text-dark"
                         style={{ fontSize: "11px" }}
                     >
-                        {String(job.dtInicio)}
+                        até {dateString}
                     </Badge>
                 </div>
 

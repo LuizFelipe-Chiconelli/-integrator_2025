@@ -14,9 +14,7 @@ export default function ChangePasswordForm() {
         e.target.checked ? setPasswordVisible(true) : setPasswordVisible(false)
     }
 
-    const onSubmit = (formData: Record<any, string>) => {
-        console.log(formData)
-    }
+    const onSubmit = (formData: Record<any, string>) => {}
 
     return (
         <FormProvider onSubmit={onSubmit} className="mt-4">
