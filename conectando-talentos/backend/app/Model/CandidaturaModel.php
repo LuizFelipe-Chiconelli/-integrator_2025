@@ -247,4 +247,33 @@ class CandidaturaModel extends ModelMain
 
         return $r ?: null;                                                        // Retorna null se não encontrado
     }
+
+    // No arquivo CandidaturaModel.php, adicione este método:
+
+/**
+ * CONTAR CANDIDATOS POR VAGA - Retorna quantidade de candidaturas por vaga
+ * 
+ * @param int $vagaId ID da vaga (opcional - se 0, conta para todas as vagas)
+ * @return array Array com vaga_id => quantidade de candidatos
+ */
+    public function contarCandidatosPorVaga(int $vagaId = 0): array
+    {
+        $db = $this->db->table($this->table . ' vc')
+            ->select('vc.vaga_id, COUNT(vc.curriculum_id) AS total_candidatos')
+            ->groupBy('vc.vaga_id');
+        
+        if ($vagaId > 0) {
+            $db->where('vc.vaga_id', $vagaId);
+        }
+        
+        $result = $db->findAll();
+        
+        // Converte para formato vaga_id => quantidade
+        $contagem = [];
+        foreach ($result as $row) {
+            $contagem[(int)$row['vaga_id']] = (int)$row['total_candidatos'];
+        }
+        
+        return $contagem;
+    }
 }

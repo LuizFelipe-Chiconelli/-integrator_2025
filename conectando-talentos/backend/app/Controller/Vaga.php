@@ -84,7 +84,7 @@ class Vaga extends ControllerMain
         // Inclui automaticamente dados da empresa e cargo
         $rows = $this->vagaModel()->listarPorEstabelecimentoComCargo(0, $status);
         
-        // 📤 RETORNA LISTA DE VAGAS
+        // 📤 RETORNA LISTA DE VAGAS    
         Response::json(['status' => 200, 'data' => $rows]);
     }
 
