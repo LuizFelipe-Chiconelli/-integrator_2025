@@ -57,17 +57,14 @@ class VagaModel extends ModelMain
         return $db->findAll();
     }
 
-    /** 
-     * ✅ ALTERNATIVA OTIMIZADA: Usando subquery para contar candidatos 
-     */
-    public function listarPorEstabelecimentoComCargo(int $eid = 0, ?int $status = null): array 
-    {
-    // Subquery para contar candidatos
-    $subquery = $this->db->table('vaga_curriculum vc')
-        ->select('vc.vaga_id, COUNT(vc.curriculum_id)')
-        ->where('vc.vaga_id = vaga.vaga_id')
-        ->getCompiledSelect();
+    // No arquivo VagaModel.php, modifique o método:
 
+/** 
+ * ✅ ATUALIZADO: Lista vagas com dados da empresa, cargo E contagem de candidatos 
+ */
+public function listarPorEstabelecimentoComCargo(int $eid = 0, ?int $status = null): array 
+{
+    // Primeiro, busca as vagas normalmente
     $db = $this->db->table($this->table)
         ->select("
             vaga.*, 
@@ -80,8 +77,7 @@ class VagaModel extends ModelMain
             estabelecimento.setor AS empresa_setor,
             estabelecimento.linkedin AS empresa_linkedin,
             estabelecimento.instagram AS empresa_instagram,
-            estabelecimento.facebook AS empresa_facebook,
-            ($subquery) AS total_candidatos
+            estabelecimento.facebook AS empresa_facebook
         ")
         ->join('cargo', 'cargo.cargo_id = vaga.cargo_id', 'LEFT')
         ->join('estabelecimento', 'estabelecimento.estabelecimento_id = vaga.estabelecimento_id', 'LEFT')
@@ -94,9 +90,28 @@ class VagaModel extends ModelMain
         $db->where('vaga.statusVaga', $status);
     }
 
-    return $db->findAll();
+    $vagas = $db->findAll();
+
+    // Se não há vagas, retorna vazio
+    if (empty($vagas)) {
+        return [];
     }
 
+    // Obtém os IDs das vagas para buscar a contagem
+    $vagaIds = array_column($vagas, 'vaga_id');
+    
+    // Busca a contagem de candidatos usando o CandidaturaModel
+    $candidaturaModel = new \App\Model\CandidaturaModel();
+    $contagemCandidatos = $candidaturaModel->contarCandidatosPorVaga();
+
+    // Adiciona a contagem a cada vaga
+    foreach ($vagas as &$vaga) {
+        $vagaId = (int)$vaga['vaga_id'];
+        $vaga['total_candidatos'] = $contagemCandidatos[$vagaId] ?? 0;
+    }
+
+    return $vagas;
+    }
     // No VagaModel.php, atualize o método findByIdCompleta:
 
     /** ✅ ATUALIZADO: Busca vaga completa com todos os dados + contagem de candidatos */
