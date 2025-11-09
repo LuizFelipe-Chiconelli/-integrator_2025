@@ -129,16 +129,10 @@ class VagaModel extends ModelMain
     return $vagas;
     }
 
-    /** ✅ ATUALIZADO: Busca vaga completa com todos os dados + contagem de candidatos */
+    /** ✅ CORRIGIDO: Busca vaga completa com todos os dados + contagem de candidatos */
     public function findByIdCompleta(int $id): ?array 
     {
-    // Subquery para contar candidatos
-    $subquery = $this->db->table('vaga_curriculum vc')
-        ->select('COUNT(vc.curriculum_id)')
-        ->where('vc.vaga_id = vaga.vaga_id')
-        ->getCompiledSelect();
-
-    $r = $this->db->table($this->table)
+    $vaga = $this->db->table($this->table)
         ->select("
             vaga.*, 
             cargo.descricao AS cargo_descricao,
@@ -152,14 +146,26 @@ class VagaModel extends ModelMain
             estabelecimento.setor AS empresa_setor,
             estabelecimento.linkedin AS empresa_linkedin,
             estabelecimento.instagram AS empresa_instagram,
-            estabelecimento.facebook AS empresa_facebook,
-            ($subquery) AS total_candidatos
+            estabelecimento.facebook AS empresa_facebook
         ")
         ->join('cargo', 'cargo.cargo_id = vaga.cargo_id', 'LEFT')
         ->join('estabelecimento', 'estabelecimento.estabelecimento_id = vaga.estabelecimento_id', 'LEFT')
         ->where('vaga.'.$this->primaryKey, $id)
         ->first();
-    return $r ?: null;
+
+    if (!$vaga) {
+        return null;
+    }
+
+    // Busca contagem de candidatos separadamente
+    $contagem = $this->db->table('vaga_curriculum')
+        ->select('COUNT(curriculum_id) AS total_candidatos')
+        ->where('vaga_id', $id)
+        ->first();
+
+    $vaga['total_candidatos'] = (int)($contagem['total_candidatos'] ?? 0);
+
+    return $vaga;
     }
     /** Busca vaga com dados do cargo (mantido para compatibilidade) */
     public function findByIdComCargo(int $id): ?array {
