@@ -64,11 +64,9 @@ class Vaga extends ControllerMain
     }
 
     /**
-     * LISTA PÚBLICA DE VAGAS - GET /vaga/listaPublica/{status?}
+     * LISTA PÚBLICA DE VAGAS - GET /vaga/listaPublica/{status?}?busca=termo
      * 
-     * Retorna vagas disponíveis para candidatos
-     * Pode filtrar por status (default = 11 = publicadas)
-     * Acesso público - não requer autenticação
+     * ✅ ATUALIZADO: Agora aceita filtro por texto via query parameter 'busca'
      * 
      * @param string $action Nome da ação (para compatibilidade de rota)
      * @param int $id Status da vaga (opcional, default 11)
@@ -79,10 +77,11 @@ class Vaga extends ControllerMain
         // 🎯 DEFINE STATUS DA VAGA (11 = publicadas por padrão)
         $status = ($id > 0) ? (int)$id : 11;
         
-        // 📋 BUSCA VAGAS PÚBLICAS COM DADOS COMPLETOS
-        // ✅ Método atualizado: listarPorEstabelecimentoComCargo()
-        // Inclui automaticamente dados da empresa e cargo
-        $rows = $this->vagaModel()->listarPorEstabelecimentoComCargo(0, $status);
+        // 🔍 OBTÉM TERMO DE BUSCA (NOVO)
+        $busca = isset($_GET['busca']) ? trim((string)$_GET['busca']) : null;
+        
+        // 📋 BUSCA VAGAS PÚBLICAS COM FILTROS
+        $rows = $this->vagaModel()->listarPorEstabelecimentoComCargo(0, $status, $busca);
         
         // 📤 RETORNA LISTA DE VAGAS    
         Response::json(['status' => 200, 'data' => $rows]);
@@ -127,31 +126,30 @@ class Vaga extends ControllerMain
     /* ========== ROTAS PRIVADAS (EMPRESA LOGADA) ========== */
 
     /**
-     * MINHAS VAGAS - GET /vaga/minhas?status={status}
+     * MINHAS VAGAS - GET /vaga/minhas?status={status}&busca={termo}
      * 
-     * Retorna lista de vagas da empresa logada
-     * Pode filtrar por status específico
-     * Acesso restrito - requer empresa logada
+     * ✅ ATUALIZADO: Agora aceita filtro por texto via query parameter 'busca'
      * 
      * @return void Retorna JSON com vagas da empresa
      */
     public function minhas(): void
     {
-        // 🔐 VERIFICA SE EMPRESA ESTÁ LOGADA
-        $eid = $this->getLoggedEmpresaId();
-        if ($eid <= 0) { 
-            Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado.']); 
-            return; 
-        }
+    // 🔐 VERIFICA SE EMPRESA ESTÁ LOGADA
+    $eid = $this->getLoggedEmpresaId();
+    if ($eid <= 0) { 
+        Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado.']); 
+        return; 
+    }
 
-        // 🎯 OBTÉM FILTRO DE STATUS (opcional)
-        $status = isset($_GET['status']) ? (int) $_GET['status'] : null;
-        
-        // 📋 BUSCA VAGAS DA EMPRESA LOGADA
-        $rows = $this->vagaModel()->listarPorEstabelecimentoComCargo($eid, $status);
+    // 🎯 OBTÉM FILTROS
+    $status = isset($_GET['status']) ? (int) $_GET['status'] : null;
+    $busca = isset($_GET['busca']) ? trim((string)$_GET['busca']) : null;
+    
+    // 📋 BUSCA VAGAS DA EMPRESA LOGADA COM FILTROS
+    $rows = $this->vagaModel()->listarPorEstabelecimentoComCargo($eid, $status, $busca);
 
-        // 📤 RETORNA LISTA DE VAGAS
-        Response::json(['status'=>200,'data'=>$rows]);
+    // 📤 RETORNA LISTA DE VAGAS
+    Response::json(['status'=>200, 'data'=>$rows]);
     }
 
     /**

@@ -59,11 +59,11 @@ class VagaModel extends ModelMain
 
     // No arquivo VagaModel.php, modifique o método:
 
-/** 
- * ✅ ATUALIZADO: Lista vagas com dados da empresa, cargo E contagem de candidatos 
- */
-public function listarPorEstabelecimentoComCargo(int $eid = 0, ?int $status = null): array 
-{
+    /** 
+     * ✅ ATUALIZADO: Lista vagas com dados da empresa, cargo, contagem de candidatos E filtro por texto
+     */
+    public function listarPorEstabelecimentoComCargo(int $eid = 0, ?int $status = null, ?string $busca = null): array 
+    {
     // Primeiro, busca as vagas normalmente
     $db = $this->db->table($this->table)
         ->select("
@@ -83,11 +83,27 @@ public function listarPorEstabelecimentoComCargo(int $eid = 0, ?int $status = nu
         ->join('estabelecimento', 'estabelecimento.estabelecimento_id = vaga.estabelecimento_id', 'LEFT')
         ->orderBy('vaga.'.$this->primaryKey, 'DESC');
 
+    // 🔐 FILTRO POR EMPRESA
     if ($eid > 0) {
         $db->where('vaga.estabelecimento_id', $eid);
     }
+    
+    // 📊 FILTRO POR STATUS
     if ($status !== null) {
         $db->where('vaga.statusVaga', $status);
+    }
+    
+    // 🔍 FILTRO POR TEXTO (NOVO - mas opcional)
+    if (!empty($busca)) {
+        $termo = trim($busca);
+        $db->groupStart() // Abre parenteses ( ... OR ... )
+            ->like('vaga.titulo', $termo)
+            ->orLike('vaga.descricao', $termo)
+            ->orLike('vaga.requisitos', $termo)
+            ->orLike('vaga.localizacao', $termo)
+            ->orLike('cargo.descricao', $termo)
+            ->orLike('estabelecimento.nome', $termo)
+        ->groupEnd(); // Fecha parenteses
     }
 
     $vagas = $db->findAll();
@@ -112,7 +128,6 @@ public function listarPorEstabelecimentoComCargo(int $eid = 0, ?int $status = nu
 
     return $vagas;
     }
-    // No VagaModel.php, atualize o método findByIdCompleta:
 
     /** ✅ ATUALIZADO: Busca vaga completa com todos os dados + contagem de candidatos */
     public function findByIdCompleta(int $id): ?array 
