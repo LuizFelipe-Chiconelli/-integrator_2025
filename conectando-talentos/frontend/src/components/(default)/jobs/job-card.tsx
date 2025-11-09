@@ -29,7 +29,7 @@ export default function JobCard({ job }: Props) {
                     />
 
                     <div>
-                        <span>{`Empresa (ID): ${job.estabelecimento_id}`}</span>
+                        <span>{job.empresa_nome}</span>
                     </div>
                 </div>
             </Card.Header>

@@ -81,3 +81,17 @@ export async function isSignedIn(): Promise<boolean> {
         return false
     }
 }
+
+export async function apply(id: number): Promise<{ ok: boolean, message?: string }> {
+    try {
+        await api.post("/candidatura/aplicar", { vaga_id: id });
+
+        return { ok: true }
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            return { ok: false, message: error.response?.data.mensagem }
+        }
+
+        return { ok: false, message: String(error) }
+    }
+}

@@ -1,3 +1,5 @@
+"use client"
+
 // Actions
 import { getSingleVacancy } from "@/actions/default/jobs"
 
@@ -7,23 +9,52 @@ import { useState, useEffect } from "react"
 // Tipos
 import type { Job } from "@/types/jobs"
 
+import { apply, isSignedIn } from "@/actions/user/user"
 import { Button, Container } from "react-bootstrap"
+import { useNotificationContext } from "@/components/notifications/context"
 
 import Banner from "./banner"
+import { useNavigate } from "react-router-dom"
 
 interface Props {
     id: string
 }
 
 export default function VacancyInfo({ id }: Props) {
+    const navigate = useNavigate()
+
     const [job, setJob] = useState<Job | null>()
     const [isLoading, setIsLoading] = useState<boolean>(true)
+    const [isPending, setIsPending] = useState<boolean>(false)
 
-    // const skills: Array<string> = job ? JSON.parse(job.qualifications) : null
+    const { sendNotification } = useNotificationContext()
 
     const fetchJob = async (): Promise<void> => {
         const res: Job | null = await getSingleVacancy(id)
-        // setJob(res)
+        setJob(res)
+    }
+
+    const handleApply = async (e: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
+        e.preventDefault()
+
+        if (isPending) return
+        setIsPending(true)
+
+        if (!isSignedIn()) {
+            return navigate("/auth/login-usuario")
+        }
+
+        const res = await apply(job!.vaga_id)
+
+        if (res.ok) {
+            sendNotification({ message: "Candidatura realizada com sucesso!", type: "Success" })
+            setIsPending(false)
+
+            return navigate("/usuario/candidaturas")
+        }
+
+        sendNotification({ message: res.message!, type: "Error" })
+        return setIsPending(false)
     }
 
     useEffect(() => {
@@ -38,8 +69,8 @@ export default function VacancyInfo({ id }: Props) {
                     <Banner />
 
                     <Container className="mt-5">
-                        <h2>{job.titulo}</h2>
                         <span className="fs-4">{job.empresa_nome}</span>
+                        <h2>{job.titulo}</h2>
 
                         <div className="mt-5">
                             <h3>Descrição</h3>
@@ -48,21 +79,15 @@ export default function VacancyInfo({ id }: Props) {
                         </div>
 
                         <div className="mt-5">
-                            <h3>Suas atividades na empresa</h3>
-
-                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Esse tenetur a error, distinctio officia similique rem dolorem dolore molestiae voluptate id minima obcaecati consectetur sunt ipsum laboriosam inventore accusantium architecto.</p>
-                        </div>
-
-                        <div className="mt-5">
                             <h3>Requisitos</h3>
 
-                            <p>
+                            <p style={{ whiteSpace: "pre-wrap" }}>
                                 {job.requisitos}
                             </p>
                         </div>
 
                         <div className="mt-5">
-                            <Button className="px-4">Candidatar-se</Button>
+                            <Button onClick={handleApply} className="px-4">Candidatar-se</Button>
                         </div>
                     </Container>
                 </>

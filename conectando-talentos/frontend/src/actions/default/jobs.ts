@@ -12,9 +12,7 @@ export async function getJobs(filter?: string): Promise<Job[]> {
 
 export async function getSingleVacancy(id: string): Promise<Job> {
     // ID será usado na busca com a API real
-    const res: AxiosResponse = await api.get(`/vaga/detalhe/${id}`)
-    console.log(res)
-    const data: Job = res.data
+    const { data: { data } }: { data: { data: Job } } = await api.get(`/vaga/detalhe/${id}`)
 
     return data
 }
