@@ -87,55 +87,87 @@ class CandidaturaModel extends ModelMain
             ->update(['statusCandidatura' => $novo]);          // Atualiza status
     }
 
-    /* ========= LISTAGENS COMPLEXAS ========= */
-
     /**
-     * LISTAR POR VAGA - Visão da EMPRESA
-     * 
-     * Retorna todas as candidaturas de uma vaga específica
-     * Inclui dados do candidato: nome, email, telefone, cidade
-     * Ordenado por data de candidatura (mais recentes primeiro)
-     * 
-     * @param int $vagaId ID da vaga
-     * @return array Lista de candidaturas com dados do candidato
-     */
-    public function listarPorVaga(int $vagaId): array {
-        return $this->db->table($this->table.' vc')            // Alias vc para vaga_curriculum
-            ->select("
-                vc.vaga_id,
-                vc.curriculum_id,
-                vc.statusCandidatura,
-                vc.dataCandidatura,
+ * LISTAR POR VAGA - Visão da EMPRESA
+ * 
+ * ✅ COMPLETO: Retorna currículo integral do candidato
+ * Inclui dados pessoais, escolaridade, experiência e qualificações
+ * 
+ * @param int $vagaId ID da vaga
+ * @return array Lista de candidaturas com currículo completo
+ */
+public function listarPorVaga(int $vagaId): array {
+    // Primeiro busca as candidaturas básicas
+    $candidaturas = $this->db->table($this->table.' vc')
+        ->select("
+            vc.vaga_id,
+            vc.curriculum_id,
+            vc.statusCandidatura,
+            vc.dataCandidatura,
 
-                v.titulo,                                      // Título da vaga
-                v.estabelecimento_id,                          // ID da empresa
+            -- Dados da Vaga
+            v.titulo,
+            v.estabelecimento_id,
 
-                pf.nome              AS candidato_nome,        // Nome do candidato
-                cur.email            AS candidato_email,       // Email do candidato
-                cur.celular          AS candidato_telefone,    // Telefone do candidato
+            -- Dados Pessoais do Candidato
+            pf.nome AS candidato_nome,
+            pf.cpf AS candidato_cpf,
+            cur.dataMascimento AS candidato_data_nascimento,
+            cur.sexo AS candidato_sexo,
+            cur.email AS candidato_email,
+            cur.celular AS candidato_celular,
+            cur.apresentacaoPessoa AS candidato_apresentacao,
+            
+            -- Endereço
+            cur.logradouro,
+            cur.numero,
+            cur.complemento,
+            cur.bairro,
+            cur.cep,
+            cid.cidade AS candidato_cidade,
+            cid.uf AS candidato_uf
+        ")
+        ->join('vaga v', 'v.vaga_id = vc.vaga_id', 'INNER')
+        ->join('curriculum cur', 'cur.curriculum_id = vc.curriculum_id', 'INNER')
+        ->join('pessoa_fisica pf', 'pf.pessoa_fisica_id = cur.pessoa_fisica_id', 'INNER')
+        ->join('cidade cid', 'cid.cidade_id = cur.cidade_id', 'LEFT')
+        ->where('vc.vaga_id', $vagaId)
+        ->orderBy('vc.dataCandidatura', 'DESC')
+        ->findAll();
 
-                -- Formata cidade e UF (ex: 'São Paulo, SP')
-                CONCAT(
-                    COALESCE(cid.cidade, ''), 
-                    CASE WHEN cid.uf IS NOT NULL AND cid.uf <> '' 
-                        THEN CONCAT(', ', cid.uf) 
-                        ELSE '' 
-                    END
-                ) AS candidato_cidade
-            ")
-            ->join('vaga v',          'v.vaga_id = vc.vaga_id',                 'INNER')  // Dados da vaga
-            ->join('curriculum cur',  'cur.curriculum_id = vc.curriculum_id',   'INNER')  // Dados do currículo
-            ->join('pessoa_fisica pf','pf.pessoa_fisica_id = cur.pessoa_fisica_id','INNER') // Dados pessoais
-            ->join('cidade cid',      'cid.cidade_id = cur.cidade_id',          'LEFT')   // Dados da cidade
-            ->where('vc.vaga_id', $vagaId)                                          // Filtra por vaga específica
-            ->orderBy('vc.dataCandidatura', 'DESC')                                 // Mais recentes primeiro
+    // Para cada candidatura, busca dados complementares
+    foreach ($candidaturas as &$candidatura) {
+        $curriculumId = (int)$candidatura['curriculum_id'];
+        
+        // 📚 Escolaridade
+        $candidatura['escolaridade'] = $this->db->table('curriculum_escolaridade')
+            ->select('*')
+            ->where('curriculum_curriculum_id', $curriculumId)
+            ->orderBy('inicioAno', 'DESC')
+            ->findAll();
+
+        // 💼 Experiência Profissional
+        $candidatura['experiencias'] = $this->db->table('curriculum_experiencia')
+            ->select('*')
+            ->where('curriculum_id', $curriculumId)
+            ->orderBy('inicioAno', 'DESC')
+            ->findAll();
+
+        // 🎯 Qualificações/Cursos
+        $candidatura['qualificacoes'] = $this->db->table('curriculum_qualificacao')
+            ->select('*')
+            ->where('curriculum_id', $curriculumId)
+            ->orderBy('ano', 'DESC')
             ->findAll();
     }
 
+    return $candidaturas;
+    }
     /**
      * LISTAR POR CURRICULUM - Visão do CANDIDATO
      * 
-     * ✅ ATUALIZADO: Retorna candidaturas do candidato com dados COMPLETOS da empresa
+     * ✅ CORRIGIDO: Colunas de salário atualizadas
+     * Retorna candidaturas do candidato com dados COMPLETOS da empresa
      * Inclui informações completas da empresa e detalhes da vaga
      * Ordenado por data de candidatura (mais recentes primeiro)
      * 
@@ -144,44 +176,43 @@ class CandidaturaModel extends ModelMain
      */
     public function listarPorCurriculum(int $curriculumId): array
     {
-        return $this->db->table($this->table . ' vc')          // Alias vc para vaga_curriculum
-            ->select("
-                vc.vaga_id,
-                vc.curriculum_id,
-                vc.statusCandidatura,
-                vc.dataCandidatura,
-                
-                -- Dados da Vaga
-                v.titulo,
-                v.descricao AS vaga_descricao,
-                v.localizacao,
-                v.salario,
-                v.nivel,
-                v.modalidade,
-                v.vinculo,
-                v.dtInicio,
-                v.dtFim,
-                
-                -- Dados da Empresa (COMPLETOS)
-                e.estabelecimento_id AS empresa_id,
-                e.nome AS empresa_nome,
-                e.email AS empresa_email,
-                e.descricao AS empresa_descricao,
-                e.website AS empresa_website,
-                e.setor AS empresa_setor,
-                e.linkedin AS empresa_linkedin,
-                e.instagram AS empresa_instagram,
-                e.facebook AS empresa_facebook,
-                
-                -- Dados do Cargo
-                cargo.descricao AS cargo_descricao
-            ")
-            ->join('vaga v', 'v.vaga_id = vc.vaga_id', 'INNER')                    // Dados da vaga
-            ->join('estabelecimento e', 'e.estabelecimento_id = v.estabelecimento_id', 'LEFT') // Dados da empresa
-            ->join('cargo', 'cargo.cargo_id = v.cargo_id', 'LEFT')                 // Dados do cargo
-            ->where('vc.curriculum_id', $curriculumId)                             // Filtra por currículo
-            ->orderBy('vc.dataCandidatura', 'DESC')                                // Mais recentes primeiro
-            ->findAll();
+    return $this->db->table($this->table . ' vc')          // Alias vc para vaga_curriculum
+        ->select("
+            vc.vaga_id,
+            vc.curriculum_id,
+            vc.statusCandidatura,
+            vc.dataCandidatura,
+            
+            -- Dados da Vaga
+            v.titulo,
+            v.descricao AS vaga_descricao,
+            v.localizacao,
+            v.salario_minimo,          
+            v.modalidade,
+            v.vinculo,
+            v.dtInicio,
+            v.dtFim,
+            
+            -- Dados da Empresa (COMPLETOS)
+            e.estabelecimento_id AS empresa_id,
+            e.nome AS empresa_nome,
+            e.email AS empresa_email,
+            e.descricao AS empresa_descricao,
+            e.website AS empresa_website,
+            e.setor AS empresa_setor,
+            e.linkedin AS empresa_linkedin,
+            e.instagram AS empresa_instagram,
+            e.facebook AS empresa_facebook,
+            
+            -- Dados do Cargo
+            cargo.descricao AS cargo_descricao
+        ")
+        ->join('vaga v', 'v.vaga_id = vc.vaga_id', 'INNER')                    // Dados da vaga
+        ->join('estabelecimento e', 'e.estabelecimento_id = v.estabelecimento_id', 'LEFT') // Dados da empresa
+        ->join('cargo', 'cargo.cargo_id = v.cargo_id', 'LEFT')                 // Dados do cargo
+        ->where('vc.curriculum_id', $curriculumId)                             // Filtra por currículo
+        ->orderBy('vc.dataCandidatura', 'DESC')                                // Mais recentes primeiro
+        ->findAll();
     }
 
     /**
