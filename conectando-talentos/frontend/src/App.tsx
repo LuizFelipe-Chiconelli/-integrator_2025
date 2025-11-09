@@ -12,6 +12,7 @@ import HomePage from './_pages/(Default)/home/page'
 import AboutUsPage from './_pages/(Default)/about-us/page'
 import VacanciesPage from './_pages/(Default)/vacancies/page'
 import CompaniesPage from './_pages/(Default)/companies/page'
+import SingleVacancyPage from './_pages/(User)/single-vacancy/page'
 
 // Pages - Auth Layout
 import CandidateSignInPage from './_pages/(Auth)/candidate-signin/page'
@@ -25,6 +26,7 @@ import CurriculumPage from './_pages/(User)/curriculum/page'
 
 // Pages - Company Layout
 import CompanyHomePage from './_pages/(Company)/home/page'
+import MyVacanciesPage from './_pages/(Company)/my-vacancies/page'
 import PublishVacancyPage from './_pages/(Company)/publish-vacancy/page'
 
 // Pages - Error
@@ -32,7 +34,6 @@ import Unauthorized from './_pages/errors/403/page'
 import PageNotFound from './_pages/errors/404/page'
 
 // Providers
-import MyVacanciesPage from './_pages/(Company)/my-vacancies/page'
 import NotificationProvider from './components/notifications/context'
 
 function App() {
@@ -47,8 +48,7 @@ function App() {
 							<Route path='/vagas' element={<VacanciesPage />} />
 							<Route path='/empresa' element={<CompaniesPage />} />
 							<Route path='/sobre' element={<AboutUsPage />} />
-
-							{/* <Route path='/vagas/:id' element={<SingleVacancy />} /> */}
+							<Route path='/vaga/:id' element={<SingleVacancyPage />} />
 
 							<Route path='/unauthorized' element={<Unauthorized />} />
 							<Route path='*' element={<PageNotFound />} />
@@ -68,7 +68,6 @@ function App() {
 							<Route index element={<UserHomePage />} />
 							<Route path='curriculo' element={<CurriculumPage />} />
 							{/* <Route path='candidaturas' element={<UserApplication />} /> */}
-							{/* <Route path='vagas-recomendadas' element={<UserJobs />} /> */}
 							{/* <Route path='*' element={<PageNotFound />} /> */}
 						</Route>
 

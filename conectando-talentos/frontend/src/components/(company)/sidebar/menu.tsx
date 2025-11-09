@@ -4,7 +4,7 @@ import { RxFileText } from "react-icons/rx"
 import { useNavigate } from "react-router-dom"
 import { LuTableProperties } from "react-icons/lu"
 import { signOut } from "@/actions/company/company"
-import { FiBriefcase, FiLogOut, FiUser } from "react-icons/fi"
+import { FiBriefcase, FiHome, FiLogOut, FiUser } from "react-icons/fi"
 import { useNotificationContext } from "@/components/notifications/context"
 
 export default function Menu() {
@@ -48,6 +48,12 @@ export default function Menu() {
             />
 
             <div className="flex-grow-1" />
+
+            <MenuButton
+                title="Página Inicial"
+                href="/"
+                icon={<FiHome />}
+            />
 
             <button
                 onClick={handleLogout}

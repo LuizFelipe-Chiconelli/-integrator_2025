@@ -2,7 +2,7 @@ import { RxFileText } from "react-icons/rx"
 import { signOut } from "@/actions/user/user"
 import { useNavigate } from "react-router-dom"
 import { FaRegAddressCard } from "react-icons/fa6"
-import { FiBriefcase, FiUser, FiLogOut, FiHome } from "react-icons/fi"
+import { FiUser, FiLogOut, FiHome } from "react-icons/fi"
 import { useNotificationContext } from "@/components/notifications/context"
 
 import MenuButton from "./btn"
@@ -31,8 +31,6 @@ export default function Menu() {
             <MenuButton title="Meu Currículo" href="/usuario/curriculo" icon={<FaRegAddressCard />} />
 
             <MenuButton title="Minhas Candidaturas" href="/usuario/candidaturas" icon={<RxFileText />} />
-
-            <MenuButton title="Vagas Recomendadas" href="/usuario/vagas-recomendadas" icon={<FiBriefcase />} />
 
             {/* Espaço flexível para empurrar os botões para baixo */}
             <div className="flex-grow-1" />

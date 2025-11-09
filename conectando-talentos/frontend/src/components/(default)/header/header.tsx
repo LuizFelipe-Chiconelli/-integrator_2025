@@ -2,6 +2,7 @@ import { Container, Nav, Navbar, NavbarCollapse, Dropdown } from "react-bootstra
 
 import { Link } from "react-router-dom"
 import { FaInfoCircle } from "react-icons/fa"
+import { RxHamburgerMenu } from "react-icons/rx"
 
 import "./header.css"
 
@@ -28,8 +29,8 @@ export default function Header() {
                                     <Nav.Link as={Link} to="/sobre">Sobre</Nav.Link>
 
                                     <div className="d-flex flex-column d-lg-none align-items-start gap-2 mt-3">
-                                        <Nav.Link as={Link} to="/auth/login-usuario">Login para Candidatos</Nav.Link>
-                                        <Nav.Link as={Link} to="/auth/login-empresa">Login para Empresas</Nav.Link>
+                                        <Nav.Link as={Link} to="/auth/usuario">Área do Candidato</Nav.Link>
+                                        <Nav.Link as={Link} to="/auth/minha-empresa">Área da Empresa</Nav.Link>
                                     </div>
                                 </Nav>
                             </Navbar.Offcanvas>
@@ -39,10 +40,10 @@ export default function Header() {
                     {/* Botões para desktop */}
                     <div className="col-3 d-none d-lg-flex justify-content-end align-items-center gap-2">
                         <Dropdown>
-                            <Dropdown.Toggle variant="outline-primary">Login</Dropdown.Toggle>
-                            <Dropdown.Menu className="translate-middle-x">
-                                <Dropdown.Item as={Link} to="/auth/login-usuario">Login para Candidatos</Dropdown.Item>
-                                <Dropdown.Item as={Link} to="/auth/login-empresa">Login para Empresas</Dropdown.Item>
+                            <Dropdown.Toggle variant="outline-primary">Sua área</Dropdown.Toggle>
+                            <Dropdown.Menu style={{ transform: 'translateX(-40%)' }}>
+                                <Dropdown.Item as={Link} to="/usuario">Área do Candidato</Dropdown.Item>
+                                <Dropdown.Item as={Link} to="/minha-empresa">Área da Empresa</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
                     </div>

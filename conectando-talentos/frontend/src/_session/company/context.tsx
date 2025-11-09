@@ -97,7 +97,8 @@ export default function CompanySessionProvider({ children }: Props) {
             updateVacancy,
             updateVacancyStatus
         }}>
-            {companyInfo !== undefined ? (children) : (<><Navigate to='/' /></>)}
+            {companyInfo === undefined && (<><Navigate to='/auth/login-empresa' /></>)}
+            {companyInfo && (children)}
         </SessionContext.Provider>
     )
 }

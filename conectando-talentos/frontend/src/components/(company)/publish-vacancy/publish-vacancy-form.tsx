@@ -17,6 +17,7 @@ import DateField from "@/components/form-kit/fields/date-field"
 import TextField from "@/components/form-kit/fields/text-field"
 import SelectField from "@/components/form-kit/fields/select-field"
 import NumberField from "@/components/form-kit/fields/number-field"
+import { useNavigate } from "react-router-dom"
 
 interface CargoAPI { cargo_id: number; descricao: string }
 interface CidadeAPI { id: number; nome: string; uf: string }
@@ -41,6 +42,8 @@ const nivelOptions: Option[] = [
 
 export default function PublishVacancyForm() {
     const formId: string = useRef<SUUID>(short().generate()).current.toString()
+
+    const navigate = useNavigate()
 
     const [loading, setLoading] = useState<boolean>(true)
     const [isPending, setIsPending] = useState<boolean>(false)
@@ -84,7 +87,7 @@ export default function PublishVacancyForm() {
         })()
     }, [])
 
-    const onSubmit = async (formData: Record<string, any>) => {
+    const onSubmit = async (formData: Record<string, any>): Promise<void> => {
         if (isPending) return
         setIsPending(true)
 
@@ -112,7 +115,9 @@ export default function PublishVacancyForm() {
 
         if (res.ok) {
             sendNotification({ message: "Vaga postada com sucesso!", type: "Success" })
-            return setIsPending(false)
+            setIsPending(false)
+
+            return navigate('/minha-empresa/vagas')
         }
 
         sendNotification({ message: res.message!, type: "Error" })

@@ -59,25 +59,10 @@ export default function JobCard({ job }: Props) {
                     </Badge>
                 </div>
 
-                {/* <div className="d-flex flex-wrap gap-1">
-                    {skills.map((skill: string, index: number) => {
-                        return (
-                            <Badge
-                                bg="light"
-                                className="border text-dark"
-                                style={{ fontSize: "11px" }}
-                                key={index}
-                            >
-                                {skill}
-                            </Badge>
-                        )
-                    })}
-                </div> */}
-
             </Card.Body>
             <Card.Footer>
                 <div>
-                    <Button>Ver Detalhes</Button>
+                    <Button href={`/vaga/${job.vaga_id}`}>Ver Detalhes</Button>
                 </div>
             </Card.Footer>
         </Card>

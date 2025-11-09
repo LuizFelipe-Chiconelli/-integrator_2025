@@ -51,9 +51,9 @@ export default function VacancyCard({ info, openModal }: Props) {
 						</div>
 					</div>
 
-					{info.requisitos && (
+					{info.descricao && (
 						<div className="text-6 mt-3" style={{ fontSize: 16 }}>
-							<p className="mb-0">{info.requisitos}</p>
+							<p className="mb-0">{info.descricao}</p>
 						</div>
 					)}
 

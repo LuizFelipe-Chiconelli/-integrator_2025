@@ -1,4 +1,4 @@
-import MyVacanciesSection from "@/components/(company)/my-vacancies/my-vacancies-section"
+import MyVacanciesSection from "@/components/(company)/my-vacancies/vacancies-section"
 
 export default function MyVacanciesPage() {
     return (

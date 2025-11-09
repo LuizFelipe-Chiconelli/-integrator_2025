@@ -121,7 +121,8 @@ export default function UserSessionProvider({ children }: Props) {
             saveQualification,
             deleteQualification
         }}>
-            {userInfo !== undefined ? (children) : (<><Navigate to='/' /></>)}
+            {userInfo === undefined && (<><Navigate to='/auth/login-usuario' /></>)}
+            {userInfo && (children)}
         </SessionContext.Provider>
     )
 }

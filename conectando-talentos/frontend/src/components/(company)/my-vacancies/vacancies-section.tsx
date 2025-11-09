@@ -52,7 +52,7 @@ export default function MyVacanciesSection() {
                 <VacancyFilters value={filters} onChange={setFilters} />
             </Container>
 
-            <Container className="mt-4">
+            <Container className="d-flex flex-column gap-3 mt-4">
                 {vacancies?.map((v) => (
                     <VacancyCard key={v.vaga_id} info={v} openModal={handleOpenModal} />
                 ))}
