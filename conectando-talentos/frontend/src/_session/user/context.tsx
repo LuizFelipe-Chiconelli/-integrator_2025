@@ -7,6 +7,7 @@ import type { Experience, Qualification, Scholarity, SessionContextType, User, U
 
 import api from "@/actions/api"
 import { Navigate } from "react-router-dom"
+import type { Application } from "@/types/jobs"
 
 export const SessionContext = createContext<SessionContextType | undefined>(undefined)
 
@@ -102,6 +103,19 @@ export default function UserSessionProvider({ children }: Props) {
         await api.delete(`/qualificacao/excluir/${id}`)
     }
 
+    // Applications
+    const getApplicationList = async (): Promise<{ ok: boolean, applications?: Application[] }> => {
+        try {
+            const { data }: { data: { data: Application[] } } = await api.get('/candidatura/minhas')
+            console.log(data)
+
+            return { ok: true, applications: undefined }
+        } catch (error) {
+            console.log(error)
+            return { ok: false }
+        }
+    }
+
     // Fetch
     useEffect(() => {
         fetchUserInfo()
@@ -119,7 +133,8 @@ export default function UserSessionProvider({ children }: Props) {
             deleteExperience,
             fetchQualification,
             saveQualification,
-            deleteQualification
+            deleteQualification,
+            getApplicationList
         }}>
             {userInfo === undefined && (<><Navigate to='/auth/login-usuario' /></>)}
             {userInfo && (children)}

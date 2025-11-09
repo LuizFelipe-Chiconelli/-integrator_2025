@@ -8,6 +8,10 @@ body {
 	overflow-x: hidden;
 }
 
+tr:last-child {
+    border: none !important;
+}
+
 .modal-backdrop {
 	z-index: 45 !important;
 }

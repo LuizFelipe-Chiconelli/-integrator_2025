@@ -12,7 +12,7 @@ import HomePage from './_pages/(Default)/home/page'
 import AboutUsPage from './_pages/(Default)/about-us/page'
 import VacanciesPage from './_pages/(Default)/vacancies/page'
 import CompaniesPage from './_pages/(Default)/companies/page'
-import SingleVacancyPage from './_pages/(User)/single-vacancy/page'
+import SingleVacancyPage from './_pages/(Default)/single-vacancy/page'
 
 // Pages - Auth Layout
 import CandidateSignInPage from './_pages/(Auth)/candidate-signin/page'
@@ -23,6 +23,7 @@ import CompanySignUpPage from './_pages/(Auth)/company-signup/page'
 // Pages - User Layout
 import UserHomePage from './_pages/(User)/home/page'
 import CurriculumPage from './_pages/(User)/curriculum/page'
+import MyApplicationsPage from './_pages/(User)/my-applications/page'
 
 // Pages - Company Layout
 import CompanyHomePage from './_pages/(Company)/home/page'
@@ -67,7 +68,7 @@ function App() {
 						<Route path='/usuario' element={<UserLayout />}>
 							<Route index element={<UserHomePage />} />
 							<Route path='curriculo' element={<CurriculumPage />} />
-							{/* <Route path='candidaturas' element={<UserApplication />} /> */}
+							<Route path='candidaturas' element={<MyApplicationsPage />} />
 							{/* <Route path='*' element={<PageNotFound />} /> */}
 						</Route>
 

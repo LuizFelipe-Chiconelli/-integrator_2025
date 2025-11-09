@@ -1,3 +1,5 @@
+import type { Application } from "@/types/jobs"
+
 export interface SessionContextType {
     userInfo: User | null | undefined
     updateUserInfo: (info: UserInfoPayload) => Promise<{ ok: boolean, message?: string }>
@@ -10,6 +12,7 @@ export interface SessionContextType {
     fetchQualification: (userId: string | number) => Promise<Qualification[]>
     saveQualification: (info: Qualification) => Promise<void>
     deleteQualification: (id: number) => Promise<void>
+    getApplicationList: () => Promise<{ ok: boolean, applications?: Application[] }>
 }
 
 export interface UserInfoPayload {

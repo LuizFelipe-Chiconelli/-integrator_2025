@@ -25,3 +25,9 @@ export interface Job {
     empresa_setor?: string | null
     empresa_website?: string | null
 }
+
+export interface Application extends Job {
+    curriculum_id: number
+    statusCandidatura: number
+    dataCandidatura: Date | string
+}
