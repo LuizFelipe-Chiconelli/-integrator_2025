@@ -28,6 +28,7 @@ import MyApplicationsPage from './_pages/(User)/my-applications/page'
 // Pages - Company Layout
 import CompanyHomePage from './_pages/(Company)/home/page'
 import MyVacanciesPage from './_pages/(Company)/my-vacancies/page'
+import ApplicationsPage from './_pages/(Company)/applications/page'
 import PublishVacancyPage from './_pages/(Company)/publish-vacancy/page'
 
 // Pages - Error
@@ -59,9 +60,9 @@ function App() {
 						<Route path='/minha-empresa' element={<CompanyLayout />}>
 							<Route index element={<CompanyHomePage />} />
 							<Route path='publicar-vaga' element={<PublishVacancyPage />} />
-							{/* <Route path='candidaturas' element={<Application />} /> */}
+							<Route path='candidaturas' element={<ApplicationsPage />} />
 							<Route path='vagas' element={<MyVacanciesPage />} />
-							{/* <Route path='*' element={<PageNotFound />} /> */}
+							<Route path='*' element={<PageNotFound />} />
 						</Route>
 
 						{/* Rotas para layout User */}
@@ -69,7 +70,7 @@ function App() {
 							<Route index element={<UserHomePage />} />
 							<Route path='curriculo' element={<CurriculumPage />} />
 							<Route path='candidaturas' element={<MyApplicationsPage />} />
-							{/* <Route path='*' element={<PageNotFound />} /> */}
+							<Route path='*' element={<PageNotFound />} />
 						</Route>
 
 						{/* Rotas para layout Login/Register */}

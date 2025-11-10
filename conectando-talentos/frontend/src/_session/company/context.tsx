@@ -6,7 +6,7 @@ import { createContext, useContext, useEffect, useState } from "react"
 import type { Company, SessionContextType } from "./types"
 
 import api from "@/actions/api"
-import type { Job } from "@/types/jobs"
+import type { CandidateApplication, Job } from "@/types/jobs"
 
 export const SessionContext = createContext<SessionContextType | undefined>(undefined)
 
@@ -84,6 +84,17 @@ export default function CompanySessionProvider({ children }: Props) {
         }
     }
 
+    // Application
+    const getApplicationList = async (id: number): Promise<{ ok: boolean, applications?: CandidateApplication[] }> => {
+        try {
+            const { data: { data } }: { data: { data: CandidateApplication[] } } = await api.get(`/candidatura/porVaga/listar/${id}`)
+
+            return { ok: true, applications: data }
+        } catch (error) {
+            return { ok: false }
+        }
+    }
+
     useEffect(() => {
         fetchCompanyInfo()
     }, [])
@@ -95,7 +106,8 @@ export default function CompanySessionProvider({ children }: Props) {
             createJobVacancy,
             getJobVacancies,
             updateVacancy,
-            updateVacancyStatus
+            updateVacancyStatus,
+            getApplicationList
         }}>
             {companyInfo === undefined && (<><Navigate to='/auth/login-empresa' /></>)}
             {companyInfo && (children)}

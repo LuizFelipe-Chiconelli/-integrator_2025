@@ -1,4 +1,4 @@
-import type { Job } from "@/types/jobs"
+import type { CandidateApplication, Job } from "@/types/jobs"
 
 export interface SessionContextType {
     companyInfo: Company | null | undefined
@@ -6,7 +6,8 @@ export interface SessionContextType {
     createJobVacancy: (info: Job) => Promise<{ ok: boolean, message?: string }>
     getJobVacancies: () => Promise<{ ok: boolean, vacancies?: Job[] }>
     updateVacancy: (info: Job) => Promise<{ ok: boolean, message?: string }>
-    updateVacancyStatus: (id: string, status: number) => Promise<{ ok: boolean, message?: string }>
+    updateVacancyStatus: (id: string, status: number) => Promise<{ ok: boolean, message?: string }>,
+    getApplicationList: (id: number) => Promise<{ ok: boolean, applications?: CandidateApplication[] }>
 }
 
 export interface Company {

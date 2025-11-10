@@ -1,3 +1,5 @@
+import type { Experience, Qualification, Scholarity } from "@/_session/user/types"
+
 export interface Job {
     vaga_id: number
     cargo_id: number
@@ -31,4 +33,31 @@ export interface Application extends Job {
     statusCandidatura: number
     dataCandidatura: Date | string
     vaga_descricao: string | null
+}
+
+export interface CandidateApplication extends Job {
+    curriculum_id: number
+    statusCandidatura: number
+    dataCandidatura: Date | string
+
+    titulo: "Desenvolvedor Front End (React - Jr)"
+    vaga_id: 14
+
+    bairro: string
+    candidato_apresentacao: string
+    candidato_celular: string
+    candidato_cidade: string
+    candidato_cpf: string
+    candidato_data_nascimento: Date | string
+    candidato_email: string
+    candidato_nome: string
+    candidato_sexo: string
+    candidato_uf: string
+    cep: string
+    complemento: string
+    logradouro: string
+    numero: string
+    escolaridade: Scholarity[]
+    experiencias: Experience[]
+    qualificacoes: Qualification[]
 }

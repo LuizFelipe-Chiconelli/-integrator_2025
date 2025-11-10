@@ -36,7 +36,7 @@ export default function VacancyModal({ info, opened, onClose, updateVacancyList 
     const [status, setStatus] = useState<number>(0)
 
     const { sendNotification } = useNotificationContext()
-    const { updateVacancy, updateVacancyStatus } = useCompanySessionContext()
+    const { updateVacancy } = useCompanySessionContext()
 
     const [cities, setCities] = useState<CidadeAPI[]>([])
     const [selectedUf, setSelectedUf] = useState<string>("")

@@ -4,6 +4,7 @@ import { Container } from "react-bootstrap"
 
 import ApplicationRow from "./row"
 import ApplicationTable from "./table"
+import ApplicationModal from "./modal"
 import ApplicationFilters from "./filter"
 
 import { useEffect, useState } from "react"
@@ -11,7 +12,6 @@ import { useUserSessionContext } from "@/_session/user/context"
 import { useNotificationContext } from "@/components/notifications/context"
 
 import type { Application } from "@/types/jobs"
-import ApplicationModal from "./modal"
 
 export default function ApplicationSection() {
     const [applications, setApplications] = useState<Application[] | undefined>([])
