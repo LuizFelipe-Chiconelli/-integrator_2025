@@ -112,11 +112,11 @@ public function listarPorVaga(int $vagaId): array {
             -- Dados Pessoais do Candidato
             pf.nome AS candidato_nome,
             pf.cpf AS candidato_cpf,
-            cur.dataMascimento AS candidato_data_nascimento,
+            cur.dataNascimento AS candidato_data_nascimento,
             cur.sexo AS candidato_sexo,
             cur.email AS candidato_email,
             cur.celular AS candidato_celular,
-            cur.apresentacaoPessoa AS candidato_apresentacao,
+            cur.apresentacaoPessoal AS candidato_apresentacao,
             
             -- Endereço
             cur.logradouro,
