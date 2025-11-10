@@ -30,4 +30,5 @@ export interface Application extends Job {
     curriculum_id: number
     statusCandidatura: number
     dataCandidatura: Date | string
+    vaga_descricao: string | null
 }

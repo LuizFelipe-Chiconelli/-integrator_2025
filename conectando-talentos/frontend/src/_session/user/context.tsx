@@ -1,13 +1,13 @@
 'use client'
 
+import { Navigate } from "react-router-dom"
 import { createContext, useContext, useEffect, useState } from "react"
 
 import type { AxiosResponse } from "axios"
+import type { Application } from "@/types/jobs"
 import type { Experience, Qualification, Scholarity, SessionContextType, User, UserInfoPayload } from "./types"
 
 import api from "@/actions/api"
-import { Navigate } from "react-router-dom"
-import type { Application } from "@/types/jobs"
 
 export const SessionContext = createContext<SessionContextType | undefined>(undefined)
 
@@ -106,10 +106,9 @@ export default function UserSessionProvider({ children }: Props) {
     // Applications
     const getApplicationList = async (): Promise<{ ok: boolean, applications?: Application[] }> => {
         try {
-            const { data }: { data: { data: Application[] } } = await api.get('/candidatura/minhas')
-            console.log(data)
+            const { data: { data } }: { data: { data: Application[] } } = await api.get('/candidatura/minhas')
 
-            return { ok: true, applications: undefined }
+            return { ok: true, applications: data }
         } catch (error) {
             console.log(error)
             return { ok: false }

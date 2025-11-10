@@ -1,6 +1,7 @@
 'use client'
 
 import short, { type SUUID } from "short-uuid"
+import { useNavigate } from "react-router-dom"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useCompanySessionContext } from "@/_session/company/context"
 import { useNotificationContext } from "@/components/notifications/context"
@@ -17,7 +18,6 @@ import DateField from "@/components/form-kit/fields/date-field"
 import TextField from "@/components/form-kit/fields/text-field"
 import SelectField from "@/components/form-kit/fields/select-field"
 import NumberField from "@/components/form-kit/fields/number-field"
-import { useNavigate } from "react-router-dom"
 
 interface CargoAPI { cargo_id: number; descricao: string }
 interface CidadeAPI { id: number; nome: string; uf: string }

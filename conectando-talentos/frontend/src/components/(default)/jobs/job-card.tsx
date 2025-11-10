@@ -8,9 +8,8 @@ interface Props {
 }
 
 export default function JobCard({ job }: Props) {
-    // const skills: Array<string> = JSON.parse(job.requisitos).slice(0, 4)
     const minSalario: string = Number(job.salario_minimo).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
-	const maxSalario: string = Number(job.salario_minimo).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+	const maxSalario: string = Number(job.salario_maximo).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
 
 	const dateString: string = new Date(`${job.dtFim}T00:00:00`).toLocaleDateString("pt-BR", { timeZone: "UTC" })
 
