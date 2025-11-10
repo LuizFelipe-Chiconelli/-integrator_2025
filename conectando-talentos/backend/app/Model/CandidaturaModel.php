@@ -166,7 +166,7 @@ public function listarPorVaga(int $vagaId): array {
     /**
      * LISTAR POR CURRICULUM - Visão do CANDIDATO
      * 
-     * ✅ CORRIGIDO: Colunas de salário atualizadas
+     * ✅ ATUALIZADO: Inclui salário máximo e requisitos
      * Retorna candidaturas do candidato com dados COMPLETOS da empresa
      * Inclui informações completas da empresa e detalhes da vaga
      * Ordenado por data de candidatura (mais recentes primeiro)
@@ -176,7 +176,7 @@ public function listarPorVaga(int $vagaId): array {
      */
     public function listarPorCurriculum(int $curriculumId): array
     {
-    return $this->db->table($this->table . ' vc')          // Alias vc para vaga_curriculum
+    return $this->db->table($this->table . ' vc')
         ->select("
             vc.vaga_id,
             vc.curriculum_id,
@@ -187,7 +187,10 @@ public function listarPorVaga(int $vagaId): array {
             v.titulo,
             v.descricao AS vaga_descricao,
             v.localizacao,
-            v.salario_minimo,          
+            v.salario_minimo,
+            v.salario_maximo,          -- ✅ NOVO: Salário máximo
+            v.requisitos,               -- ✅ NOVO: Requisitos da vaga
+            v.nivel,
             v.modalidade,
             v.vinculo,
             v.dtInicio,
@@ -207,11 +210,11 @@ public function listarPorVaga(int $vagaId): array {
             -- Dados do Cargo
             cargo.descricao AS cargo_descricao
         ")
-        ->join('vaga v', 'v.vaga_id = vc.vaga_id', 'INNER')                    // Dados da vaga
-        ->join('estabelecimento e', 'e.estabelecimento_id = v.estabelecimento_id', 'LEFT') // Dados da empresa
-        ->join('cargo', 'cargo.cargo_id = v.cargo_id', 'LEFT')                 // Dados do cargo
-        ->where('vc.curriculum_id', $curriculumId)                             // Filtra por currículo
-        ->orderBy('vc.dataCandidatura', 'DESC')                                // Mais recentes primeiro
+        ->join('vaga v', 'v.vaga_id = vc.vaga_id', 'INNER')
+        ->join('estabelecimento e', 'e.estabelecimento_id = v.estabelecimento_id', 'LEFT')
+        ->join('cargo', 'cargo.cargo_id = v.cargo_id', 'LEFT')
+        ->where('vc.curriculum_id', $curriculumId)
+        ->orderBy('vc.dataCandidatura', 'DESC')
         ->findAll();
     }
 

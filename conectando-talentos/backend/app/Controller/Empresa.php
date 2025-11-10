@@ -143,113 +143,134 @@ class Empresa extends ControllerMain
      */
     public function perfil(): void
     {
-        // 🔍 OBTÉM ID DA EMPRESA DA SESSÃO E VERIFICA AUTENTICAÇÃO
-        $empresaId = (int) Session::get('empresa_id');
-        if (!$empresaId) {
-            Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado.']);
+    // 🔍 OBTÉM ID DA EMPRESA DA SESSÃO E VERIFICA AUTENTICAÇÃO
+    $empresaId = (int) Session::get('empresa_id');
+    if (!$empresaId) {
+        Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado.']);
+        return;
+    }
+
+    // 📡 IDENTIFICA O MÉTODO DA REQUISIÇÃO (GET ou POST)
+    $metodo = $_SERVER['REQUEST_METHOD'];
+
+    // 📥 MÉTODO GET - CONSULTA DE DADOS
+    if ($metodo === 'GET') {
+        // 🏢 BUSCA DADOS DA EMPRESA
+        $empresa = $this->model->findById($empresaId);
+        if (!$empresa) {
+            Response::json(['status'=>404,'mensagem'=>'Empresa não encontrada.']);
             return;
         }
 
-        // 📡 IDENTIFICA O MÉTODO DA REQUISIÇÃO (GET ou POST)
-        $metodo = $_SERVER['REQUEST_METHOD'];
+        // 🔒 REMOVE SENHA POR SEGURANÇA (nunca retornar senha)
+        unset($empresa['senha']);
 
-        // 📥 MÉTODO GET - CONSULTA DE DADOS
-        if ($metodo === 'GET') {
-            // 🏢 BUSCA DADOS DA EMPRESA
-            $empresa = $this->model->findById($empresaId);
-            if (!$empresa) {
-                Response::json(['status'=>404,'mensagem'=>'Empresa não encontrada.']);
-                return;
-            }
+        // 📞 BUSCA TELEFONES DA EMPRESA
+        $telefones = $this->loadModel('Telefone')->buscarPorEmpresa($empresaId);
 
-            // 🔒 REMOVE SENHA POR SEGURANÇA (nunca retornar senha)
-            unset($empresa['senha']);
+        // 📤 RETORNA DADOS COMPLETOS DA EMPRESA
+        Response::json([
+            'status'    => 200,
+            'empresa'   => $empresa,       // Dados da empresa
+            'telefones' => $telefones      // Lista de telefones
+        ]);
+        return;
+    }
 
-            // 📞 BUSCA TELEFONES DA EMPRESA
-            $telefones = $this->loadModel('Telefone')->buscarPorEmpresa($empresaId);
+    // 📤 MÉTODO POST - ATUALIZAÇÃO DE DADOS
+    if ($metodo === 'POST') {
+        // 📨 OBTÉM DADOS DO CORPO DA REQUISIÇÃO
+        $dados = json_decode(file_get_contents('php://input'), true) ?? [];
 
-            // 📤 RETORNA DADOS COMPLETOS DA EMPRESA
-            Response::json([
-                'status'    => 200,
-                'empresa'   => $empresa,       // Dados da empresa
-                'telefones' => $telefones      // Lista de telefones
-            ]);
+        // 🔍 VERIFICA SE EMPRESA AINDA EXISTE NO BANCO
+        $empresaAtual = $this->model->findById($empresaId);
+        if (!$empresaAtual) {
+            Response::json(['status'=>404,'mensagem'=>'Empresa não encontrada.']);
             return;
         }
 
-        // 📤 MÉTODO POST - ATUALIZAÇÃO DE DADOS
-        if ($metodo === 'POST') {
-            // 📨 OBTÉM DADOS DO CORPO DA REQUISIÇÃO
-            $dados = json_decode(file_get_contents('php://input'), true) ?? [];
+        // 🔒 REMOVE SENHA DOS DADOS ATUAIS
+        unset($empresaAtual['senha']);
 
-            // 🔍 VERIFICA SE EMPRESA AINDA EXISTE NO BANCO
-            $empresaAtual = $this->model->findById($empresaId);
-            if (!$empresaAtual) {
-                Response::json(['status'=>404,'mensagem'=>'Empresa não encontrada.']);
-                return;
+        // 🎯 PREPARA DADOS PARA ATUALIZAÇÃO (mantém valores atuais se não informados)
+        $payload = [
+            'nome'      => trim($dados['nome'] ?? $empresaAtual['nome']),
+            'cnpj'      => preg_replace('/\D/', '', $dados['cnpj'] ?? $empresaAtual['cnpj']),
+            'endereco'  => $dados['endereco']  ?? $empresaAtual['endereco'],
+            'email'     => strtolower(trim($dados['email'] ?? $empresaAtual['email'])),
+            'descricao' => $dados['descricao'] ?? $empresaAtual['descricao'],
+            'website'   => $dados['website']   ?? $empresaAtual['website'],
+            'setor'     => $dados['setor']     ?? $empresaAtual['setor'],
+            'linkedin'  => $dados['linkedin']  ?? $empresaAtual['linkedin'],
+            'instagram' => $dados['instagram'] ?? $empresaAtual['instagram'],
+            'facebook'  => $dados['facebook']  ?? $empresaAtual['facebook'],
+        ];
+
+        // 🔐 ATUALIZA SENHA SE FORNECIDA (opcional)
+        if (!empty($dados['senha'])) {
+            $payload['senha'] = password_hash($dados['senha'], PASSWORD_DEFAULT);
+        }
+
+        // 💾 TENTA ATUALIZAR OS DADOS DA EMPRESA
+        try {
+            // 1. ATUALIZA DADOS PRINCIPAIS DA EMPRESA
+            $this->model->atualizarPorId($empresaId, $payload);
+
+            // 2. 🔧 CORREÇÃO: GERENCIA TELEFONES (aceita "telefone" ou "telefones")
+            $telModel = $this->loadModel('Telefone');
+
+            // Verifica se o model foi carregado corretamente
+            if (!$telModel) {
+                throw new \Exception('Model de Telefone não encontrado');
             }
 
-            // 🔒 REMOVE SENHA DOS DADOS ATUAIS
-            unset($empresaAtual['senha']);
+            // 🗑️ REMOVE TODOS OS TELEFONES EXISTENTES DA EMPRESA
+            $telModel->deleteByEmpresa($empresaId);
 
-            // 🎯 PREPARA DADOS PARA ATUALIZAÇÃO (mantém valores atuais se não informados)
-            $payload = [
-                'nome'      => trim($dados['nome'] ?? $empresaAtual['nome']),                    // Nome (atual ou novo)
-                'cnpj'      => preg_replace('/\D/', '', $dados['cnpj'] ?? $empresaAtual['cnpj']), // CNPJ (apenas números)
-                'endereco'  => $dados['endereco']  ?? $empresaAtual['endereco'],                // Endereço
-                'email'     => strtolower(trim($dados['email'] ?? $empresaAtual['email'])),     // Email em minúsculo
-                'descricao' => $dados['descricao'] ?? $empresaAtual['descricao'],               // Descrição
-                'website'   => $dados['website']   ?? $empresaAtual['website'],                 // Website
-                'setor'     => $dados['setor']     ?? $empresaAtual['setor'],                   // Setor
-                'linkedin'  => $dados['linkedin']  ?? $empresaAtual['linkedin'],                // LinkedIn
-                'instagram' => $dados['instagram'] ?? $empresaAtual['instagram'],               // Instagram
-                'facebook'  => $dados['facebook']  ?? $empresaAtual['facebook'],                // Facebook
-            ];
+            // ➕ ADICIONA OS NOVOS TELEFONES
+            $telefonesParaSalvar = [];
 
-            // 🔐 ATUALIZA SENHA SE FORNECIDA (opcional)
-            if (!empty($dados['senha'])) {
-                $payload['senha'] = password_hash($dados['senha'], PASSWORD_DEFAULT);
+            // 🔍 CAPTURA TELEFONES DE DIFERENTES FORMATOS
+            if (isset($dados['telefones']) && is_array($dados['telefones'])) {
+                // Formato: "telefones": ["numero1", "numero2"]
+                $telefonesParaSalvar = $dados['telefones'];
+            } elseif (isset($dados['telefone']) && !empty($dados['telefone'])) {
+                // Formato: "telefone": "numero" (seu formato atual)
+                $telefonesParaSalvar = [$dados['telefone']];
             }
 
-            // 💾 TENTA ATUALIZAR OS DADOS DA EMPRESA
-            try {
-                // 1. ATUALIZA DADOS PRINCIPAIS DA EMPRESA
-                $this->model->atualizarPorId($empresaId, $payload);
-
-                // 2. GERENCIA TELEFONES (se fornecidos)
-                if (!empty($dados['telefones']) && is_array($dados['telefones'])) {
-                    $telModel   = $this->loadModel('Telefone');
-                    $existentes = $telModel->buscarPorEmpresa($empresaId);
-
-                    // 🗑️ REMOVE TODOS OS TELEFONES EXISTENTES
-                    foreach ($existentes as $t) {
-                        $telModel->excluir((int)$t['telefone_id']);
-                    }
-                    
-                    // ➕ ADICIONA OS NOVOS TELEFONES
-                    foreach ($dados['telefones'] as $numero) {
-                        if (trim($numero) !== '') { // Ignora números vazios
-                            $telModel->inserir([
-                                'estabelecimento_id' => $empresaId, // Vincula à empresa
-                                'usuario_id'         => null,       // Não é telefone de usuário
-                                'numero'             => $numero,    // Número do telefone
-                                'tipo'               => 'm'         // Tipo móvel (padrão)
-                            ]);
-                        }
-                    }
+            // 💾 SALVA OS TELEFONES
+            foreach ($telefonesParaSalvar as $telefone) {
+                // Remove caracteres não numéricos
+                $numeroLimpo = preg_replace('/\D/', '', $telefone);
+                
+                // Valida se tem pelo menos 10 dígitos (DDD + número)
+                if (!empty($numeroLimpo) && strlen($numeroLimpo) >= 10) {
+                    $telModel->inserir([
+                        'estabelecimento_id' => $empresaId,
+                        'usuario_id' => null,
+                        'numero' => $numeroLimpo,
+                        'tipo' => 'm' // móvel como padrão
+                    ]);
                 }
-
-                // ✅ RETORNA SUCESSO
-                Response::json(['status'=>200,'mensagem'=>'Perfil atualizado com sucesso!']);
-            } catch (\Throwable $e) {
-                // 🚨 CAPTURA ERROS DURANTE A ATUALIZAÇÃO
-                Response::json(['status'=>500,'mensagem'=>'Erro ao atualizar perfil.','erro'=>$e->getMessage()]);
             }
-            return;
-        }
 
-        // 🚫 MÉTODO NÃO PERMITIDO
-        Response::json(['status'=>405,'mensagem'=>'Método não permitido.']);
+            // ✅ RETORNA SUCESSO
+            Response::json(['status'=>200,'mensagem'=>'Perfil atualizado com sucesso!']);
+        } catch (\Throwable $e) {
+            // 🚨 CAPTURA ERROS DURANTE A ATUALIZAÇÃO
+            Response::json([
+                'status'=>500,
+                'mensagem'=>'Erro ao atualizar perfil.',
+                'erro'=>$e->getMessage(),
+                'debug'=>['empresa_id' => $empresaId]
+            ]);
+        }
+        return;
+    }
+
+    // 🚫 MÉTODO NÃO PERMITIDO
+    Response::json(['status'=>405,'mensagem'=>'Método não permitido.']);
     }
 
     /* ================= LOGOUT ================= */
