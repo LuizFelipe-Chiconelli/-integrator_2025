@@ -5,11 +5,13 @@ import { Button, Container, Spinner, Alert } from "react-bootstrap"
 import type { Qualification } from "@/_session/user/types"
 
 import QualificationForm from "./qualification-form"
+import { useNotificationContext } from "@/components/notifications/context"
 
 export default function QualificationSection() {
 	const [qualification, setQualification] = useState<Qualification[] | null>([])
 	const [newFormVisible, setNewFormVisible] = useState<boolean>(false)
 
+	const { sendNotification } = useNotificationContext()
 	const { userInfo, fetchQualification, saveQualification, deleteQualification } = useUserSessionContext()
 
 	const refreshQualification = async (userId: string | number): Promise<void> => {
@@ -19,22 +21,30 @@ export default function QualificationSection() {
 
 	const handleSave = async (info: Qualification): Promise<void> => {
 		try {
-			await saveQualification(info)
+			const res = await saveQualification(info)
+			await refreshQualification(userInfo!.curriculum.curriculum_id)
 
-			if (userInfo) {
-				await refreshQualification(userInfo.curriculum.curriculum_id)
-			}
+			if (!res.ok) throw new Error("Falha ao salvar informações")
+
+			sendNotification({ message: "Alterações salvas!", type: "Success" })
 		} catch (error) {
-			console.log(error)
+			sendNotification({ message: "Falha ao salvar alterações!", type: "Error" })
 		}
 	}
 
 	const handleDelete = async (info?: Qualification): Promise<void> => {
-		if (info?.curriculum_qualificacao_id) {
-			await deleteQualification(info.curriculum_qualificacao_id)
-		}
+		try {
+			if (info?.curriculum_qualificacao_id) {
+				const res = await deleteQualification(info.curriculum_qualificacao_id)
 
-		await refreshQualification(userInfo!.curriculum.curriculum_id)
+				if (!res.ok) throw new Error("Erro ao deletar informações!")
+			}
+
+			await refreshQualification(userInfo!.curriculum.curriculum_id)
+			sendNotification({ message: "Informações deletadas com sucesso!", type: "Success" })
+		} catch (error) {
+			sendNotification({ message: "Erro ao deletar informações!", type: "Error" })
+		}
 	}
 
 	useEffect(() => {

@@ -9,12 +9,14 @@ import type { Option } from "@/components/form-kit/types"
 import api from "@/actions/api"
 
 import ExperienceForm from "./experience-form"
+import { useNotificationContext } from "@/components/notifications/context"
 
 export default function ExperienceSection() {
 	const [experience, setExperience] = useState<Experience[] | null>([])
 	const [newFormVisible, setNewFormVisible] = useState<boolean>(false)
 	const [roleOptions, setRoleOptions] = useState<Option[]>([])
 
+	const { sendNotification } = useNotificationContext()
 	const { userInfo, fetchExperience, saveExperience, deleteExperience } = useUserSessionContext()
 
 	const refreshExperience = async (userId: string | number): Promise<void> => {
@@ -24,21 +26,31 @@ export default function ExperienceSection() {
 
 	const handleSave = async (info: Experience): Promise<void> => {
 		try {
-			await saveExperience(info)
-			if (userInfo) {
-				await refreshExperience(userInfo.curriculum.curriculum_id)
-			}
+			const res = await saveExperience(info)
+
+			await refreshExperience(userInfo!.curriculum.curriculum_id)
+
+			if (!res.ok) throw new Error("Falha ao salvar informações")
+
+			sendNotification({ message: "Alterações salvas!", type: "Success" })
 		} catch (error) {
-			console.log(error)
+			sendNotification({ message: "Falha ao salvar alterações!", type: "Error" })
 		}
 	}
 
 	const handleDelete = async (info?: Experience): Promise<void> => {
-		if (info?.curriculum_experiencia_id) {
-			await deleteExperience(info.curriculum_experiencia_id)
-		}
+		try {
+			if (info?.curriculum_experiencia_id) {
+				const res = await deleteExperience(info.curriculum_experiencia_id)
 
-		await refreshExperience(userInfo!.curriculum.curriculum_id)
+				if (!res.ok) throw new Error("Erro ao deletar informações!")
+			}
+
+			await refreshExperience(userInfo!.curriculum.curriculum_id)
+			sendNotification({ message: "Informações deletadas com sucesso!", type: "Success" })
+		} catch (error) {
+			sendNotification({ message: "Erro ao deletar informações!", type: "Error" })
+		}
 	}
 
 	const fetchRoles = async (): Promise<void> => {

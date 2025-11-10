@@ -4,7 +4,12 @@ import { Badge, Button, Modal, Spinner } from "react-bootstrap"
 
 import type { Application } from "@/types/jobs"
 
-const modalidades: Record<number, string> = {
+const modalidade: Record<number, string> = {
+    1: "Presencial",
+    2: "Remoto",
+}
+
+const vinculo: Record<number, string> = {
     1: "CLT",
     2: "PJ",
     3: "Estágio",
@@ -48,7 +53,15 @@ export default function ApplicationModal({ info, opened, onClose, updateApplicat
                                 className="border text-muted"
                                 style={{ fontSize: "11px" }}
                             >
-                                {modalidades[info.modalidade]}
+                                {vinculo[info.vinculo]}
+                            </Badge>
+
+                            <Badge
+                                bg="light"
+                                className="border text-muted"
+                                style={{ fontSize: "11px" }}
+                            >
+                                {modalidade[info.modalidade]}
                             </Badge>
                         </div>
 

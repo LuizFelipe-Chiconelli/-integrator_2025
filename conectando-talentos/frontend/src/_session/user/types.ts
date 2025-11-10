@@ -4,14 +4,14 @@ export interface SessionContextType {
     userInfo: User | null | undefined
     updateUserInfo: (info: UserInfoPayload) => Promise<{ ok: boolean, message?: string }>
     fetchScholarity: (userId: string | number) => Promise<Scholarity[]>
-    saveScholarity: (info: Scholarity) => Promise<void>
-    deleteScholarity: (id: number) => Promise<void>
+    saveScholarity: (info: Scholarity) => Promise<{ ok: boolean }>
+    deleteScholarity: (id: number) => Promise<{ ok: boolean }>
     fetchExperience: (userId: string | number) => Promise<Experience[]>
-    saveExperience: (info: Experience) => Promise<void>
-    deleteExperience: (id: number) => Promise<void>
+    saveExperience: (info: Experience) => Promise<{ ok: boolean }>
+    deleteExperience: (id: number) => Promise<{ ok: boolean }>
     fetchQualification: (userId: string | number) => Promise<Qualification[]>
-    saveQualification: (info: Qualification) => Promise<void>
-    deleteQualification: (id: number) => Promise<void>
+    saveQualification: (info: Qualification) => Promise<{ ok: boolean }>
+    deleteQualification: (id: number) => Promise<{ ok: boolean }>
     getApplicationList: () => Promise<{ ok: boolean, applications?: Application[] }>
 }
 

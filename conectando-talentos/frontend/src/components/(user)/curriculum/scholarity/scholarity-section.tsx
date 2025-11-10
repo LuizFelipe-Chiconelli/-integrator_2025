@@ -5,11 +5,13 @@ import { useUserSessionContext } from "@/_session/user/context"
 import { Button, Container, Spinner, Alert } from "react-bootstrap"
 
 import ScholarityForm from "./scholarity-form"
+import { useNotificationContext } from "@/components/notifications/context"
 
 export default function ScholaritySection() {
 	const [scholarity, setScholarity] = useState<Scholarity[] | null>([])
 	const [newFormVisible, setNewFormVisible] = useState<boolean>(false)
 
+	const { sendNotification } = useNotificationContext()
 	const { userInfo, fetchScholarity, saveScholarity, deleteScholarity } = useUserSessionContext()
 
 	const refreshScholarity = async (userId: string | number): Promise<void> => {
@@ -18,16 +20,31 @@ export default function ScholaritySection() {
 	}
 
 	const handleSave = async (info: Scholarity): Promise<void> => {
-		await saveScholarity(info)
-		await refreshScholarity(userInfo!.curriculum.curriculum_id)
+		try {
+			const res = await saveScholarity(info)
+			await refreshScholarity(userInfo!.curriculum.curriculum_id)
+
+			if (!res.ok) throw new Error("Falha ao salvar informações")
+
+			sendNotification({ message: "Alterações salvas!", type: "Success" })
+		} catch (error) {
+			sendNotification({ message: "Falha ao salvar alterações!", type: "Error" })
+		}
 	}
 
 	const handleDelete = async (info?: Scholarity): Promise<void> => {
-		if (info?.curriculum_escolaridade_id) {
-			await deleteScholarity(info.curriculum_escolaridade_id)
-		}
+		try {
+			if (info?.curriculum_escolaridade_id) {
+				const res = await deleteScholarity(info.curriculum_escolaridade_id)
 
-		await refreshScholarity(userInfo!.curriculum.curriculum_id)
+				if (!res.ok) throw new Error("Erro ao deletar informações!")
+			}
+
+			await refreshScholarity(userInfo!.curriculum.curriculum_id)
+			sendNotification({ message: "Informações deletadas com sucesso!", type: "Success" })
+		} catch (error) {
+			sendNotification({ message: "Erro ao deletar informações!", type: "Error" })
+		}
 	}
 
 	useEffect(() => {
