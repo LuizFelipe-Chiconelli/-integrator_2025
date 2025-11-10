@@ -33,7 +33,7 @@ const optionSelecione: Option = { id: "", label: "Selecione" }
 export default function VacancyModal({ info, opened, onClose, updateVacancyList }: Props) {
     const [roleOptions, setRoleOptions] = useState<Option[]>([])
     const [isPending, setIsPending] = useState<boolean>(false)
-    const [status, setStatus] = useState<number>(info?.statusVaga || 11)
+    const [status, setStatus] = useState<number>(0)
 
     const { sendNotification } = useNotificationContext()
     const { updateVacancy, updateVacancyStatus } = useCompanySessionContext()
@@ -65,24 +65,10 @@ export default function VacancyModal({ info, opened, onClose, updateVacancyList 
         return { id: String(c.id), label: c.nome }
     })]
 
-    const handleStatus = async (status: number): Promise<void> => {
-        const res = await updateVacancyStatus(String(info!.vaga_id), status)
-
-        if (res.ok) {
-            return setStatus(status)
-        }
-
-        return sendNotification({ message: res.message!, type: "Error" })
-    }
-
     const onSubmit = async (formData: Record<string, any>) => {
         try {
             if (isPending) return
             setIsPending(true)
-
-            if (status != info?.statusVaga) {
-                handleStatus(status)
-            }
 
             const cityName: string = cities.find(c => { return String(c.id) == formData.city })!.nome
 
@@ -98,6 +84,7 @@ export default function VacancyModal({ info, opened, onClose, updateVacancyList 
                 nivel: Number(formData.nivel),
                 modalidade: Number(formData.modalidade),
                 vinculo: Number(formData.vinculo),
+                statusVaga: status,
                 dtFim: formData.dtFim,
             }
 
@@ -129,7 +116,7 @@ export default function VacancyModal({ info, opened, onClose, updateVacancyList 
     }, [cities, ufOptions, cityOptions])
 
     useEffect(() => {
-        if (info) {
+        if (info && status === 0) {
             setStatus(Number(info.statusVaga))
         }
     }, [info])
