@@ -18,9 +18,6 @@ interface Props {
 }
 
 export default function VacancyCard({ info, openModal }: Props) {
-	const minSalario: string = Number(info.salario_minimo).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
-	const maxSalario: string = Number(info.salario_maximo).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
-
 	const dateString: string = new Date(`${info.dtFim}T00:00:00`).toLocaleDateString("pt-BR", { timeZone: "UTC" })
 
 	const handleOpenModal = (e: React.MouseEvent<HTMLButtonElement>): void => {
@@ -65,7 +62,7 @@ export default function VacancyCard({ info, openModal }: Props) {
 						)}
 						{(info.salario_minimo && info.salario_maximo) && (
 							<div className="d-flex align-items-center gap-2">
-								<LuDollarSign /> {minSalario} - {maxSalario}
+								<LuDollarSign /> R$ {info.salario_minimo} - R$ {info.salario_maximo}
 							</div>
 						)}
 						{info.dtFim && (

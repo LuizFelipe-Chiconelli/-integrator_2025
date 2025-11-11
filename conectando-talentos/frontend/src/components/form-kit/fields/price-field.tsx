@@ -22,7 +22,6 @@ interface Props {
 }
 
 export default function PriceField({ ref, id, bg = "light", name, label, placeholder = "", className, disabled = false, maxLenght, required, initialValue }: Props) {
-
     // Hooks
     const inputRef = useRef<HTMLInputElement>(null)
 
@@ -32,12 +31,29 @@ export default function PriceField({ ref, id, bg = "light", name, label, placeho
     // Funções internas
 
     const format = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const regex = /([0-9]*[\,]{0,1}[0-9]{0,2})/
-        e.target.value = e.target.value.match(regex)?.[0] || ""
+        // Converte para número e garante que estamos trabalhando com centavos
+        const number = parseInt(e.target.value.replace(/\D/g, '') || '0');
+        const cents = number.toString().padStart(3, '0');
+
+        // Separa reais e centavos
+        const realPart = cents.slice(0, -2) || '0';
+        const centPart = cents.slice(-2);
+
+        // Formata a parte dos reais com pontos
+        const formattedReal = realPart
+            .split('')
+            .reverse()
+            .join('')
+            .replace(/(\d{3})(?=\d)/g, '$1.')
+            .split('')
+            .reverse()
+            .join('');
+
+        e.target.value = `${formattedReal},${centPart}`;
     }
 
     const validate = (): boolean => {
-        if (required && !inputRef.current?.value) {
+        if (required && (!inputRef.current?.value || inputRef.current?.value == "0,00")) {
             setError('Este campo não pode ficar vazio!')
             return false
         }

@@ -24,9 +24,6 @@ interface Props {
 }
 
 export default function ApplicationModal({ info, opened, onClose, updateApplicationList }: Props) {
-    const minSalario: string = Number(info?.salario_minimo).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
-    const maxSalario: string = Number(info?.salario_minimo).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
-
     return (
         <Modal show={opened} onHide={onClose} centered size="lg" backdrop="static">
             <Modal.Header closeButton>
@@ -45,7 +42,7 @@ export default function ApplicationModal({ info, opened, onClose, updateApplicat
                                 className="border text-success"
                                 style={{ fontSize: "11px" }}
                             >
-                                {minSalario} - {maxSalario}
+                                R$ {info.salario_minimo} - R$ {info.salario_maximo}
                             </Badge>
 
                             <Badge
