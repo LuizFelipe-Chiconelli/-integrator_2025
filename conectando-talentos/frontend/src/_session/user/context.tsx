@@ -145,6 +145,20 @@ export default function UserSessionProvider({ children }: Props) {
         }
     }
 
+    const giveUpApplication = async (id: number): Promise<{ ok: boolean }> => {
+        try {
+            await api.post('/candidatura/status', {
+                vaga_id: id,
+                curriculum_id: userInfo!.curriculum.curriculum_id,
+                statusCandidatura: 16
+            })
+
+            return { ok: true }
+        } catch (error) {
+            return { ok: false }
+        }
+    }
+
     // Fetch
     useEffect(() => {
         fetchUserInfo()
@@ -163,7 +177,8 @@ export default function UserSessionProvider({ children }: Props) {
             fetchQualification,
             saveQualification,
             deleteQualification,
-            getApplicationList
+            getApplicationList,
+            giveUpApplication
         }}>
             {userInfo === undefined && (<><Navigate to='/auth/login-usuario' /></>)}
             {userInfo && (children)}
