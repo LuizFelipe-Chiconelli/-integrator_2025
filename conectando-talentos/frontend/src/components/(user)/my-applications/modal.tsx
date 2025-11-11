@@ -1,8 +1,11 @@
 'use client'
 
-import { Badge, Button, Modal, Spinner } from "react-bootstrap"
+import { Badge, Button, Modal } from "react-bootstrap"
 
 import type { Application } from "@/types/jobs"
+import { useUserSessionContext } from "@/_session/user/context"
+import { useNotificationContext } from "@/components/notifications/context"
+import { useState } from "react"
 
 const modalidade: Record<number, string> = {
     1: "Presencial",
@@ -24,6 +27,28 @@ interface Props {
 }
 
 export default function ApplicationModal({ info, opened, onClose, updateApplicationList }: Props) {
+    const [isPending, setIsPending] = useState<boolean>(false)
+
+    const { sendNotification } = useNotificationContext()
+    const { giveUpApplication } = useUserSessionContext()
+
+    const handleGiveUp = async (): Promise<void> => {
+        if (isPending) return
+        setIsPending(true)
+
+        const res = await giveUpApplication(info!.vaga_id)
+
+        if (res.ok) {
+            sendNotification({ message: "Abandono de vaga concluído!", type: "Success" })
+            setIsPending(false)
+
+            return updateApplicationList()
+        }
+
+        sendNotification({ message: "Erro ao abandonar vaga!", type: "Error" })
+        return setIsPending(false)
+    }
+
     return (
         <Modal show={opened} onHide={onClose} centered size="lg" backdrop="static">
             <Modal.Header closeButton>
@@ -78,9 +103,11 @@ export default function ApplicationModal({ info, opened, onClose, updateApplicat
                             </p>
                         </div>
 
-                        <div className="d-flex justify-content-end mt-5">
-                            <Button className="btn-danger px-4">Desistir</Button>
-                        </div>
+                        {![14, 15, 16].includes(info.statusCandidatura) && (
+                            <div className="d-flex justify-content-end mt-5">
+                                <Button className="btn-danger px-4" onClick={handleGiveUp}>Desistir</Button>
+                            </div>
+                        )}
                     </>
                 )}
             </Modal.Body>

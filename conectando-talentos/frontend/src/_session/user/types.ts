@@ -13,6 +13,7 @@ export interface SessionContextType {
     saveQualification: (info: Qualification) => Promise<{ ok: boolean }>
     deleteQualification: (id: number) => Promise<{ ok: boolean }>
     getApplicationList: () => Promise<{ ok: boolean, applications?: Application[] }>
+    giveUpApplication: (vacancyId: number) => Promise<{ ok: boolean }>
 }
 
 export interface UserInfoPayload {

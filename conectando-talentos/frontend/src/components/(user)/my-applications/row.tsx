@@ -3,13 +3,24 @@ import type { Application } from "@/types/jobs"
 import { LuBuilding } from "react-icons/lu"
 import { Badge, Button } from "react-bootstrap"
 import { MdOutlineDateRange } from "react-icons/md"
+import type { Color } from "react-bootstrap/esm/types"
 
 const status: Record<number, string> = {
     11: "Pendente",
     12: "Em análise",
     13: "Aprovada",
     14: "Reprovada",
-    15: "Contratado"
+    15: "Contratado",
+    16: "Abandono"
+}
+
+const colors: Record<string, Color> = {
+    "Pendente": "warning",
+    "Em análise": "primary",
+    "Aprovada": "success",
+    "Reprovada": "danger",
+    "Contratado": "success",
+    "Abandono": "danger",
 }
 
 interface Props {
@@ -25,7 +36,11 @@ export default function ApplicationRow({ info, onClick }: Props) {
             <td className="col-3 ps-2">{info.titulo}</td>
             <td className="col-3"><LuBuilding className="mb-1" /> {info.empresa_nome}</td>
             <td className="col-2"><MdOutlineDateRange className="mb-1" /> {dateString}</td>
-            <td><Badge bg="warning" className="text-warning-emphasis">{status[info.statusCandidatura]}</Badge></td>
+            <td>
+                <Badge bg={colors[status[info.statusCandidatura]]} className="">
+                    {status[info.statusCandidatura]}
+                </Badge>
+            </td>
             <td className="text-end pe-3"><Button className="btn-light border" onClick={onClick}>Visualizar</Button></td>
         </tr>
     )

@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Button, Modal, Spinner } from "react-bootstrap"
+import { Badge, Button, Modal } from "react-bootstrap"
 
 import type { CandidateApplication } from "@/types/jobs"
 import type { Option } from "@/components/form-kit/types"
@@ -126,9 +126,9 @@ export default function ApplicationModal({ info, opened, onClose, updateApplicat
                             ))}
                         </div>
 
-                        <div className="d-flex justify-content-between align-items-center mt-4">
-                            <div className="d-flex gap-2">
-                                {statusOptions.map(s => (
+                        {info.statusCandidatura != 16 && statusOptions.map(s => (
+                            <div className="d-flex justify-content-between align-items-center mt-4">
+                                <div className="d-flex gap-2">
                                     <Button
                                         key={s.id}
                                         variant={status === Number(s.id) ? "primary" : "outline-primary"}
@@ -138,15 +138,15 @@ export default function ApplicationModal({ info, opened, onClose, updateApplicat
                                     >
                                         {s.label}
                                     </Button>
-                                ))}
-                            </div>
+                                </div>
 
-                            <div className="d-flex gap-2">
-                                <Button onClick={handleSave} disabled={isPending}>
-                                    {isPending ? "Salvando…" : "Salvar alterações"}
-                                </Button>
+                                <div className="d-flex gap-2">
+                                    <Button onClick={handleSave} disabled={isPending}>
+                                        {isPending ? "Salvando…" : "Salvar alterações"}
+                                    </Button>
+                                </div>
                             </div>
-                        </div>
+                        ))}
                     </>
                 )}
             </Modal.Body>
