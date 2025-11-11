@@ -21,7 +21,7 @@ export default function VacanciesGrid() {
     const [jobs, setJobs] = useState<Array<Job> | null>(null)
     const [filteredJobs, setFilteredJobs] = useState<Array<Job> | null>(null)
 
-    const MAX_PER_PAGE: number = 10
+    const MAX_PER_PAGE: number = 9
 
     // Função que busca e seta as vagas de empregos
     const fetchJobs = async () => {
