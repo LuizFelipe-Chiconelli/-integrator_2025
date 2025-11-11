@@ -2,25 +2,14 @@
 
 import { Pagination, Container } from "react-bootstrap"
 
-import { useSearchParams } from "react-router-dom"
-
 interface Props {
+    page: number
     maxPages: number
+    setPage: (val: number) => void
 }
 
-export default function PaginationButtons({ maxPages }: Props) {
-    const [_, setSearchParams] = useSearchParams()
-
+export default function PaginationButtons({ page, maxPages, setPage }: Props) {
     const pages: Array<number> = []
-
-    const changePage = (page: string): void => {
-        setSearchParams((prev: URLSearchParams) => {
-            const updatedParams = new URLSearchParams(prev)
-            updatedParams.set("page", page)
-
-            return updatedParams
-        })
-    }
 
     const genButtons = () => {
         for (let i = 1; i <= maxPages; i++) {
@@ -36,7 +25,7 @@ export default function PaginationButtons({ maxPages }: Props) {
                 {pages.map(p => (
                     <Pagination.Item
                         key={p}
-                        onClick={() => { changePage(String(p)) }}
+                        onClick={() => { setPage(p) }}
                     >{p}</Pagination.Item>
                 ))}
             </Pagination>
