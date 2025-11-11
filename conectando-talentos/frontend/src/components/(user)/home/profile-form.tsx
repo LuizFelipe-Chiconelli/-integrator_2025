@@ -20,7 +20,6 @@ import PhoneField from "@/components/form-kit/fields/phone-field"
 import SelectField from "@/components/form-kit/fields/select-field"
 import NumberField from "@/components/form-kit/fields/number-field"
 import { fetchCitiesByUF, fetchUF } from "@/actions/all"
-import { toTitleCase } from "@/utils"
 
 interface Props {
     info: User
@@ -50,7 +49,7 @@ export default function ProfileForm({ info, updateInfo }: Props) {
 
     const cityOptions: Option[] = cities ? [
         { id: "", label: "Selecione" },
-        ...cities.map((c) => { return { id: c.codigo_ibge, label: toTitleCase(c.nome) } })
+        ...cities.map((c) => { return { id: c.codigo_ibge, label: c.nome } })
     ] : []
 
     const handleFetchUF = async () => {

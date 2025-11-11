@@ -99,8 +99,8 @@ export default function CompanySessionProvider({ children }: Props) {
     }
 
     const updateApplicationStatus = async (payload: {
-        vaga_id: number
-        curriculum_id: number
+        vaga_id: number,
+        curriculum_id: number,
         statusCandidatura: number
     }): Promise<{ ok: boolean }> => {
         try {

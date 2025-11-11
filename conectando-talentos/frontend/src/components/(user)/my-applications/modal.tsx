@@ -1,11 +1,8 @@
 'use client'
 
-import { Badge, Button, Modal } from "react-bootstrap"
+import { Badge, Button, Modal, Spinner } from "react-bootstrap"
 
-import { useState } from "react"
 import type { Application } from "@/types/jobs"
-import { useUserSessionContext } from "@/_session/user/context"
-import { useNotificationContext } from "@/components/notifications/context"
 
 const modalidade: Record<number, string> = {
     1: "Presencial",
@@ -27,30 +24,8 @@ interface Props {
 }
 
 export default function ApplicationModal({ info, opened, onClose, updateApplicationList }: Props) {
-    const [isPending, setIsPending] = useState<boolean>(false)
-
     const minSalario: string = Number(info?.salario_minimo).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
     const maxSalario: string = Number(info?.salario_minimo).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
-
-    const { sendNotification } = useNotificationContext()
-    const { giveUpApplication } = useUserSessionContext()
-
-    const onGiveUp = async () => {
-        if (isPending) return
-        setIsPending(true)
-
-        const res = await giveUpApplication(info!.vaga_id)
-
-        if (res.ok) {
-            sendNotification({ message: "Desistência concluída!", type: "Success" })
-            setIsPending(false)
-
-            return updateApplicationList()
-        }
-
-        setIsPending(false)
-        return sendNotification({ message: "Erro ao desistir da vaga!", type: "Error" })
-    }
 
     return (
         <Modal show={opened} onHide={onClose} centered size="lg" backdrop="static">
@@ -106,11 +81,9 @@ export default function ApplicationModal({ info, opened, onClose, updateApplicat
                             </p>
                         </div>
 
-                        {!([14, 15, 16].includes(info.statusCandidatura)) && (
-                            <div className="d-flex justify-content-end mt-5">
-                                <Button onClick={onGiveUp} className="btn-danger px-4">Desistir</Button>
-                            </div>
-                        )}
+                        <div className="d-flex justify-content-end mt-5">
+                            <Button className="btn-danger px-4">Desistir</Button>
+                        </div>
                     </>
                 )}
             </Modal.Body>

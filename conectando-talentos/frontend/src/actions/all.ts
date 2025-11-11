@@ -8,6 +8,6 @@ export async function fetchUF() {
 }
 
 export async function fetchCitiesByUF(uf: string) {
-    const { data } = await axios.get(`https://brasilapi.com.br/api/ibge/municipios/v1/${uf}?providers=gov`)
+    const { data } = await axios.get(`https://brasilapi.com.br/api/ibge/municipios/v1/${uf}?providers=dados-abertos-br,gov,wikipedia`)
     return data
 }
