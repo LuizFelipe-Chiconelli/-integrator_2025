@@ -1,6 +1,7 @@
 import TextArea from "@/components/form-kit/fields/text-area"
 import TextField from "@/components/form-kit/fields/text-field"
 import DateField from "@/components/form-kit/fields/date-field"
+import PriceField from "@/components/form-kit/fields/price-field"
 import SelectField from "@/components/form-kit/fields/select-field"
 
 import { Col, Row } from "react-bootstrap"
@@ -8,7 +9,6 @@ import { useEffect, useRef } from "react"
 
 import type { Job } from "@/types/jobs"
 import type { FieldMethods, Option } from "@/components/form-kit/types"
-import PriceField from "@/components/form-kit/fields/price-field"
 
 const optionSelecione: Option = { id: "", label: "Selecione" }
 
@@ -85,8 +85,9 @@ export default function FormFields({
                         ref={roleRef}
                         id={`cargo`}
                         name="cargo_id"
-                        label="Cargo (catálogo)"
+                        label="Cargo (catálogo) *"
                         options={roleOptions}
+                        required
                     />
                 </Col>
 
@@ -94,8 +95,9 @@ export default function FormFields({
                     <TextArea
                         id={`sobre`}
                         name="sobreVaga"
-                        label="Sobre a vaga"
+                        label="Sobre a vag *"
                         initialValue={info.descricao}
+                        required
                     />
                 </Col>
 
@@ -114,7 +116,7 @@ export default function FormFields({
                         ref={ufRef}
                         id={`estado`}
                         name="uf"
-                        label="Estado"
+                        label="Estado *"
                         options={ufOptions}
                         onChange={setSelectedUf}
                         required
@@ -126,7 +128,7 @@ export default function FormFields({
                         ref={cityRef}
                         id={`cidade`}
                         name="city"
-                        label="Cidade"
+                        label="Cidade *"
                         options={cityOptions}
                         onChange={setSelectedCity}
                         required
@@ -137,7 +139,7 @@ export default function FormFields({
                     <PriceField
                         id={`sal-min`}
                         name="salario_minimo"
-                        label="Pagamento mínimo"
+                        label="Pagamento mínimo *"
                         placeholder="Ex: R$ 3.000"
                         initialValue={info.salario_minimo || ""}
                         required
@@ -148,7 +150,7 @@ export default function FormFields({
                     <PriceField
                         id={`sal-max`}
                         name="salario_maximo"
-                        label="Pagamento máximo"
+                        label="Pagamento máximo *"
                         placeholder="Ex: R$ 5.000"
                         initialValue={info.salario_maximo || ""}
                         required
@@ -159,9 +161,10 @@ export default function FormFields({
                     <SelectField
                         id={`nivel`}
                         name="nivel"
-                        label="Nível"
+                        label="Nível *"
                         options={nivelOptions}
                         initialValue={info.nivel ? String(info.nivel) : ""}
+                        required
                     />
                 </Col>
 
