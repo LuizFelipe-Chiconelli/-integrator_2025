@@ -11,20 +11,16 @@ import type { Option } from "@/components/form-kit/types"
 
 // Options
 const typeOptions: Option[] = [
-    { id: "null", label: "Todos" },
-    { id: "fulltime", label: "Integral" },
-    { id: "halftime", label: "Meio Período" },
-    { id: "homeoffice", label: "Remoto" },
-    { id: "freelancer", label: "Freelancer" },
-    { id: "internship", label: "Estágio" }
+    { id: "", label: "Todos" },
+    { id: "integral", label: "Integral" },
+    { id: "remoto", label: "Remoto" }
 ]
 
 const expOptions: Option[] = [
-    { id: "null", label: "Todos" },
-    { id: "jr", label: "Júnior/Trainee" },
-    { id: "pl", label: "Pleno" },
-    { id: "sr", label: "Senior" },
-    { id: "dir", label: "Gerente/Diretor" }
+    { id: "", label: "Todos" },
+    { id: "junior-trainee", label: "Júnior/Trainee" },
+    { id: "pleno", label: "Pleno" },
+    { id: "senior", label: "Senior" }
 ]
 
 export default function VacanciesFilter() {
@@ -39,15 +35,12 @@ export default function VacanciesFilter() {
             const updatedParams = new URLSearchParams(prev)
 
             // Setar parêmtros com o valor da variável ou nulo
-            if (typeValue) updatedParams.set("type", String(typeValue))
-            if (expValue) updatedParams.set("exp", String(expValue))
-
-            // Resetar página
-            if (updatedParams.get("page")) updatedParams.delete("page")
+            if (typeValue) updatedParams.set("tipo", String(typeValue))
+            if (expValue) updatedParams.set("nivel", String(expValue))
 
             // Remover valores nulos
-            if (typeValue == "null") updatedParams.delete("type")
-            if (expValue == "null") updatedParams.delete("exp")
+            if (typeValue == "") updatedParams.delete("tipo")
+            if (expValue == "") updatedParams.delete("nivel")
 
             return updatedParams
         })

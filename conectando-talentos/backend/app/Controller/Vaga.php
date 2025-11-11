@@ -66,15 +66,14 @@ class Vaga extends ControllerMain
     /**
      * LISTA PÚBLICA DE VAGAS - GET /vaga/listaPublica?busca=termo&tipo=integral&nivel=junior
      * 
-     * ✅ ATUALIZADO: Agora aceita múltiplos filtros
-     * 
-     * @param string $action Nome da ação (para compatibilidade de rota)
-     * @param int $id Status da vaga (opcional, default 11)
+     * @param string $action Nome da ação (obrigatório pelo roteador)
+     * @param int $id ID ou status (obrigatório pelo roteador)
      * @return void Retorna JSON com lista de vagas
      */
     public function listaPublica(string $action = null, int $id = 0): void
     {
         // 🎯 DEFINE STATUS DA VAGA (11 = publicadas por padrão)
+        // Se ID foi passado via rota, usa como status, senão usa 11
         $status = ($id > 0) ? (int)$id : 11;
         
         // 🔍 OBTÉM FILTROS

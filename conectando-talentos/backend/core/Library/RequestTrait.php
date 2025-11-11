@@ -8,7 +8,11 @@ trait RequestTrait
 {
     static public function getRotaParametros()
     {
-        $aParametros = explode("/", ltrim(filter_var(rtrim($_SERVER['REQUEST_URI'], "/"), FILTER_SANITIZE_URL), "/"));
+        // Remove a query string da URL antes de processar
+        $requestUri = $_SERVER['REQUEST_URI'];
+        $path = parse_url($requestUri, PHP_URL_PATH); // Pega apenas o path
+        
+        $aParametros = explode("/", ltrim(filter_var(rtrim($path, "/"), FILTER_SANITIZE_URL), "/"));
         $outrosPar      = [];
 
         // outros parametros

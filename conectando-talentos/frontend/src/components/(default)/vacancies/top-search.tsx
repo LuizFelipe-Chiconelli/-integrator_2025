@@ -17,9 +17,7 @@ export default function TopSearch() {
         setSearchParams((prev: URLSearchParams) => {
             const updatedParams = new URLSearchParams(prev)
 
-            updatedParams.set("query", query)
-
-            if (updatedParams.get("page")) updatedParams.delete("page")
+            updatedParams.set("busca", query)
 
             return updatedParams
         })
@@ -29,8 +27,7 @@ export default function TopSearch() {
     const removeSearch = (): void => {
         setSearchParams((prev: URLSearchParams) => {
             const updatedParams = new URLSearchParams(prev)
-            updatedParams.delete("query")
-            if (updatedParams.get("page")) updatedParams.delete("page")
+            updatedParams.delete("busca")
 
             return updatedParams
         })
@@ -78,6 +75,7 @@ export default function TopSearch() {
                                 <Button
                                     id="searchButton"
                                     className="w-100 fs-6"
+                                    type="submit"
                                     style={{ height: "42px" }}
                                 >
                                     Buscar Vagas

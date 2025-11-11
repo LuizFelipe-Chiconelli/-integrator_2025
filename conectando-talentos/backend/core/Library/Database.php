@@ -547,6 +547,13 @@ class Database
         return $this;
     }
 
+    public function whereLikeRaw($field, $value)
+    {
+        $this->where .= " {$field} LIKE ?";
+        $this->params[] = "%{$value}%";
+        return $this;
+    }
+
     /**
      * orWhereLike
      *
@@ -613,6 +620,23 @@ class Database
     public function endGroup()
     {
         $this->where .= " ) ";
+        return $this;
+    }
+
+    public function startGroup($operator = null)
+    {
+        $op = $operator ?: 'AND';
+        if (empty($this->where)) {
+            $this->where = " WHERE (";
+        } else {
+            $this->where .= " {$op} (";
+        }
+        return $this;
+    }
+
+    public function closeGroup()
+    {
+        $this->where .= " )";
         return $this;
     }
 

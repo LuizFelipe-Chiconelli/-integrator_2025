@@ -1,7 +1,7 @@
 import { Container } from "react-bootstrap"
 
-import VacanciesFilter from "./filter"
 import JobCard from "../jobs/job-card"
+import VacanciesFilter from "./filter"
 import CardPlaceholder from "../jobs/card-placeholder"
 import PaginationButtons from "@/components/all/pagination"
 
@@ -14,7 +14,7 @@ import { useSearchParams } from "react-router-dom"
 // Actions
 import { getJobs } from "@/actions/default/jobs"
 
-const MAX_PER_PAGE: number = 1
+const MAX_PER_PAGE: number = 10
 
 export default function VacanciesGrid() {
     const [searchParams] = useSearchParams()
@@ -25,7 +25,7 @@ export default function VacanciesGrid() {
 
     // Função que busca e seta as vagas de empregos
     const fetchJobs = async () => {
-        const res: Array<Job> = await getJobs()
+        const res: Array<Job> = await getJobs(searchParams.toString())
         setJobs(res)
     }
 
@@ -37,7 +37,7 @@ export default function VacanciesGrid() {
             const offset: number = MAX_PER_PAGE * (page - 1)
 
             setMaxPages(Math.ceil(jobs.length / MAX_PER_PAGE))
-            setFilteredJobs(jobs.slice(offset, (offset + maxPages) - 1))
+            setFilteredJobs(jobs.slice(offset, (offset + MAX_PER_PAGE) - 1))
         }
     }, [jobs, page])
 
