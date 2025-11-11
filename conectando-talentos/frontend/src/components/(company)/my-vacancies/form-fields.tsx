@@ -4,10 +4,11 @@ import DateField from "@/components/form-kit/fields/date-field"
 import SelectField from "@/components/form-kit/fields/select-field"
 
 import { Col, Row } from "react-bootstrap"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 
 import type { Job } from "@/types/jobs"
 import type { FieldMethods, Option } from "@/components/form-kit/types"
+import PriceField from "@/components/form-kit/fields/price-field"
 
 const optionSelecione: Option = { id: "", label: "Selecione" }
 
@@ -133,7 +134,7 @@ export default function FormFields({
                 </Col>
 
                 <Col lg={3}>
-                    <TextField
+                    <PriceField
                         id={`sal-min`}
                         name="salario_minimo"
                         label="Pagamento mínimo"
@@ -144,7 +145,7 @@ export default function FormFields({
                 </Col>
 
                 <Col lg={3}>
-                    <TextField
+                    <PriceField
                         id={`sal-max`}
                         name="salario_maximo"
                         label="Pagamento máximo"

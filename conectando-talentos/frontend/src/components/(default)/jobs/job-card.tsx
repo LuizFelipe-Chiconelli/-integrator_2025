@@ -34,7 +34,7 @@ export default function JobCard({ job }: Props) {
             </Card.Header>
             <Card.Body className="d-flex flex-column gap-2 py-3">
                 <Link to='#' className="text-decoration-none">
-                    <h3 className="text-primary fs-5 mb-0">{job.cargo_descricao}</h3>
+                    <h3 className="text-primary fs-5 mb-0">{job.titulo}</h3>
                 </Link>
 
                 <div>

@@ -39,7 +39,8 @@ export default function EmailField({ ref, id, bg = "light", name, label, placeho
         if (
             inputRef.current?.value
             && (!(inputRef.current.value.includes("@"))
-                || inputRef.current.value.endsWith("@"))
+                || inputRef.current.value.endsWith("@")
+                || inputRef.current.value.endsWith("."))
         ) {
             setError('Digite um endereço de email válido!')
             return false

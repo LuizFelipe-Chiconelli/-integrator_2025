@@ -32,7 +32,7 @@ export default function NumberField({ ref, id, bg = "light", name, label, placeh
     // Funções internas
 
     const format = (e: React.ChangeEvent<HTMLInputElement>) => {
-        e.target.value = e.target.value.replace(/\D/, '')
+        e.target.value = e.target.value.replace(/\D/g, '')
     }
 
     const validate = (): boolean => {

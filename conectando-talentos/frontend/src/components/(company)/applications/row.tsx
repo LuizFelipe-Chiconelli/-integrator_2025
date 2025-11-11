@@ -24,7 +24,7 @@ export default function ApplicationRow({ info, onClick }: Props) {
             <td className="col-4">{info.titulo}</td>
             <td className="col-2">{dateString}</td>
             <td><Badge bg="warning" className="text-warning-emphasis">{status[info.statusCandidatura]}</Badge></td>
-            <td className="text-end pe-3"><Button className="btn-light border">Visualizar</Button></td>
+            <td className="text-end pe-3"><Button onClick={onClick} className="btn-light border">Visualizar</Button></td>
         </tr>
     )
 }

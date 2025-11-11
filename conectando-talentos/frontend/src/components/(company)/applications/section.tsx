@@ -4,6 +4,7 @@ import { Alert, Container } from "react-bootstrap"
 
 import ApplicationRow from "./row"
 import ApplicationTable from "./table"
+import ApplicationModal from "./modal"
 import ApplicationFilters from "./filter"
 
 import { useEffect, useState } from "react"
@@ -11,7 +12,6 @@ import { useCompanySessionContext } from "@/_session/company/context"
 import { useNotificationContext } from "@/components/notifications/context"
 
 import type { CandidateApplication, Job } from "@/types/jobs"
-// import ApplicationModal from "./modal"
 
 export default function ApplicationSection() {
     const [vacancies, setVacancies] = useState<Job[] | undefined>([])
@@ -84,12 +84,12 @@ export default function ApplicationSection() {
                 )}
             </Container>
 
-            {/* <ApplicationModal
+            <ApplicationModal
                 info={selectedApplication}
                 opened={isVisible}
                 onClose={handleCloseModal}
                 updateApplicationList={fetchApplications}
-            /> */}
+            />
         </Container>
     )
 }

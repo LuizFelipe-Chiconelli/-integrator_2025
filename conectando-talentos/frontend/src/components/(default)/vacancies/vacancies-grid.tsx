@@ -14,21 +14,28 @@ import { useSearchParams } from "react-router-dom"
 // Actions
 import { getJobs } from "@/actions/default/jobs"
 
+const MAX_PER_PAGE: number = 1
+
 export default function VacanciesGrid() {
     const [searchParams] = useSearchParams()
+    const [maxPages, setMaxPages] = useState<number>(1)
     const [jobs, setJobs] = useState<Array<Job> | null>(null)
 
     // Função que busca e seta as vagas de empregos
     async function fetchJobs() {
-        const page: string = String(searchParams.get("page"))
+        const page: number = Number(searchParams.get("page") || "1")
 
-        const res: Array<Job> = await getJobs(page == "" ? page : "1")
-        setJobs(res.slice(0, 9))
+        const res: Array<Job> = await getJobs()
+        const offset: number = MAX_PER_PAGE * page
+        
+        setMaxPages(Math.ceil(res.length / MAX_PER_PAGE))
+        setJobs(res.slice(offset, MAX_PER_PAGE))
     }
 
     // Ação a realizar sempre que os parametros de pesquisa mudarem
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' }) // Scrollar tela para o topo
+
         setJobs(null) // Remover valores para mostrar os placeholder
         fetchJobs() // Pesquisar e setar novos valores
     }, [searchParams])
@@ -69,7 +76,7 @@ export default function VacanciesGrid() {
                     )}
                 </div>
 
-                <PaginationButtons />
+                <PaginationButtons maxPages={maxPages} />
             </Container>
         </Container>
     )

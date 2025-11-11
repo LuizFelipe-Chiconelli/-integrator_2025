@@ -4,16 +4,24 @@ import type { FieldMethods, FieldRef } from "../types"
 
 import { useFormContext } from "../context"
 import { useRef, useImperativeHandle, useState, useEffect } from "react"
+import { Form } from "react-bootstrap"
+import type { Color } from "react-bootstrap/esm/types"
 
 interface Props {
     ref?: React.Ref<FieldMethods>
+    id: string
+    bg?: Color
     name: string
     label?: string
     placeholder?: string
+    className?: string
+    disabled?: boolean
+    maxLenght?: number
     required?: boolean
+    initialValue?: string
 }
 
-export default function PriceField({ ref, name, label, placeholder = "", required }: Props) {
+export default function PriceField({ ref, id, bg = "light", name, label, placeholder = "", className, disabled = false, maxLenght, required, initialValue }: Props) {
 
     // Hooks
     const inputRef = useRef<HTMLInputElement>(null)
@@ -23,8 +31,9 @@ export default function PriceField({ ref, name, label, placeholder = "", require
 
     // Funções internas
 
-    const numberFormat = (e: React.ChangeEvent<HTMLInputElement>) => {
-        e.target.value = e.target.value.match(/([0-9]*[\.]{0,1}[0-9]{0,2})/)?.[0] || ""
+    const format = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const regex = /([0-9]*[\,]{0,1}[0-9]{0,2})/
+        e.target.value = e.target.value.match(regex)?.[0] || ""
     }
 
     const validate = (): boolean => {
@@ -37,8 +46,16 @@ export default function PriceField({ ref, name, label, placeholder = "", require
         return true
     }
 
+    const setValue = (val: string | null): void => {
+        if (inputRef?.current && val) {
+            const v: string = val.includes(',') ? val : `${val},00`
+            const regex = /([0-9]*[\,]{0,1}[0-9]{0,2})/
+            inputRef.current.value = v.match(regex)?.[0] || ""
+        }
+    }
+
     const getValue = (): string => {
-        return inputRef.current?.value ?? ""
+        return inputRef.current?.value || ""
     }
 
     // Controle
@@ -46,6 +63,7 @@ export default function PriceField({ ref, name, label, placeholder = "", require
     useImperativeHandle(ref, () => {
         return {
             getValue,
+            setValue,
             validate
         }
     }, [])
@@ -54,6 +72,7 @@ export default function PriceField({ ref, name, label, placeholder = "", require
         const fieldRef: FieldRef = {
             current: {
                 getValue,
+                setValue,
                 validate
             }
         }
@@ -65,24 +84,36 @@ export default function PriceField({ ref, name, label, placeholder = "", require
         }
     }, [name, registerField, unregisterField])
 
+    useEffect(() => {
+        if (initialValue) {
+            setValue(initialValue)
+        }
+    }, [])
+
     return (
-        <div className="flex flex-col">
+        <Form.Group className="mb-3">
             {label && (
-                <label htmlFor={`input-${name}`} className="ml-2">{label}</label>
+                <Form.Label htmlFor={id} className="fw-semibold mb-1 ms-1" style={{ fontSize: 14 }}>
+                    {label}
+                </Form.Label>
             )}
-            <input
-                id={`input-${name}`}
+
+            <Form.Control
+                id={id}
                 ref={inputRef}
                 type="text"
-                name={name}
                 placeholder={placeholder}
-                className={`border rounded-sm transition-all focus:outline-1 px-4 py-1
-                ${error ? "border-red-500 outline-red-500 outline-1" : ""}`}
-                onChange={numberFormat}
+                className={`bg-${bg} ${className ?? ""}`.trim()}
+                onChange={format}
+                disabled={disabled}
+                {...maxLenght ? { maxLength: maxLenght } : {}}
             />
+
             {error && (
-                <span className="text-red-500 text-sm mt-1 ml-2">{error}</span>
+                <Form.Control.Feedback type="invalid" style={{ display: "block" }}>
+                    {error}
+                </Form.Control.Feedback>
             )}
-        </div>
+        </Form.Group>
     )
 }

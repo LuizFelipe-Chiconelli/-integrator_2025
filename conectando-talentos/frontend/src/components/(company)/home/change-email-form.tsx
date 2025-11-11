@@ -7,17 +7,31 @@ import type { Company } from "@/_session/company/types"
 
 import FormProvider from "@/components/form-kit/context"
 import EmailField from "@/components/form-kit/fields/email-field"
+import { useState } from "react"
+import { useNotificationContext } from "@/components/notifications/context"
 
 interface Props {
     info: Company
 }
 
 export default function ChangeEmailForm({ info }: Props) {
+    const [isPending, setIsPending] = useState<boolean>(false)
 
+    const { sendNotification } = useNotificationContext()
     const { updateCompanyInfo } = useCompanySessionContext()
 
-    const onSubmit = (formData: Record<string, any>) => {
-        updateCompanyInfo(formData as Company)
+    const onSubmit = async (formData: Record<string, any>): Promise<void> => {
+        if (isPending) return
+        setIsPending(true)
+
+        const res = await updateCompanyInfo(formData as Company)
+        if (res.ok) {
+            sendNotification({ message: res.message!, type: 'Success' })
+            return setIsPending(false)
+        }
+
+        sendNotification({ message: res.message!, type: 'Error' })
+        return setIsPending(false)
     }
 
     return (

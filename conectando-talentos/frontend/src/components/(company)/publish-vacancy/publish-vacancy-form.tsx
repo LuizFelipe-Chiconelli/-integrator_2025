@@ -18,6 +18,7 @@ import DateField from "@/components/form-kit/fields/date-field"
 import TextField from "@/components/form-kit/fields/text-field"
 import SelectField from "@/components/form-kit/fields/select-field"
 import NumberField from "@/components/form-kit/fields/number-field"
+import PriceField from "@/components/form-kit/fields/price-field"
 
 interface CargoAPI { cargo_id: number; descricao: string }
 interface CidadeAPI { id: number; nome: string; uf: string }
@@ -203,7 +204,7 @@ export default function PublishVacancyForm() {
 
                     {/* Salário + Nível */}
                     <div className="row row-cols-1 row-cols-lg-4 g-3">
-                        <NumberField
+                        <PriceField
                             id={`vaga-sal-${formId}`}
                             name="salario_minimo"
                             label="Pagamento mínimo"
@@ -211,7 +212,7 @@ export default function PublishVacancyForm() {
                             required
                         />
 
-                        <NumberField
+                        <PriceField
                             id={`vaga-sal-${formId}`}
                             name="salario_maximo"
                             label="Pagamento máximo"

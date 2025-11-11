@@ -48,6 +48,8 @@ export default function CompanySessionProvider({ children }: Props) {
         }
     }
 
+    // Vacancy
+
     const createJobVacancy = async (info: Job): Promise<{ ok: boolean, message?: string }> => {
         try {
             await api.post('/vaga/publicar', info)
@@ -88,8 +90,23 @@ export default function CompanySessionProvider({ children }: Props) {
     const getApplicationList = async (id: number): Promise<{ ok: boolean, applications?: CandidateApplication[] }> => {
         try {
             const { data: { data } }: { data: { data: CandidateApplication[] } } = await api.get(`/candidatura/porVaga/listar/${id}`)
+            console.log(data)
 
             return { ok: true, applications: data }
+        } catch (error) {
+            return { ok: false }
+        }
+    }
+
+    const updateApplicationStatus = async (payload: {
+        vaga_id: number,
+        curriculum_id: number,
+        statusCandidatura: number
+    }): Promise<{ ok: boolean }> => {
+        try {
+            await api.post('/candidatura/status', payload)
+
+            return { ok: true }
         } catch (error) {
             return { ok: false }
         }
@@ -107,7 +124,8 @@ export default function CompanySessionProvider({ children }: Props) {
             getJobVacancies,
             updateVacancy,
             updateVacancyStatus,
-            getApplicationList
+            getApplicationList,
+            updateApplicationStatus
         }}>
             {companyInfo === undefined && (<><Navigate to='/auth/login-empresa' /></>)}
             {companyInfo && (children)}

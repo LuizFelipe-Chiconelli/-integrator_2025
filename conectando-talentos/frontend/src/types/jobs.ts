@@ -40,8 +40,8 @@ export interface CandidateApplication extends Job {
     statusCandidatura: number
     dataCandidatura: Date | string
 
-    titulo: "Desenvolvedor Front End (React - Jr)"
-    vaga_id: 14
+    titulo: string
+    vaga_id: number
 
     bairro: string
     candidato_apresentacao: string

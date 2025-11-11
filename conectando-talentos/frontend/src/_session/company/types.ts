@@ -8,6 +8,7 @@ export interface SessionContextType {
     updateVacancy: (info: Job) => Promise<{ ok: boolean, message?: string }>
     updateVacancyStatus: (id: string, status: number) => Promise<{ ok: boolean, message?: string }>,
     getApplicationList: (id: number) => Promise<{ ok: boolean, applications?: CandidateApplication[] }>
+    updateApplicationStatus: (payload: {vaga_id: number, curriculum_id: number, statusCandidatura: number }) => Promise<{ ok: boolean }>
 }
 
 export interface Company {

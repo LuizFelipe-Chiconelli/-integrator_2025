@@ -1,6 +1,6 @@
 'use client'
 
-import type { City } from "@/types/all"
+import type { City, NewCity, UF } from "@/types/all"
 import type { UserInfoPayload, User } from "@/_session/user/types"
 import type { FieldMethods, Option } from "@/components/form-kit/types"
 
@@ -19,6 +19,7 @@ import DateField from "@/components/form-kit/fields/date-field"
 import PhoneField from "@/components/form-kit/fields/phone-field"
 import SelectField from "@/components/form-kit/fields/select-field"
 import NumberField from "@/components/form-kit/fields/number-field"
+import { fetchCitiesByUF, fetchUF } from "@/actions/all"
 
 interface Props {
     info: User
@@ -26,7 +27,8 @@ interface Props {
 }
 
 export default function ProfileForm({ info, updateInfo }: Props) {
-    const [cities, setCities] = useState<City[] | null>(null)
+    const [uf, setUF] = useState<UF[]>([])
+    const [cities, setCities] = useState<NewCity[] | null>(null)
     const [selectedUf, setSelectedUf] = useState<string>(info.curriculum.uf)
 
     const { sendNotification } = useNotificationContext()
@@ -40,23 +42,24 @@ export default function ProfileForm({ info, updateInfo }: Props) {
         { id: "F", label: "Feminino" }
     ]
 
-    const ufOptions: Option[] = cities ? [
+    const ufOptions: Option[] = uf ? [
         { id: "", label: "Selecione um estado" },
-        ...Array.from(new Set(cities.map(c => c.uf))).map((uf) => {
-            return { id: uf, label: uf }
-        })
+        ...uf.map((u) => { return { id: u.sigla, label: u.sigla }})
     ] : []
 
     const cityOptions: Option[] = cities ? [
         { id: "", label: "Selecione" },
-        ...Array.from(
-            cities.filter((c) => { return c.uf === selectedUf })
-        ).map((c) => { return { id: c.id, label: c.nome } })
+        ...cities.map((c) => { return { id: c.codigo_ibge, label: c.nome } })
     ] : []
 
-    const fetchLocations = async () => {
-        const { status, data } = await api.get("/cidade/lista")
-        if (status == 200) setCities(data.cidades)
+    const handleFetchUF = async () => {
+        const res = await fetchUF()
+        setUF(res)
+    }
+
+    const handleFetchCities = async () => {
+        const res = await fetchCitiesByUF(selectedUf)
+        setCities(res)
     }
 
     const onSubmit = async (formData: Record<string, any>): Promise<void> => {
@@ -77,7 +80,13 @@ export default function ProfileForm({ info, updateInfo }: Props) {
         ufRef.current?.setValue?.(val)
     }
 
-    useEffect(() => { fetchLocations() }, [])
+    useEffect(() => { handleFetchUF() }, [])
+
+    useEffect(() => {
+        if (selectedUf) {
+            handleFetchCities()
+        }
+    }, [uf])
 
     useEffect(() => {
         let exists: boolean = cityOptions.some(opt => opt.id === info.curriculum.cidade_id)
