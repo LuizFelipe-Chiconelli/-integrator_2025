@@ -14,14 +14,14 @@ import { useSearchParams } from "react-router-dom"
 // Actions
 import { getJobs } from "@/actions/default/jobs"
 
-const MAX_PER_PAGE: number = 1
-
 export default function VacanciesGrid() {
     const [searchParams] = useSearchParams()
     const [page, setPage] = useState<number>(1)
     const [maxPages, setMaxPages] = useState<number>(1)
     const [jobs, setJobs] = useState<Array<Job> | null>(null)
     const [filteredJobs, setFilteredJobs] = useState<Array<Job> | null>(null)
+
+    const MAX_PER_PAGE: number = 9
 
     // Função que busca e seta as vagas de empregos
     const fetchJobs = async () => {
@@ -34,10 +34,10 @@ export default function VacanciesGrid() {
         window.scrollTo({ top: 0, behavior: 'smooth' }) // Scrollar tela para o topo
 
         if (jobs) {
-            const offset: number = MAX_PER_PAGE * (page - 1)
+            const offset: number = 1 * (page - 1)
 
             setMaxPages(Math.ceil(jobs.length / MAX_PER_PAGE))
-            setFilteredJobs(jobs.slice(offset, (offset + maxPages) - 1))
+            setFilteredJobs(jobs.slice(offset, (offset + MAX_PER_PAGE)))
         }
     }, [jobs, page])
 

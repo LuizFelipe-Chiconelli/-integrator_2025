@@ -9,7 +9,8 @@ const status: Record<number, string> = {
     12: "Em análise",
     13: "Aprovada",
     14: "Reprovada",
-    15: "Contratado"
+    15: "Contratado",
+    16: "Abandonado"
 }
 
 interface Props {
@@ -26,7 +27,9 @@ export default function ApplicationRow({ info, onClick }: Props) {
             <td className="col-3"><LuBuilding className="mb-1" /> {info.empresa_nome}</td>
             <td className="col-2"><MdOutlineDateRange className="mb-1" /> {dateString}</td>
             <td><Badge bg="warning" className="text-warning-emphasis">{status[info.statusCandidatura]}</Badge></td>
-            <td className="text-end pe-3"><Button className="btn-light border" onClick={onClick}>Visualizar</Button></td>
+            <td className="text-end pe-3">
+                <Button className="btn-light border" onClick={onClick}>Visualizar</Button>
+            </td>
         </tr>
     )
 }

@@ -16,9 +16,8 @@ import FormProvider from "@/components/form-kit/context"
 import TextArea from "@/components/form-kit/fields/text-area"
 import DateField from "@/components/form-kit/fields/date-field"
 import TextField from "@/components/form-kit/fields/text-field"
-import SelectField from "@/components/form-kit/fields/select-field"
-import NumberField from "@/components/form-kit/fields/number-field"
 import PriceField from "@/components/form-kit/fields/price-field"
+import SelectField from "@/components/form-kit/fields/select-field"
 
 interface CargoAPI { cargo_id: number; descricao: string }
 interface CidadeAPI { id: number; nome: string; uf: string }
@@ -158,7 +157,7 @@ export default function PublishVacancyForm() {
                     <TextArea
                         id={`vaga-descricao-${formId}`}
                         name="descricao"
-                        label="Sobre a Vaga"
+                        label="Sobre a Vaga *"
                         placeholder="Descreva responsabilidades, benefícios, stack etc."
                         required
                     />
@@ -187,7 +186,7 @@ export default function PublishVacancyForm() {
                         <SelectField
                             id={`vaga-uf-${formId}`}
                             name="uf"
-                            label="UF"
+                            label="Estado *"
                             options={ufOptions}
                             required
                         />
@@ -196,7 +195,7 @@ export default function PublishVacancyForm() {
                             ref={cidadeRef}
                             id={`vaga-cidade-${formId}`}
                             name="cidade_id"
-                            label="Cidade"
+                            label="Cidade *"
                             options={cidadeOptions}
                             required
                         />
@@ -207,7 +206,7 @@ export default function PublishVacancyForm() {
                         <PriceField
                             id={`vaga-sal-${formId}`}
                             name="salario_minimo"
-                            label="Pagamento mínimo"
+                            label="Pagamento mínimo *"
                             placeholder="Ex: R$ 3.000"
                             required
                         />
@@ -215,7 +214,7 @@ export default function PublishVacancyForm() {
                         <PriceField
                             id={`vaga-sal-${formId}`}
                             name="salario_maximo"
-                            label="Pagamento máximo"
+                            label="Pagamento máximo *"
                             placeholder="Ex: R$ 5.000"
                             required
                         />
@@ -224,7 +223,7 @@ export default function PublishVacancyForm() {
                             <SelectField
                                 id={`vaga-nivel-${formId}`}
                                 name="nivel"
-                                label="Nível"
+                                label="Nível *"
                                 options={nivelOptions}
                                 required
                             />

@@ -18,8 +18,8 @@ interface Props {
 }
 
 export default function VacancyCard({ info, openModal }: Props) {
-	const minSalario: string = Number(info.salario_minimo).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
-	const maxSalario: string = Number(info.salario_maximo).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+	const minSalario: string = Number(info.salario_minimo.replace(",", ".")).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+	const maxSalario: string = Number(info.salario_maximo.replace(",", ".")).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
 
 	const dateString: string = new Date(`${info.dtFim}T00:00:00`).toLocaleDateString("pt-BR", { timeZone: "UTC" })
 
