@@ -64,28 +64,30 @@ class Vaga extends ControllerMain
     }
 
     /**
-     * LISTA PÚBLICA DE VAGAS - GET /vaga/listaPublica/{status?}?busca=termo
-     * 
-     * ✅ ATUALIZADO: Agora aceita filtro por texto via query parameter 'busca'
-     * 
-     * @param string $action Nome da ação (para compatibilidade de rota)
-     * @param int $id Status da vaga (opcional, default 11)
-     * @return void Retorna JSON com lista de vagas
-     */
+ * LISTA PÚBLICA DE VAGAS - GET /vaga/listaPublica/{status?}?busca=termo&tipo=integral&nivel=junior
+ * 
+ * ✅ ATUALIZADO: Agora aceita múltiplos filtros
+ * 
+ * @param string $action Nome da ação (para compatibilidade de rota)
+ * @param int $id Status da vaga (opcional, default 11)
+ * @return void Retorna JSON com lista de vagas
+ */
     public function listaPublica(string $action = null, int $id = 0): void
     {
-        // 🎯 DEFINE STATUS DA VAGA (11 = publicadas por padrão)
-        $status = ($id > 0) ? (int)$id : 11;
-        
-        // 🔍 OBTÉM TERMO DE BUSCA (NOVO)
-        $busca = isset($_GET['busca']) ? trim((string)$_GET['busca']) : null;
-        
-        // 📋 BUSCA VAGAS PÚBLICAS COM FILTROS
-        $rows = $this->vagaModel()->listarPorEstabelecimentoComCargo(0, $status, $busca);
-        
-        // 📤 RETORNA LISTA DE VAGAS    
-        Response::json(['status' => 200, 'data' => $rows]);
-    }
+    // 🎯 DEFINE STATUS DA VAGA (11 = publicadas por padrão)
+    $status = ($id > 0) ? (int)$id : 11;
+    
+    // 🔍 OBTÉM FILTROS
+    $busca = isset($_GET['busca']) ? trim((string)$_GET['busca']) : null;
+    $tipoVaga = isset($_GET['tipo']) ? trim((string)$_GET['tipo']) : null;
+    $nivelExperiencia = isset($_GET['nivel']) ? trim((string)$_GET['nivel']) : null;
+    
+    // 📋 BUSCA VAGAS PÚBLICAS COM FILTROS
+    $rows = $this->vagaModel()->listarPorEstabelecimentoComCargo(0, $status, $busca, $tipoVaga, $nivelExperiencia);
+    
+    // 📤 RETORNA LISTA DE VAGAS    
+    Response::json(['status' => 200, 'data' => $rows]);
+}
 
     /**
      * DETALHE DA VAGA - GET /vaga/detalhe/{id}

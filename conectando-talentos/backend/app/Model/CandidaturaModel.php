@@ -19,10 +19,6 @@ class CandidaturaModel extends ModelMain
      */
     protected $table = 'vaga_curriculum';
 
-    /**
-     * CHAVE PRIMÁRIA COMPOSTA
-     * Identificação única por combinação vaga_id + curriculum_id
-     */
     protected $primaryKey = null; // PK composta
 
     /* ========= AÇÕES BÁSICAS ========= */

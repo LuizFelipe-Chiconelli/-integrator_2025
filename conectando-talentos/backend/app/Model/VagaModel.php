@@ -57,12 +57,16 @@ class VagaModel extends ModelMain
         return $db->findAll();
     }
 
-    // No arquivo VagaModel.php, modifique o método:
-
     /** 
-     * ✅ ATUALIZADO: Lista vagas com dados da empresa, cargo, contagem de candidatos E filtro por texto
-     */
-    public function listarPorEstabelecimentoComCargo(int $eid = 0, ?int $status = null, ?string $busca = null): array 
+    *  ATUALIZADO: Lista vagas com dados da empresa, cargo, contagem de candidatos E múltiplos filtros
+    */
+    public function listarPorEstabelecimentoComCargo(
+    int $eid = 0, 
+    ?int $status = null, 
+    ?string $busca = null,
+    ?string $tipoVaga = null,
+    ?string $nivelExperiencia = null
+    ): array 
     {
     // Primeiro, busca as vagas normalmente
     $db = $this->db->table($this->table)
@@ -83,27 +87,66 @@ class VagaModel extends ModelMain
         ->join('estabelecimento', 'estabelecimento.estabelecimento_id = vaga.estabelecimento_id', 'LEFT')
         ->orderBy('vaga.'.$this->primaryKey, 'DESC');
 
-    // 🔐 FILTRO POR EMPRESA
+    //  FILTRO POR EMPRESA
     if ($eid > 0) {
         $db->where('vaga.estabelecimento_id', $eid);
     }
     
-    // 📊 FILTRO POR STATUS
+    //  FILTRO POR STATUS
     if ($status !== null) {
         $db->where('vaga.statusVaga', $status);
     }
     
-    // 🔍 FILTRO POR TEXTO (NOVO - mas opcional)
+    // FILTRO POR TEXTO
     if (!empty($busca)) {
         $termo = trim($busca);
-        $db->groupStart() // Abre parenteses ( ... OR ... )
+        $db->groupStart()
             ->like('vaga.titulo', $termo)
             ->orLike('vaga.descricao', $termo)
             ->orLike('vaga.requisitos', $termo)
             ->orLike('vaga.localizacao', $termo)
             ->orLike('cargo.descricao', $termo)
             ->orLike('estabelecimento.nome', $termo)
-        ->groupEnd(); // Fecha parenteses
+        ->groupEnd();
+    }
+
+    // FILTRO POR TIPO DE VAGA (JORNADA)
+    if (!empty($tipoVaga) && $tipoVaga !== 'todos') {
+        switch($tipoVaga) {
+            case 'integral':
+                $db->where('vaga.tipoVaga', 'Integral');
+                break;
+            case 'meio-periodo':
+                $db->where('vaga.tipoVaga', 'Meio Período');
+                break;
+            case 'remoto':
+                $db->where('vaga.tipoVaga', 'Remoto');
+                break;
+            case 'freelancer':
+                $db->where('vaga.tipoVaga', 'Freelancer');
+                break;
+            case 'estagio':
+                $db->where('vaga.tipoVaga', 'Estágio');
+                break;
+        }
+    }
+
+    //  FILTRO POR NÍVEL DE EXPERIÊNCIA
+    if (!empty($nivelExperiencia) && $nivelExperiencia !== 'todos') {
+        switch($nivelExperiencia) {
+            case 'junior-trainee':
+                $db->where('vaga.nivelExperiencia', 'Júnior/Trainee');
+                break;
+            case 'pleno':
+                $db->where('vaga.nivelExperiencia', 'Pleno');
+                break;
+            case 'senior':
+                $db->where('vaga.nivelExperiencia', 'Sênior');
+                break;
+            case 'gerente-diretor':
+                $db->where('vaga.nivelExperiencia', 'Gerente/Diretor');
+                break;
+        }
     }
 
     $vagas = $db->findAll();
@@ -129,7 +172,7 @@ class VagaModel extends ModelMain
     return $vagas;
     }
 
-    /** ✅ CORRIGIDO: Busca vaga completa com todos os dados + contagem de candidatos */
+    /**  CORRIGIDO: Busca vaga completa com todos os dados + contagem de candidatos */
     public function findByIdCompleta(int $id): ?array 
     {
     $vaga = $this->db->table($this->table)

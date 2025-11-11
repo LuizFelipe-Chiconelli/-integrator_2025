@@ -219,7 +219,7 @@ class Candidatura extends ControllerMain
      */
     public function minhas(): void
     {
-        // 🔐 VERIFICA SE CANDIDATO TEM CURRÍCULO VÁLIDO
+        // VERIFICA SE CANDIDATO TEM CURRÍCULO VÁLIDO CHAMANDO UM HELPER
         $currId = $this->requireCurriculumOr401();
 
         // 🔍 CARREGA MODEL DE CANDIDATURA
@@ -229,8 +229,8 @@ class Candidatura extends ControllerMain
             return; 
         }
 
-        // 📋 BUSCA CANDIDATURAS DO CANDIDATO
-        // ✅ CORRIGIDO: Usa método atualizado listarPorCurriculum()
+        //BUSCA CANDIDATURAS DO CANDIDATO
+        // Usa método atualizado listarPorCurriculum()
         $rows = $M->listarPorCurriculum($currId);
         Response::json(['status'=>200,'data'=>$rows]);
     }
@@ -248,10 +248,10 @@ class Candidatura extends ControllerMain
      */
     public function porVaga($action = "", $vagaId = 0): void
     {
-        // 🐛 DEBUG PARA LOG DE PARÂMETROS
+        //  DEBUG PARA LOG DE PARÂMETROS
         error_log("DEBUG porVaga - action: '$action', vagaId: '$vagaId'");
         
-        // 🔄 LÓGICA FLEXÍVEL PARA DIFERENTES FORMATOS DE URL
+        //  LÓGICA FLEXÍVEL PARA DIFERENTES FORMATOS DE URL
         
         // Se o primeiro parâmetro for numérico, é o vagaId
         if (is_numeric($action) && $vagaId === 0) {
@@ -269,20 +269,20 @@ class Candidatura extends ControllerMain
             $vagaId = (int)($_GET['vaga_id'] ?? $_GET['vagaId'] ?? 0);
         }
         
-        // 🔐 VERIFICA SE EMPRESA ESTÁ LOGADA
+        //  VERIFICA SE EMPRESA ESTÁ LOGADA
         $eid = (int)(Session::get('empresa_id') ?: Session::get('estabelecimento_id') ?: 0);
         if ($eid <= 0) { 
             Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado.']); 
             return; 
         }
         
-        // ✅ VALIDA ID DA VAGA
+        // VALIDA ID DA VAGA
         if ($vagaId <= 0) { 
             Response::json(['status'=>422,'mensagem'=>'vagaId inválido.']); 
             return; 
         }
 
-        // 🔍 CARREGA MODEL DE VAGA PARA VERIFICAÇÃO DE PERMISSÃO
+        //  CARREGA MODEL DE VAGA PARA VERIFICAÇÃO DE PERMISSÃO
         $VM = $this->vagaModel();
         if (!$VM) { 
             Response::json(['status'=>500,'mensagem'=>'Model de Vaga não encontrado.']); 
@@ -322,10 +322,10 @@ class Candidatura extends ControllerMain
      */
     public function detalhe($action = "", $vagaId = 0, $curriculumId = 0): void
     {
-        // 🐛 DEBUG PARA LOG DE PARÂMETROS
+        // DEBUG PARA LOG DE PARÂMETROS
         error_log("DEBUG detalhe - action: '$action', vagaId: '$vagaId', curriculumId: '$curriculumId'");
         
-        // 🔄 LÓGICA FLEXÍVEL PARA DIFERENTES FORMATOS DE URL
+        // LÓGICA FLEXÍVEL PARA DIFERENTES FORMATOS DE URL
         
         // Se o primeiro parâmetro for "listar", então os próximos são os IDs
         if ($action === "listar" && is_numeric($vagaId) && $curriculumId === 0) {
@@ -339,7 +339,7 @@ class Candidatura extends ControllerMain
             $curriculumId = (int)$curriculumId;
         }
         
-        // 🔁 FALLBACK PARA QUERY PARAMS SE AINDA FALTAR DADOS
+        //  FALLBACK PARA QUERY PARAMS SE AINDA FALTAR DADOS
         if ($vagaId <= 0) {
             $vagaId = (int)($_GET['vaga_id'] ?? 0);
         }
@@ -347,36 +347,36 @@ class Candidatura extends ControllerMain
             $curriculumId = (int)($_GET['curriculum_id'] ?? 0);
         }
 
-        // 🔐 VERIFICA SE EMPRESA ESTÁ LOGADA
+        //  VERIFICA SE EMPRESA ESTÁ LOGADA
         $eid = (int)(Session::get('empresa_id') ?: Session::get('estabelecimento_id') ?: 0);
         if ($eid <= 0) { 
             Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado.']); 
             return; 
         }
 
-        // ✅ VALIDA PARÂMETROS OBRIGATÓRIOS
+        //  VALIDA PARÂMETROS OBRIGATÓRIOS
         if ($vagaId <= 0 || $curriculumId <= 0) {
             Response::json(['status'=>422,'mensagem'=>'Parâmetros inválidos.']); 
             return;
         }
 
-        // 🔍 CARREGA MODEL DE CANDIDATURA
+        //  CARREGA MODEL DE CANDIDATURA
         $M = $this->candModel();
         if (!$M) { 
             Response::json(['status'=>500,'mensagem'=>'Model de candidatura não encontrado.']); 
             return; 
         }
 
-        // 📋 BUSCA DETALHES COMPLETOS DA CANDIDATURA
+        //  BUSCA DETALHES COMPLETOS DA CANDIDATURA
         $det = $M->detalheComJoins($vagaId, $curriculumId);
         
-        // 🔒 VERIFICA PERMISSÃO E EXISTÊNCIA
+        //  VERIFICA PERMISSÃO E EXISTÊNCIA
         if (!$det || (int)$det['estabelecimento_id'] !== $eid) {
             Response::json(['status'=>403,'mensagem'=>'Sem permissão ou não encontrado.']); 
             return;
         }
 
-        // 📤 RETORNA DADOS COMPLETOS
+        //  RETORNA DADOS COMPLETOS
         Response::json(['status'=>200,'data'=>$det]);
     }
 

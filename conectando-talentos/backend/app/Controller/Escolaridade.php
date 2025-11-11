@@ -61,12 +61,12 @@ class Escolaridade extends ControllerMain
      */
     private function resolveEscolaridadeId($grau): int
     {
-        // 🔢 SE JÁ FOR NÚMERO, CONVERTE DIRETAMENTE
+        //  SE JÁ FOR NÚMERO, CONVERTE DIRETAMENTE
         if (is_numeric($grau)) {
             return (int)$grau;
         }
         
-        // 🔄 SE FOR STRING, CONVERTE SLUG PARA ID
+        //  SE FOR STRING, CONVERTE SLUG PARA ID
         $slug = strtolower((string)$grau);
         return self::MAP_SLUG_TO_ID[$slug] ?? 0;
     }
@@ -82,18 +82,18 @@ class Escolaridade extends ControllerMain
      */
     public function lista(int $curriculumId = 0): void
     {
-        // ✅ VALIDA ID DO CURRÍCULO
+        //  VALIDA ID DO CURRÍCULO
         if ($curriculumId <= 0) {
             Response::json(['status'=>400,'mensagem'=>'curriculumId inválido.']);
             return;
         }
 
-        // 📋 BUSCA TODAS AS FORMAÇÕES DO CURRÍCULO
+        //  BUSCA TODAS AS FORMAÇÕES DO CURRÍCULO
         $rows = $this->loadModel('CurriculumEscolaridade')->findByCurriculum($curriculumId);
 
-        // 🔄 CONVERTE DADOS DO BANCO PARA FORMATO FRONT-END
+        //  CONVERTE DADOS DO BANCO PARA FORMATO FRONT-END
         $data = array_map(function(array $r) {
-            // 🎯 CONVERTE ID DA ESCOLARIDADE PARA SLUG AMIGÁVEL
+            //  CONVERTE ID DA ESCOLARIDADE PARA SLUG AMIGÁVEL
             $slug = self::MAP_ID_TO_SLUG[(int)($r['escolaridade_id'] ?? 0)] ?? '';
             
             return [
@@ -110,7 +110,7 @@ class Escolaridade extends ControllerMain
             ];
         }, $rows);
 
-        // 📤 RETORNA DADOS FORMATADOS
+        // RETORNA DADOS FORMATADOS
         Response::json(['status'=>200,'data'=>$data]);
     }
 
@@ -124,10 +124,10 @@ class Escolaridade extends ControllerMain
      */
     public function criar(): void
     {
-        // 📨 OBTÉM DADOS DO CORPO DA REQUISIÇÃO
+        //  OBTÉM DADOS DO CORPO DA REQUISIÇÃO
         $body = json_decode(file_get_contents('php://input'), true) ?? [];
 
-        // 🧹 PREPARA E SANITIZA DADOS PARA INSERÇÃO
+        // PREPARA E SANITIZA DADOS PARA INSERÇÃO
         $payload = [
             'curriculum_curriculum_id' => (int)($body['curriculum_curriculum_id'] ?? 0),
             'inicioMes'                => (int)($body['inicioMes'] ?? 0),
@@ -140,13 +140,13 @@ class Escolaridade extends ControllerMain
             'escolaridade_id'          => $this->resolveEscolaridadeId($body['grau'] ?? $body['escolaridade_id'] ?? 0),
         ];
 
-        // ✅ VALIDA DADO OBRIGATÓRIO
+        //  VALIDA DADO OBRIGATÓRIO
         if ($payload['curriculum_curriculum_id'] <= 0) {
             Response::json(['status'=>422,'mensagem'=>'curriculum_curriculum_id obrigatório.']);
             return;
         }
 
-        // 💾 TENTA CRIAR REGISTRO NO BANCO
+        //  TENTA CRIAR REGISTRO NO BANCO
         try {
             $id = $this->loadModel('CurriculumEscolaridade')->create($payload);
             Response::json(['status'=>201,'data'=>['curriculum_escolaridade_id'=>$id]]);
@@ -166,13 +166,13 @@ class Escolaridade extends ControllerMain
      */
     public function atualizar(int $id = 0): void
     {
-        // ✅ VALIDA ID DA FORMAÇÃO
+        //  VALIDA ID DA FORMAÇÃO
         if ($id <= 0) {
             Response::json(['status'=>400,'mensagem'=>'ID inválido.']);
             return;
         }
 
-        // 📨 OBTÉM DADOS DO CORPO DA REQUISIÇÃO
+        //  OBTÉM DADOS DO CORPO DA REQUISIÇÃO
         $body = json_decode(file_get_contents('php://input'), true) ?? [];
         
         // 🧹 PREPARA E SANITIZA DADOS PARA ATUALIZAÇÃO
@@ -188,7 +188,7 @@ class Escolaridade extends ControllerMain
             'escolaridade_id'          => $this->resolveEscolaridadeId($body['grau'] ?? $body['escolaridade_id'] ?? 0),
         ];
 
-        // 💾 TENTA ATUALIZAR REGISTRO NO BANCO
+        //  TENTA ATUALIZAR REGISTRO NO BANCO
         try {
             $rows = $this->loadModel('CurriculumEscolaridade')->updateById($id, $payload);
             Response::json(['status'=>200,'data'=>['linhas'=>$rows]]);
@@ -208,13 +208,13 @@ class Escolaridade extends ControllerMain
      */
     public function remover(int $id = 0): void
     {
-        // ✅ VALIDA ID DA FORMAÇÃO
+        // VALIDA ID DA FORMAÇÃO
         if ($id <= 0) {
             Response::json(['status'=>400,'mensagem'=>'ID inválido.']);
             return;
         }
 
-        // 🗑️ TENTA EXCLUIR REGISTRO DO BANCO
+        // TENTA EXCLUIR EGISTRO DO BANCO
         try {
             $rows = $this->loadModel('CurriculumEscolaridade')->deleteById($id);
             Response::json(['status'=>200,'data'=>['linhas'=>$rows]]);
