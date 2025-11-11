@@ -12,7 +12,7 @@ import type { Option } from "@/components/form-kit/types"
 // Options
 const typeOptions: Option[] = [
     { id: "", label: "Todos" },
-    { id: "integral", label: "Integral" },
+    { id: "presencial", label: "Presencial" },
     { id: "remoto", label: "Remoto" }
 ]
 
@@ -28,18 +28,18 @@ export default function VacanciesFilter() {
 
     // Setar parâmetros
     const onSubmit = (formData: Record<string, any>) => {
-        const typeValue: string = formData.formTipo as string
+        const modalityValue: string = formData.formModalidade as string
         const expValue: string = formData.formExp as string
 
         setSearchParams((prev: URLSearchParams) => {
             const updatedParams = new URLSearchParams(prev)
 
             // Setar parêmtros com o valor da variável ou nulo
-            if (typeValue) updatedParams.set("tipo", String(typeValue))
-            if (expValue) updatedParams.set("nivel", String(expValue))
+            if (modalityValue) updatedParams.set("modalidade", modalityValue)
+            if (expValue) updatedParams.set("nivel", expValue)
 
             // Remover valores nulos
-            if (typeValue == "") updatedParams.delete("tipo")
+            if (modalityValue == "") updatedParams.delete("modalidade")
             if (expValue == "") updatedParams.delete("nivel")
 
             return updatedParams
@@ -55,9 +55,9 @@ export default function VacanciesFilter() {
                 className="d-flex flex-column gap-3 mb-3"
             >
                 <SelectField
-                    id="formTipo"
-                    name="formTipo"
-                    label="Tipo de Vaga"
+                    id="formModalidade"
+                    name="formModalidade"
+                    label="Modalidade da Vaga"
                     bg="white"
                     options={typeOptions}
                 />

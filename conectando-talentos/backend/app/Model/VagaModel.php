@@ -71,37 +71,37 @@ class VagaModel extends ModelMain
         int $eid = 0,
         ?int $status = null,
         ?string $busca = null,
-        ?string $tipoVaga = null,
+        ?string $modalidadeVaga = null,
         ?string $nivelExperiencia = null
     ): array {
         $db = $this->db->table($this->table)
             ->select("
-            vaga.*, 
-            cargo.descricao AS cargo_descricao,
-            estabelecimento.estabelecimento_id AS empresa_id,
-            estabelecimento.nome AS empresa_nome,
-            estabelecimento.email AS empresa_email,
-            estabelecimento.descricao AS empresa_descricao,
-            estabelecimento.website AS empresa_website,
-            estabelecimento.setor AS empresa_setor,
-            estabelecimento.linkedin AS empresa_linkedin,
-            estabelecimento.instagram AS empresa_instagram,
-            estabelecimento.facebook AS empresa_facebook
-        ")
+                vaga.*, 
+                cargo.descricao AS cargo_descricao,
+                estabelecimento.estabelecimento_id AS empresa_id,
+                estabelecimento.nome AS empresa_nome,
+                estabelecimento.email AS empresa_email,
+                estabelecimento.descricao AS empresa_descricao,
+                estabelecimento.website AS empresa_website,
+                estabelecimento.setor AS empresa_setor,
+                estabelecimento.linkedin AS empresa_linkedin,
+                estabelecimento.instagram AS empresa_instagram,
+                estabelecimento.facebook AS empresa_facebook
+            ")
             ->join('cargo', 'cargo.cargo_id = vaga.cargo_id', 'LEFT')
             ->join('estabelecimento', 'estabelecimento.estabelecimento_id = vaga.estabelecimento_id', 'LEFT');
 
         // ------------------------------------------------------------------
-        // FILTROS FIXOS (nivel, tipoVaga)
+        // FILTROS FIXOS (nivel, modalidadeVaga)
         // ------------------------------------------------------------------
         if (!empty($nivelExperiencia) && $nivelExperiencia !== 'todos') {
             $map = ['junior-trainee' => 1, 'pleno' => 2, 'senior' => 3];
             $db->where('vaga.nivel', $map[$nivelExperiencia]);
         }
 
-        if (!empty($tipoVaga) && $tipoVaga !== 'todos') {
-            $map = ['integral' => 1, 'remoto' => 2];
-            $db->where('vaga.tipoVaga', $map[$tipoVaga]);
+        if (!empty($modalidadeVaga) && $modalidadeVaga !== 'todos') {
+            $map = ['presencial' => 1, 'remoto' => 2];
+            $db->where('vaga.modalidade', $map[$modalidadeVaga]);
         }
 
         // ------------------------------------------------------------------

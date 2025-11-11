@@ -78,11 +78,11 @@ class Vaga extends ControllerMain
         
         // 🔍 OBTÉM FILTROS
         $busca = isset($_GET['busca']) ? trim((string)$_GET['busca']) : null;
-        $tipoVaga = isset($_GET['tipo']) ? trim((string)$_GET['tipo']) : null;
+        $modalidadeVaga = isset($_GET['modalidade']) ? trim((string)$_GET['modalidade']) : null;
         $nivelExperiencia = isset($_GET['nivel']) ? trim((string)$_GET['nivel']) : null;
         
         // 📋 BUSCA VAGAS PÚBLICAS COM FILTROS
-        $rows = $this->vagaModel()->listarPorEstabelecimentoComCargo(0, $status, $busca, $tipoVaga, $nivelExperiencia);
+        $rows = $this->vagaModel()->listarPorEstabelecimentoComCargo(0, $status, $busca, $modalidadeVaga, $nivelExperiencia);
         
         // 📤 RETORNA LISTA DE VAGAS    
         Response::json(['status' => 200, 'data' => $rows]);
