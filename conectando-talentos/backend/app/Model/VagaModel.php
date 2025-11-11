@@ -91,6 +91,10 @@ class VagaModel extends ModelMain
             ->join('cargo', 'cargo.cargo_id = vaga.cargo_id', 'LEFT')
             ->join('estabelecimento', 'estabelecimento.estabelecimento_id = vaga.estabelecimento_id', 'LEFT');
 
+        if ($eid > 0) {
+            $db->where('vaga.estabelecimento_id', $eid);
+        }
+
         // ------------------------------------------------------------------
         // FILTROS FIXOS (nivel, modalidadeVaga)
         // ------------------------------------------------------------------
