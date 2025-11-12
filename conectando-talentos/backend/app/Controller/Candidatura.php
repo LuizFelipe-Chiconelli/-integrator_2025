@@ -77,27 +77,27 @@ class Candidatura extends ControllerMain
      */
     private function resolveCurriculumId(): int
     {
-        // 🔍 VERIFICA SE JÁ ESTÁ EM CACHE NA SESSÃO
+        //  VERIFICA SE JÁ ESTÁ EM CACHE NA SESSÃO
         $currId = (int)(Session::get('curriculum_id') ?: 0);
         if ($currId > 0) return $currId;
 
-        // 👤 OBTÉM ID DO USUÁRIO DA SESSÃO
+        //  OBTÉM ID DO USUÁRIO DA SESSÃO
         $usuarioId = (int)(Session::get('usuario_id') ?: 0);
         if ($usuarioId <= 0) return 0;
 
-        // 📋 BUSCA DADOS DO USUÁRIO
+        // BUSCA DADOS DO USUÁRIO
         $usuario = $this->usuarioModel() ? $this->usuarioModel()->findById($usuarioId) : null;
         if (!$usuario) return 0;
 
-        // 👥 OBTÉM ID DA PESSOA FÍSICA VINCULADA
+        //  OBTÉM ID DA PESSOA FÍSICA VINCULADA
         $pfId = (int)($usuario['pessoa_fisica_id'] ?? 0);
         if ($pfId <= 0) return 0;
 
-        // 📄 BUSCA CURRÍCULO DA PESSOA FÍSICA
+        //  BUSCA CURRÍCULO DA PESSOA FÍSICA
         $cv = $this->cvModel() ? ($this->cvModel()->getByPessoaFisica($pfId) ?? []) : [];
         $currId = (int)($cv['curriculum_id'] ?? 0);
         
-        // 💾 SALVA EM CACHE NA SESSÃO PARA PRÓXIMAS REQUISIÇÕES
+        //  SALVA EM CACHE NA SESSÃO PARA PRÓXIMAS REQUISIÇÕES
         if ($currId > 0) Session::set('curriculum_id', $currId);
 
         return $currId;
@@ -134,33 +134,33 @@ class Candidatura extends ControllerMain
      */
     public function aplicar(): void
     {
-        // 🔐 VERIFICA SE CANDIDATO TEM CURRÍCULO VÁLIDO
+        //  VERIFICA SE CANDIDATO TEM CURRÍCULO VÁLIDO
         $currId = $this->requireCurriculumOr401();
 
-        // 📨 OBTÉM DADOS DA REQUISIÇÃO
+        //  OBTÉM DADOS DA REQUISIÇÃO
         $d = json_decode(file_get_contents('php://input'), true) ?? [];
         $vagaId = (int)($d['vaga_id'] ?? 0);
         
-        // ✅ VALIDA ID DA VAGA
+        //  VALIDA ID DA VAGA
         if ($vagaId <= 0) { 
             Response::json(['status'=>422,'mensagem'=>'vaga_id inválido.']); 
             return; 
         }
 
-        // 🔍 CARREGA MODEL DE CANDIDATURA
+        //  CARREGA MODEL DE CANDIDATURA
         $M = $this->candModel();
         if (!$M) { 
             Response::json(['status'=>500,'mensagem'=>'Model de candidatura não encontrado.']); 
             return; 
         }
 
-        // ⚠️ VERIFICA SE JÁ ESTÁ CANDIDATADO
+        //  VERIFICA SE JÁ ESTÁ CANDIDATADO
         if ($M->jaCandidatado($vagaId, $currId)) {
             Response::json(['status'=>409,'mensagem'=>'Você já se candidatou a esta vaga.']); 
             return;
         }
 
-        // 💾 TENTA REALIZAR CANDIDATURA
+        //  TENTA REALIZAR CANDIDATURA
         try {
             $ok = $M->aplicar($vagaId, $currId);
             Response::json(['status'=>201,'mensagem'=>'Candidatura registrada.','ok'=>$ok]);
@@ -179,27 +179,27 @@ class Candidatura extends ControllerMain
      */
     public function remover(): void
     {
-        // 🔐 VERIFICA SE CANDIDATO TEM CURRÍCULO VÁLIDO
+        //  VERIFICA SE CANDIDATO TEM CURRÍCULO VÁLIDO
         $currId = $this->requireCurriculumOr401();
 
-        // 📨 OBTÉM DADOS DA REQUISIÇÃO
+        //  OBTÉM DADOS DA REQUISIÇÃO
         $d = json_decode(file_get_contents('php://input'), true) ?? [];
         $vagaId = (int)($d['vaga_id'] ?? 0);
         
-        // ✅ VALIDA ID DA VAGA
+        //  VALIDA ID DA VAGA
         if ($vagaId <= 0) { 
             Response::json(['status'=>422,'mensagem'=>'vaga_id inválido.']); 
             return; 
         }
 
-        // 🔍 CARREGA MODEL DE CANDIDATURA
+        //  CARREGA MODEL DE CANDIDATURA
         $M = $this->candModel();
         if (!$M) { 
             Response::json(['status'=>500,'mensagem'=>'Model de candidatura não encontrado.']); 
             return; 
         }
 
-        // 🗑️ TENTA REMOVER CANDIDATURA
+        //  TENTA REMOVER CANDIDATURA
         try {
             $rows = $M->remover($vagaId, $currId);
             Response::json(['status'=>200,'mensagem'=>'Candidatura removida.','rows'=>$rows]);
@@ -222,7 +222,7 @@ class Candidatura extends ControllerMain
         // VERIFICA SE CANDIDATO TEM CURRÍCULO VÁLIDO CHAMANDO UM HELPER
         $currId = $this->requireCurriculumOr401();
 
-        // 🔍 CARREGA MODEL DE CANDIDATURA
+        //  CARREGA MODEL DE CANDIDATURA
         $M = $this->candModel();
         if (!$M) { 
             Response::json(['status'=>500,'mensagem'=>'Model de candidatura não encontrado.']); 
@@ -289,21 +289,21 @@ class Candidatura extends ControllerMain
             return; 
         }
 
-        // 🔒 VERIFICA SE EMPRESA É DONA DA VAGA
+        //  VERIFICA SE EMPRESA É DONA DA VAGA
         $vaga = $VM->findById($vagaId);
         if (!$vaga || (int)$vaga['estabelecimento_id'] !== $eid) {
             Response::json(['status'=>403,'mensagem'=>'Vaga não pertence à empresa.']); 
             return;
         }
 
-        // 🔍 CARREGA MODEL DE CANDIDATURA
+        //  CARREGA MODEL DE CANDIDATURA
         $M = $this->candModel();
         if (!$M) { 
             Response::json(['status'=>500,'mensagem'=>'Model de candidatura não encontrado.']); 
             return; 
         }
 
-        // 📋 BUSCA CANDIDATURAS DA VAGA
+        //  BUSCA CANDIDATURAS DA VAGA
         $rows = $M->listarPorVaga($vagaId);
         Response::json(['status'=>200,'data'=>$rows]);
     }
@@ -390,47 +390,47 @@ class Candidatura extends ControllerMain
      */
     public function status(): void
     {
-        // 🔐 VERIFICA SE EMPRESA ESTÁ LOGADA
+        //  VERIFICA SE EMPRESA ESTÁ LOGADA
         $eid = (int)(Session::get('empresa_id') ?: Session::get('estabelecimento_id') ?: 0);
         if ($eid <= 0) { 
             Response::json(['status'=>401,'mensagem'=>'Acesso não autorizado.']); 
             return; 
         }
 
-        // 📨 OBTÉM DADOS DA REQUISIÇÃO
+        //  OBTÉM DADOS DA REQUISIÇÃO
         $d = json_decode(file_get_contents('php://input'), true) ?? [];
         $vagaId = (int)($d['vaga_id'] ?? 0);
         $currId = (int)($d['curriculum_id'] ?? 0);
         $novo   = (int)($d['statusCandidatura'] ?? 0);
 
-        // ✅ VALIDA TODOS OS PARÂMETROS
+        //  VALIDA TODOS OS PARÂMETROS
         if ($vagaId<=0 || $currId<=0 || $novo<=0) {
             Response::json(['status'=>422,'mensagem'=>'Parâmetros inválidos.']); 
             return;
         }
 
-        // 🔍 CARREGA MODEL DE VAGA PARA VERIFICAÇÃO DE PERMISSÃO
+        //  CARREGA MODEL DE VAGA PARA VERIFICAÇÃO DE PERMISSÃO
         $VM = $this->vagaModel();
         if (!$VM) { 
             Response::json(['status'=>500,'mensagem'=>'Model de Vaga não encontrado.']); 
             return; 
         }
 
-        // 🔒 VERIFICA SE EMPRESA É DONA DA VAGA
+        //  VERIFICA SE EMPRESA É DONA DA VAGA
         $vaga = $VM->findById($vagaId);
         if (!$vaga || (int)$vaga['estabelecimento_id'] !== $eid) {
             Response::json(['status'=>403,'mensagem'=>'Vaga não pertence à empresa.']); 
             return;
         }
 
-        // 🔍 CARREGA MODEL DE CANDIDATURA
+        //  CARREGA MODEL DE CANDIDATURA
         $M = $this->candModel();
         if (!$M) { 
             Response::json(['status'=>500,'mensagem'=>'Model de candidatura não encontrado.']); 
             return; 
         }
 
-        // 💾 TENTA ATUALIZAR STATUS
+        //  TENTA ATUALIZAR STATUS
         try {
             $rows = $M->atualizarStatus($vagaId, $currId, $novo);
             Response::json(['status'=>200,'mensagem'=>'Status atualizado.','rows'=>$rows]);

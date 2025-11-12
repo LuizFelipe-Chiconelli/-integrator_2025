@@ -27,7 +27,7 @@ class Desistencia extends ControllerMain
     private function candModel() {
         $m = $this->loadModel('CandidaturaModel');
         if (!$m) $m = $this->loadModel('Candidatura');
-        return $m;
+        return $m;                      
     }
 
     /**

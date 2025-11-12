@@ -12,17 +12,11 @@ is_dir($sessionDir) || mkdir($sessionDir, 0777, true);
 session_set_cookie_params([
     'lifetime' => 0,         // até fechar o navegador
     'path'     => '/',       // vale para toda a app
-    /*  NÃO coloque domain aqui em dev;
-        deixe o browser assumir o host para
-        evitar conflito entre portas.        */
     'secure'   => false,     // true em produção HTTPS
     'httponly' => true,
     'samesite' => 'Lax'      // Lax = OK para mesma origem
 ]);
 
-/*  Cria ou retoma sessão para TODAS as requisições.
-    Como o PHP só grava se algo mudar, o overhead é mínimo.
-----------------------------------------------------------------------------*/
 session_start();
 /*----------------------------------------------------------------------------*/
 
