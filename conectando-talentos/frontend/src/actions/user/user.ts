@@ -2,6 +2,7 @@
 
 import api from "../api"
 import axios from "axios"
+import { signOut as comapnySignOut } from "../company/company"
 
 import type { User } from "@/_session/user/types"
 
@@ -9,6 +10,12 @@ export async function signIn(email: string, password: string): Promise<{
     ok: boolean, message: string, user?: { id: number, tipo: string, email: string }
 }> {
     try {
+        try {
+            await comapnySignOut()
+        } finally {
+            console.log("")
+        }
+
         const res: {
             data: {
                 mensagem: string

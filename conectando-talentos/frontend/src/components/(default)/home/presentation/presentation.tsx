@@ -22,7 +22,7 @@ export default function Presentation() {
                     <InfoCard
                         icon={<MdOutlineWorkOutline className="fs-1" />}
                         title="Para Candidatos"
-                        text="Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum minus quidem aperiam consequuntur similique nam fuga voluptas officiis..."
+                        text="Inscrições rápidas e ágeis, conectadas com a plataforma oficial de empregos da prefeitura de Muriaé."
                     />
                 </div>
 
@@ -30,7 +30,7 @@ export default function Presentation() {
                     <InfoCard
                         icon={<IoBusinessOutline className="fs-1" />}
                         title="Para Empresas"
-                        text="Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum minus quidem aperiam consequuntur similique nam fuga voluptas officiis..."
+                        text="Publicação de vagas simplificadas e ampla oferta de profissionais regionais."
                     />
                 </div>
 
@@ -38,7 +38,7 @@ export default function Presentation() {
                     <InfoCard
                         icon={<IoNewspaperOutline className="fs-1" />}
                         title="Processo Simplificado"
-                        text="Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum minus quidem aperiam consequuntur similique nam fuga voluptas officiis..."
+                        text="Etapas concisas, conscientes e humanas para candidatos e recrutadores, em uma interface intuitiva e ágil."
                     />
                 </div>
 
@@ -46,7 +46,7 @@ export default function Presentation() {
                     <InfoCard
                         icon={<RiRoadMapLine className="fs-1" />}
                         title="Foco Regional"
-                        text="Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum minus quidem aperiam consequuntur similique nam fuga voluptas officiis..."
+                        text="Específico para Muriaé e região, preservando a prioridade e proximidade entre empresas e profissionais."
                     />
                 </div>
             </div>

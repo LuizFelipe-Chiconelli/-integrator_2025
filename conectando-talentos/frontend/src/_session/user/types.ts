@@ -22,7 +22,7 @@ export interface UserInfoPayload {
     logradouro: string
     bairro: string
     cep: string
-    cidade_id: string
+    cidade_id: string | number
     telefone: string
     data_nascimento: string
     sexo: string
@@ -71,10 +71,10 @@ export interface Scholarity {
     descricao: string
     instituicao: string
     cidade_id: string
-    inicioMes: string
-    inicioAno: string
-    fimMes: string
-    fimAno: string
+    inicioMes: number
+    inicioAno: number
+    fimMes: number
+    fimAno: number
 }
 
 export interface Experience {

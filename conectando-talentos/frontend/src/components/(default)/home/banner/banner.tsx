@@ -24,7 +24,7 @@ export default function Banner() {
                         <h1 className="fw-bold">Bem-vindo ao InformJobs</h1>
                         <span className="fs-3">Conquiste sua primeira vaga de emprego com facilidade!</span>
                     </div>
-                    <Button href="/auth/login-usuario">Acesse sua conta</Button>
+                    <Button href="/usuario">Acesse sua conta</Button>
                 </div>
 
                 <div className="col-lg-6 d-flex justify-content-center">

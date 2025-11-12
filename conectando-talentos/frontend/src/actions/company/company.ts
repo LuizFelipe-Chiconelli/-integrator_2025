@@ -3,10 +3,18 @@
 import api from "../api"
 import axios from "axios"
 
+import { signOut as userSignOut } from "../user/user"
+
 export async function signIn(email: string, password: string): Promise<{
     ok: boolean, message: string, company?: { id: number, nome: string, email: string }
 }> {
     try {
+        try {
+            await userSignOut()
+        } finally {
+            console.log("")
+        }
+
         const res: {
             data: {
                 mensagem: string

@@ -94,7 +94,8 @@ export default function ApplicationModal({ info, opened, onClose, updateApplicat
                                 <div className="d-flex flex-column">
                                     <span className="fs-5">{i.descricao} - {i.instituicao}</span>
                                     <div>
-                                        <span>{i.inicioMes}/{i.inicioAno}</span> - <span>{i.fimMes}/{i.fimAno}</span>
+                                        <span>{i.inicioMes.toString().padStart(2, "0")}/{i.inicioAno.toString().padStart(2, "0")}</span>
+                                         - <span>{i.fimMes.toString().padStart(2, "0")}/{i.fimAno.toString().padStart(2, "0")}</span>
                                     </div>
                                 </div>
                             ))}
@@ -126,18 +127,20 @@ export default function ApplicationModal({ info, opened, onClose, updateApplicat
                             ))}
                         </div>
 
-                        {info.statusCandidatura != 16 && statusOptions.map(s => (
+                        {info.statusCandidatura != 16 && (
                             <div className="d-flex justify-content-between align-items-center mt-4">
                                 <div className="d-flex gap-2">
-                                    <Button
-                                        key={s.id}
-                                        variant={status === Number(s.id) ? "primary" : "outline-primary"}
-                                        size="sm"
-                                        disabled={isPending}
-                                        onClick={() => setStatus(Number(s.id))}
-                                    >
-                                        {s.label}
-                                    </Button>
+                                    {statusOptions.map(s => (
+                                        <Button
+                                            key={s.id}
+                                            variant={status === Number(s.id) ? "primary" : "outline-primary"}
+                                            size="sm"
+                                            disabled={isPending}
+                                            onClick={() => setStatus(Number(s.id))}
+                                        >
+                                            {s.label}
+                                        </Button>
+                                    ))}
                                 </div>
 
                                 <div className="d-flex gap-2">
@@ -146,7 +149,7 @@ export default function ApplicationModal({ info, opened, onClose, updateApplicat
                                     </Button>
                                 </div>
                             </div>
-                        ))}
+                        )}
                     </>
                 )}
             </Modal.Body>
