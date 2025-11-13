@@ -4,6 +4,18 @@ namespace Core\Library;
 
 class Ambiente
 {
+
+    //Separação de Ambientes: Permite configurações diferentes para dev/prod
+
+    //Superglobal $_ENV: Armazena variáveis de ambiente acessíveis em toda aplicação
+
+    //Segurança: Mantém dados sensíveis fora do código
+
+    //Flexibilidade: Facilita mudança entre ambientes sem alterar código
+    //1Carrega arquivo .env → 2. Configurações globais → 3. Configurações do ambiente específico
+
+    //Esta classe é fundamental para o funcionamento do framework, garantindo que cada ambiente tenha suas configurações apropriadas.
+    
     /**
      * load
      *

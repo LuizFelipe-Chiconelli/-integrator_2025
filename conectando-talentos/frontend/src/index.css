@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap');
+
+* {
+	font-family: "Lexend", sans-serif;
+}
+
+body {
+	overflow-x: hidden;
+}
+
+tr:last-child {
+    border: none !important;
+}
+
+.modal-backdrop {
+	z-index: 45 !important;
+}

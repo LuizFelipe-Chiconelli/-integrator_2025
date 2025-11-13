@@ -1,0 +1,9 @@
+#logo {
+    font-size: 40px;
+}
+
+.nav .nav-link {
+    color: var(--bs-text);
+    margin-bottom: 5px;
+    padding: 0;
+}

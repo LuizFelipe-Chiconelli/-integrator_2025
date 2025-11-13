@@ -6,23 +6,23 @@ use PDO;
 use PDOException;
 use Exception;
 
-class Database 
+class Database
 {
     private $conexao;
-    private static $dbdrive  = "";
-    private static $host     = "";
-    private static $port     = "";
-    private static $user     = "";
+    private static $dbdrive = "";
+    private static $host = "";
+    private static $port = "";
+    private static $user = "";
     private static $password = "";
-    private static $db       = "";
-    
+    private static $db = "";
+
     protected $table;
     private $select = "*";
     private $join = "";
     private $where = "";
     private $groupBy = "";
     private $orderBy = "";
-    private $limit = "";  
+    private $limit = "";
     private $params = [];
 
     /**
@@ -41,13 +41,13 @@ class Database
         $db_port,
         $db_bdados,
         $db_user,
-        $db_password       
+        $db_password
     ) {
-        self::$dbdrive  = $db_dbdrive;
-        self::$host     = $db_host;
-        self::$port     = $db_port;
-        self::$db       = $db_bdados;  
-        self::$user     = $db_user;
+        self::$dbdrive = $db_dbdrive;
+        self::$host = $db_host;
+        self::$port = $db_port;
+        self::$db = $db_bdados;
+        self::$user = $db_user;
         self::$password = $db_password;
     }
 
@@ -56,14 +56,15 @@ class Database
      *
      * @return void
      */
-    private function __clone() 
+    private function __clone()
     {
     }
 
     /**
      * destruct - Método que destroi a conexão com banco de dados e remove da memória todas as variáveis setadas
      */
-    public function __destruct() {
+    public function __destruct()
+    {
         $this->disconnect();
         foreach ($this as $key => $value) {
             unset($this->$key);
@@ -72,38 +73,56 @@ class Database
 
     /*Metodos que trazem o conteudo da variavel desejada
     @return   $xxx = conteudo da variavel solicitada*/
-    private function getDBDrive() {return self::$dbdrive;}
-    private function getHost()    {return self::$host;}
-    private function getPort()    {return self::$port;}
-    private function getUser()    {return self::$user;}
-    private function getPassword(){return self::$password;}
-    private function getDB()      {return self::$db;}
+    private function getDBDrive()
+    {
+        return self::$dbdrive;
+    }
+    private function getHost()
+    {
+        return self::$host;
+    }
+    private function getPort()
+    {
+        return self::$port;
+    }
+    private function getUser()
+    {
+        return self::$user;
+    }
+    private function getPassword()
+    {
+        return self::$password;
+    }
+    private function getDB()
+    {
+        return self::$db;
+    }
 
     /**
      * connect
      *
      * @return object
      */
-    public  function connect()
-    { 
+    public function connect()
+    {
         try {
-            if ( $this->getDBDrive() == 'mysql' ) {            // MySQL
+            if ($this->getDBDrive() == 'mysql') {            // MySQL
 
                 $this->conexao = new PDO(
-                                            $this->getDBDrive().":host=".$this->getHost().";port=".$this->getPort().";dbname=".$this->getDB(), 
-                                            $this->getUser(), 
-                                            $this->getPassword(), 
-                                            [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"]
-                                        );
+                    $this->getDBDrive() . ":host=" . $this->getHost() . ";port=" . $this->getPort() . ";dbname=" . $this->getDB(),
+                    $this->getUser(),
+                    $this->getPassword(),
+                    [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"]
+                );
 
-            } else if ( $this->getDBDrive() == 'sqlsrv' ) {    // SQL Server
+            } else if ($this->getDBDrive() == 'sqlsrv') {    // SQL Server
 
                 $this->conexao = new PDO(
-                                            $this->getDBDrive().":Server=".$this->getHost().",".$this->getPort().";DataBase=".$this->getDB(), 
-                                            $this->getUser(), 
-                                            $this->getPassword(), 
-                                            [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"]
-                                        );
+                    $this->getDBDrive() . ":Server=" . $this->getHost() . "," . $this->getPort() . ";DataBase=" . $this->getDB(),
+                    $this->getUser(),
+                    $this->getPassword(),
+                    [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"]
+                );
 
             }
 
@@ -115,7 +134,7 @@ class Database
         }
 
         return ($this->conexao);
-        
+
     }
 
     /**
@@ -123,32 +142,33 @@ class Database
      *
      * @return void
      */
-    private function disconnect(){
+    private function disconnect()
+    {
         $this->conexao = null;
     }
 
     /**
      * Método select que retorna um array de objetos
-    *   @param string $sql
-    *   @param array $params
-    *   @return void
-    */
+     *   @param string $sql
+     *   @param array $params
+     *   @return void
+     */
     public function dbSelect($sql, $params = null)
     {
-        if ((gettype($params) != 'array') && (gettype($params) != "NULL") ) {
+        if ((gettype($params) != 'array') && (gettype($params) != "NULL")) {
             $params = [$params];
         }
-        
-        $query = $this->connect()->prepare( $sql , array( PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL ) );
-        $query->execute( $params );
+
+        $query = $this->connect()->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+        $query->execute($params);
         $rs = $query;
-        
+
         self::__destruct();
-        
+
         return $rs;
-        
+
     }
-    
+
     /**
      * dbInsert - Método insert que insere valores no banco de dados e retorna o último id inserido
      *
@@ -158,23 +178,24 @@ class Database
      */
     public function dbInsert($sql, $params = null)
     {
-        try {        
+        try {
             $conexao = $this->connect();
-            $query   = $conexao->prepare($sql);
+            $query = $conexao->prepare($sql);
             $query->execute($params);
-            
-            $rs      = $conexao->lastInsertId(); // or die(print_r($query->errorInfo(), true));
-            
+
+            $rs = $conexao->lastInsertId(); // or die(print_r($query->errorInfo(), true));
+
             self::__destruct();
-            
+
             return $rs;
 
         } catch (Exception $e) {
             var_dump($sql);
             print_r($query->debugDumpParams());
             var_dump($params);
-            echo 'Exceção capturada: '.  $e->getMessage(); exit;
-        }     
+            echo 'Exceção capturada: ' . $e->getMessage();
+            exit;
+        }
     }
 
     /**
@@ -189,15 +210,16 @@ class Database
         try {
             $query = $this->connect()->prepare($sql);
             $query->execute($params);
-            
+
             $rs = $query->rowCount();// or die(print_r($query->errorInfo(), true));
-            self::__destruct();            
-            
+            self::__destruct();
+
             return $rs;
 
         } catch (Exception $e) {
-            echo 'Exceção capturada: '.  $e->getMessage(); exit;
-        }  
+            echo 'Exceção capturada: ' . $e->getMessage();
+            exit;
+        }
     }
 
     /**
@@ -207,26 +229,26 @@ class Database
      * @param mixed $params 
      * @return int|bool
      */
-    public function dbDelete($sql, $params=null)
+    public function dbDelete($sql, $params = null)
     {
-        $query=$this->connect()->prepare($sql);
-        
+        $query = $this->connect()->prepare($sql);
+
         try {
-            
+
             $query->execute($params);
-            $rs = $query->rowCount(); 
-            
+            $rs = $query->rowCount();
+
         } catch (Exception $exc) {
             echo "Erro ao Excluir Registro, favor entrar em contato com Suporte Tenico" . $exc->getTraceAsString();
         }
 
         self::__destruct();
-        
+
         if ($rs == array()) {
             return false;
         } else {
             return $rs;
-        }       
+        }
     }
 
     /**
@@ -239,7 +261,7 @@ class Database
     {
         return $rscPdo->fetch(PDO::FETCH_OBJ);
     }
-    
+
     /**
      * dbBuscaDadosAll - Método que retornar todos os registros (OBJ)
      *
@@ -250,14 +272,14 @@ class Database
     {
         return $rscPdo->fetchAll(PDO::FETCH_OBJ);
     }
-    
+
     /**
      * dbBuscaArray - Método que retornar a posição atual do registro (array)
      *
      * @param object $rscPdo 
      * @return array
      */
-    public function dbBuscaArray( $rscPdo )
+    public function dbBuscaArray($rscPdo)
     {
         $aRegistro = $rscPdo->fetch(PDO::FETCH_ASSOC);
 
@@ -278,13 +300,13 @@ class Database
     {
         return $rscPdo->fetchall(PDO::FETCH_ASSOC);
     }
-    
+
     /**
      * dbNumeroLinhas - Método que retornar o Numero de linhas Selecionadas
      *
      * @param object $rscPdo 
      * @return int
-     */    
+     */
     public function dbNumeroLinhas($rscPdo)
     {
         return $rscPdo->rowCount();
@@ -299,8 +321,8 @@ class Database
     public function dbNumeroColunas($rscPdo)
     {
         return $rscPdo->columnCount();
-    }            
-    
+    }
+
     /**
      * dbResultado
      *
@@ -310,9 +332,9 @@ class Database
      */
     public function dbResultado($rscRes, $CampoRetorno)
     {
-        $rowResX = $this->dbBuscaArray( $rscRes );
-        
-        return $rowResX[ $CampoRetorno ];
+        $rowResX = $this->dbBuscaArray($rscRes);
+
+        return $rowResX[$CampoRetorno];
     }
 
     /**
@@ -461,7 +483,7 @@ class Database
         }
 
         // Monta cláusula IN
-        $clause = "{$field} " . ($notIn ? "NOT" : "" ) . " IN (" . implode(', ', $placeholders) . ")";
+        $clause = "{$field} " . ($notIn ? "NOT" : "") . " IN (" . implode(', ', $placeholders) . ")";
 
         // Adiciona a cláusula WHERE
         if (empty($this->where)) {
@@ -503,7 +525,7 @@ class Database
      * whereLike
      *
      * @param mixed $field 
-     * @param strung $value 
+     * @param string $value 
      * @param string $operadorLogico 
      * @return object
      */
@@ -513,7 +535,7 @@ class Database
         $clause = " {$field} LIKE ? ";
 
         // Setando valores
-        $this->params[] = "'%$value%'";
+        $this->params[] = "%$value%";
 
         // Adiciona a cláusula WHERE
         if (empty($this->where)) {
@@ -522,6 +544,31 @@ class Database
             $this->where .= " {$operadorLogico} {$clause}";
         }
 
+        return $this;
+    }
+
+    public function whereLikeRaw($field, $value)
+    {
+        $this->where .= " {$field} LIKE ?";
+        $this->params[] = "%{$value}%";
+        return $this;
+    }
+
+    /**
+     * orWhereLike
+     *
+     * @param mixed $field 
+     * @param string $value 
+     * @return object
+     */
+    public function orWhereLike($field, $value)
+    {
+        $this->params[] = "%$value%";
+        if (empty($this->where)) {
+            $this->where = " WHERE {$field} LIKE ?";
+        } else {
+            $this->where .= " OR {$field} LIKE ?";
+        }
         return $this;
     }
 
@@ -573,6 +620,23 @@ class Database
     public function endGroup()
     {
         $this->where .= " ) ";
+        return $this;
+    }
+
+    public function startGroup($operator = null)
+    {
+        $op = $operator ?: 'AND';
+        if (empty($this->where)) {
+            $this->where = " WHERE (";
+        } else {
+            $this->where .= " {$op} (";
+        }
+        return $this;
+    }
+
+    public function closeGroup()
+    {
+        $this->where .= " )";
         return $this;
     }
 
@@ -636,7 +700,7 @@ class Database
         $this->where = "";
         $this->groupBy = "";
         $this->orderBy = "";
-        $this->limit = "";  
+        $this->limit = "";
         $this->params = [];
     }
 
@@ -709,10 +773,10 @@ class Database
     {
         try {
             $fields = implode(" = ?, ", array_keys($data)) . " = ?";
-            $sql    = "UPDATE {$this->table} SET {$fields} WHERE {$this->where}";
+            $sql = "UPDATE {$this->table} SET {$fields} {$this->where}";
             $updData = array_merge(array_values($data), $this->params);
 
-            $query  = $this->connect()->prepare($sql);
+            $query = $this->connect()->prepare($sql);
             $query->execute($updData);
 
             $rs = $query->rowCount();
@@ -735,9 +799,9 @@ class Database
     public function delete()
     {
         try {
-            $sql    = "DELETE FROM {$this->table} WHERE {$this->where};";
+            $sql = "DELETE FROM {$this->table} {$this->where};";
 
-            $query  = $this->connect()->prepare($sql);
+            $query = $this->connect()->prepare($sql);
             $query->execute($this->params);
 
             $rs = $query->rowCount();

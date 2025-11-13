@@ -1,0 +1,16 @@
+.menu-button {
+    padding: 5px 10px;
+    transition: .2s;
+}
+
+.menu-button:hover, .menu-button.active {
+    background-color: rgb(235, 234, 234) !important;
+}
+
+.menu-button.active {
+    font-weight: 600 !important;
+}
+
+.menu-button svg {
+    font-size: 18px !important;
+}
